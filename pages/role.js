@@ -124,16 +124,49 @@ export default function Role() {
   }, []);
 
   
+  const getApiResponse = async (jobrole, level) => {
+    const url = `${process.env.NEXT_PUBLIC_HOST}/api/proxy`; // Replace with your Vercel proxy URL
+    const headers = {
+      "Content-Type": "application/json",
+    };
+  
+    const data = {
+      model: "gemma:2b",
+      prompt: `give me 15 questions for ${jobrole} at ${level} level`,
+      stream: false,
+    };
+  
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(data),
+      });
+  
+      if (response.ok) {
+        const responseData = await response.json();
+        return responseData.response; // Return the response from the API
+      } else {
+        console.error("Error fetching response from the API.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in the fetch operation:", error);
+      return null;
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();  // Prevent form from submitting normally
     localStorage.removeItem("apiResponseStatus");
-    
+  
     // Declare formattedQuestions here once
     let formattedQuestions = [];
-    
+  
     router.push("/instruction");
   
-    const fetchedQuestions = await getApiResponse(jobRole,level);
+    // Fetch the questions using the API
+    const fetchedQuestions = await getApiResponse(jobRole, level); // Call the function correctly here
   
     console.log('Fetched Questions:', fetchedQuestions); // Debug: Log fetched questions
   
@@ -154,7 +187,7 @@ export default function Role() {
         // Start with the "Introduce yourself" question as the first element
         const firstName = user?.fullName?.split(' ')[0];
         formattedQuestions = [{
-          questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+          questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
           answer: null,
         }];
   
@@ -221,6 +254,106 @@ export default function Role() {
       console.error("No questions received. Please try again.");
     }
   };
+  
+  
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();  // Prevent form from submitting normally
+  //   localStorage.removeItem("apiResponseStatus");
+    
+  //   // Declare formattedQuestions here once
+  //   let formattedQuestions = [];
+    
+  //   router.push("/instruction");
+  
+  //   // const fetchedQuestions = await getApiResponse(jobRole,level);
+  //   const fetchedQuestions = await getApiResponse(jobRole,level);
+  
+  //   console.log('Fetched Questions:', fetchedQuestions); // Debug: Log fetched questions
+  
+  //   if (fetchedQuestions) {
+  //     // Check if the fetchedQuestions are in the expected format
+  //     if (typeof fetchedQuestions !== 'string') {
+  //       console.error('Fetched questions are not in expected string format:', fetchedQuestions);
+  //       return;
+  //     }
+  
+  //     // Use regex to match the questions
+  //     const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
+  //     const matchedQuestions = fetchedQuestions.match(questionsRegex);
+  
+  //     console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
+  
+  //     if (matchedQuestions) {
+  //       // Start with the "Introduce yourself" question as the first element
+  //       const firstName = user?.fullName?.split(' ')[0];
+  //       formattedQuestions = [{
+  //         questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+  //         answer: null,
+  //       }];
+  
+  //       // Add the fetched questions to the array
+  //       const additionalQuestions = matchedQuestions.map(questionText => ({
+  //         questionText: questionText.trim(),
+  //         answer: null,
+  //       }));
+  
+  //       // Prepend the fetched questions after the "Introduce yourself"
+  //       formattedQuestions.push(...additionalQuestions);
+  
+  //       // Set the questions in the state with the "Introduce yourself" as the first question
+  //       setQuestions(formattedQuestions);
+  //     } else {
+  //       console.error("No valid questions found in the fetched data.");
+  //     }
+  //   } else {
+  //     console.error("No questions received from API.");
+  //   }
+  
+  //   console.log("Questions to be sent:", formattedQuestions);
+  
+  //   if (formattedQuestions && formattedQuestions.length > 0) {
+  //     const data = { jobRole, email, level, questions: formattedQuestions };
+  
+  //     try {
+  //       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRole`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(data),
+  //       });
+  
+  //       if (!res.ok) {
+  //         const errorData = await res.json();
+  //         throw new Error(errorData?.error || "Something went wrong. Please try again.");
+  //       }
+  
+  //       const response = await res.json();
+  //       // console.log(response.data._id); // Log the successful response
+  
+  //       // Store the response _id in localStorage
+  //       if (response.data._id) {
+  //         // Remove the existing items if they exist
+  //         localStorage.removeItem("_id");
+  //         localStorage.removeItem("_idForReport");
+  
+  //         // Add the new items
+  //         localStorage.setItem("_id", response.data._id);
+  //         localStorage.setItem("_idForReport", response.data._id);
+  //       }
+  
+  //       // Store response status in localStorage to enable button on Instruction page
+  //       localStorage.setItem("apiResponseStatus", "success");
+  
+  //     } catch (error) {
+  //       console.error('Error:', error);
+  //       // Store response failure status in localStorage
+  //       localStorage.setItem("apiResponseStatus", "error");
+  //     }
+  //   } else {
+  //     console.error("No questions received. Please try again.");
+  //   }
+  // };
   
 
   
