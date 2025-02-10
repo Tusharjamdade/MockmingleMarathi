@@ -1,0 +1,909 @@
+
+
+// import React, { useState, useEffect } from 'react'; 
+// import { getApiResponseReport } from './api/report'; 
+// import { IoIosArrowBack } from "react-icons/io";
+// import Link from 'next/link';
+// import { useRouter } from 'next/router';
+// function Report() { 
+//   const router = useRouter(); 
+//   const[user,setUser]=useState('')
+//   const [email, setEmail] = useState(''); 
+//   const [loading, setLoading] = useState(true); 
+//   const [error, setError] = useState(null); 
+//   const [reportAnalysis, setReportAnalysis] = useState(null);
+//   const [reports, setReports] = useState([]);  
+//   const [isEmailFetched, setIsEmailFetched] = useState(false);  
+
+//   useEffect(() => {
+//     if (!localStorage.getItem("token")) {
+//       router.push("/login");
+
+//     }
+//   }, []);
+//   useEffect(() => {
+//     const userFromStorage = localStorage.getItem('user'); // Retrieve user data from localStorage
+//     if (userFromStorage) {
+//       const parsedUser = JSON.parse(userFromStorage); // Parse the stringified user object
+//       const email = parsedUser.email; // Access the email field from the parsed object
+
+//       // Log the email to check if it's being correctly fetched from localStorage
+//       console.log("Fetched email from localStorage:", email);
+
+//       if (email) {
+//         setEmail(email);
+//         setIsEmailFetched(true);
+//         setVisibility((prevVisibility) => ({
+//           ...prevVisibility,
+//           previousReports: true,  // Show previous reports when jobRoleId is missing
+//         }));
+//       } else {
+//         console.error("Email is missing in localStorage");
+//         setError("Email is missing in localStorage");
+//       }
+//     } else {
+//       // If no user data found in localStorage, handle the case gracefully
+//       console.error("No user data found in localStorage");
+//       setError("No user data found in localStorage");
+//     }
+//   }, []);
+
+
+//   // State to manage visibility of sections
+//   const [visibility, setVisibility] = useState({
+//     report: false,
+//     previousReports: false,
+//   });
+
+//   // State to manage visibility of each individual report
+//   const [reportVisibility, setReportVisibility] = useState([]);
+
+//   const toggleVisibility = (section) => {
+//     setVisibility((prevVisibility) => ({
+//       ...prevVisibility,
+//       [section]: !prevVisibility[section],  
+//     }));
+//   };
+
+//   const toggleIndividualReportVisibility = (index) => {
+//     setReportVisibility((prevVisibility) => {
+//       const newVisibility = [...prevVisibility];
+//       newVisibility[index] = !newVisibility[index];
+//       return newVisibility;
+//     });
+//   };
+
+
+//   // Fetch reports by email only if email is available and email fetching is completed
+//   useEffect(() => {
+//     if (!email) {
+//       setError("Email is missing or empty.");
+//       return; // Prevent API call if email is missing
+//     }
+
+//     const fetchReportsByEmail = async () => {
+//       try {
+//         // Log the email to make sure it's correct
+//         console.log("Email being sent to API:", email);
+
+//         const response = await fetch(`/api/storeReport?email=${email}`);
+
+//         if (!response.ok) {
+//           throw new Error(`Failed to fetch reports, status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log('Fetched reports:', data);
+
+//         if (data.reports && data.reports.length > 0) {
+//           const sortedReports = data.reports.sort((a, b) => {
+//             const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+//             const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+//             return dateB - dateA;
+//           });
+//           setReports(sortedReports);
+//           setReportVisibility(new Array(sortedReports.length).fill(false)); // Initialize visibility for each report
+//         } else {
+//           console.log('No reports available for the given email.');
+//           setReports([]);
+//         }
+//       } catch (err) {
+//         console.error('Error fetching reports:', err);
+//         setError(`Error fetching reports: ${err.message}`);
+//       } finally {
+//         setLoading(false);  
+//       }
+//     };
+
+//     fetchReportsByEmail();
+//   }, [email, isEmailFetched]);  // Depend on email and isEmailFetched
+
+
+
+
+//   useEffect(() => {
+
+//     const emailFromLocalStorage = localStorage.getItem('user'); // Retrieve user data from localStorage
+
+//     if (emailFromLocalStorage) {
+//       const parsedUser = JSON.parse(emailFromLocalStorage); // Parse the stringified user object
+//       const email = parsedUser.email; // Access the email field from the parsed object
+//       console.log(email); // Output the email
+
+//       if (email) {
+//         setEmail(email);
+//         setIsEmailFetched(true);
+
+
+//         // If jobRoleId is missing, set the email and show previous reports
+//         setEmail(email);
+//         setIsEmailFetched(true);
+//         setVisibility((prevVisibility) => ({
+//           ...prevVisibility,
+//           previousReports: true,  // Show previous reports when jobRoleId is missing
+//         }));
+//       }
+//     } else {
+//       // If neither jobRoleId nor email is available, show an error
+//       setError('Missing job role ID and email');
+//       setLoading(false);
+//     }
+//   }, []);
+
+
+
+//   if (error) {
+//     return <div>Error: {error}</div>;
+//   }
+
+//   // Render "No job role data found" only if there's no job role data fetched and jobRoleId exists
+
+//   const goBack = () => {
+//     if (document.referrer.includes('/report')) {
+//         router.push('/'); // Redirect to /page if coming from /report
+//     } else {
+//         router.back(); // Go back to the previous page
+//     }
+// };
+// const downloadReport = (reportAnalysis) => {
+//   const formattedHTML = reportAnalysis
+//     .replace(/The user's/g, "You'r")
+//     .replace(/\*\*(.*?)\*\*/g, (match, p1) => `</br><strong>${p1}</strong>`)
+//     .replace(/\*/g, '')
+//     .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
+//     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>')
+//     .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+//     .replace(/(\.)/g, '.<br>');
+
+//   const htmlContent = `
+//     <html>
+//       <head><title>Report Analysis</title></head>
+//       <body>
+//         ${formattedHTML}
+//       </body>
+//     </html>
+//   `;
+
+//   const blob = new Blob([htmlContent], { type: 'text/html' });
+//   const link = document.createElement('a');
+//   link.href = URL.createObjectURL(blob);
+//   link.download = 'report-analysis.html';
+//   link.click();
+// };
+
+
+//   return (
+//     <div className='min-h-screen bg-cover' style={{ backgroundImage: "url('/BG.jpg')" }}>
+//      <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack} ><IoIosArrowBack /></div>
+//      <div className="text-white">
+//         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
+
+//         <div className="mx-auto mt-5">
+//           {reportAnalysis && (
+//             <div>
+//               <div 
+//                 className="bg-purple-700 p-4 rounded-lg mt-2 cursor-pointer"
+//                 onClick={() => toggleVisibility('report')}
+//               >
+//                 Report ▼
+//               </div>
+
+//               {visibility.report && (
+//                 <div className="bg-transparent p-4 rounded-lg mt-2">
+//                   <div className="report-analysis">
+//                     <h4><strong>Analysis</strong></h4>
+//                     <div
+//                       className="analysis-content"
+//                       dangerouslySetInnerHTML={{
+//                         __html: reportAnalysis
+//                           .replace(/The user's/g, "You'r")
+//                           .replace(/\*/g, '')
+//                           .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
+//                           .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>') 
+//                           .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//                           .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//                           .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+//                           .replace(/(\.)/g, '.<br>'),
+//                       }}
+//                     />
+//                     <button onClick={() => downloadReport(reportAnalysis)}>Download Report</button>
+//                   </div>
+//                 </div>
+//               )}
+//             </div>
+//           )}
+
+//           <div 
+//             className="bg-purple-700 p-4 rounded-lg mt-2 cursor-pointer"
+//             onClick={() => toggleVisibility('previousReports')}
+//           >
+//             Previous Reports ▼
+//           </div>
+
+//           {visibility.previousReports && (
+//             <div className="mx-auto mt-5 ">
+//               {reports.length > 0 ? (
+//                 reports.map((report, index) => (
+//                   <div key={index} className="bg-transparent  rounded-lg mt-2 ">
+//                     <div 
+//                       className="bg-purple-500 p-4 rounded-lg cursor-pointer"
+//                       onClick={() => toggleIndividualReportVisibility(index)}
+//                     >
+//                       {reportVisibility[index] ? 'Hide' : 'Show'} Report ▼
+//                     </div>
+
+//                     {reportVisibility[index] && (
+//                       <div className='m-2'>
+//                         <h2><strong>Role:</strong> {report.role}</h2>
+//                         <h3><strong>Email:</strong> {report.email}</h3>
+//                         <p><strong>Created At:</strong> {new Date(report.createdAt).toLocaleString()}</p>
+//                         <div className="report-analysis">
+//                           <h4><strong>Analysis</strong></h4>
+//                           <div
+//                             className="analysis-content"
+//                             dangerouslySetInnerHTML={{
+//                               __html: report.reportAnalysis
+//                                 .replace(/The user's/g, "You'r")
+//                                 .replace(/\*/g, '')
+//                                 .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br></br>')
+//                                 .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>') 
+//                                 .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//                                 .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//                                 .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+//                                 .replace(/(\.)/g, '.<br>'),
+//                             }}
+//                           />
+//                           <button onClick={() => downloadReport(report.reportAnalysis)}>Download Report</button>
+//                         </div>
+//                       </div>
+//                     )}
+//                   </div>
+//                 ))
+//               ) : (
+//                 <div>For Report Visit After 5 Min </div>
+//               )}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Report;
+
+
+// import React, { useState, useEffect } from 'react'; 
+// import { IoIosArrowBack } from "react-icons/io";
+// import { useRouter } from 'next/router';
+
+// function Report() { 
+//   const router = useRouter(); 
+//   const [openReport, setOpenReport] = useState(false);
+//   const [reportData, setReportData] = useState(null); 
+//   const [user, setUser] = useState('');
+//   const [email, setEmail] = useState(''); 
+//   const [jobRole, setJobRole] = useState(''); 
+//   const [loading, setLoading] = useState(true); 
+//   const [error, setError] = useState(null); 
+//   const [jobRoleId, setJobRoleId] = useState(null); 
+//   const [reportAnalysis, setReportAnalysis] = useState(null);
+//   const [reports, setReports] = useState([]);  
+//   const [isEmailFetched, setIsEmailFetched] = useState(false);  
+//   const [visibility, setVisibility] = useState({
+//     report: false,
+//     previousReports: false,
+//   });
+//   const [reportVisibility, setReportVisibility] = useState([]);
+
+//   useEffect(() => {
+//     const userFromStorage = localStorage.getItem('user'); // Retrieve user data from localStorage
+//     if (userFromStorage) {
+//       const parsedUser = JSON.parse(userFromStorage); // Parse the stringified user object
+//       const email = parsedUser.email; // Access the email field from the parsed object
+
+//       // Log email to check if it's fetched correctly
+//       console.log("Fetched email from localStorage:", email);
+
+//       if (email) {
+//         setEmail(email);  // Set email in state
+//         setIsEmailFetched(true);
+//         setVisibility((prevVisibility) => ({
+//           ...prevVisibility,
+//           previousReports: true,  // Show previous reports when email is available
+//         }));
+//       } else {
+//         console.error("Email is missing in localStorage");
+//         setError("Email is missing in localStorage");
+//       }
+//     } else {
+//       console.error("No user data found in localStorage");
+//       setError("No user data found in localStorage");
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     if (!email) {
+//       console.error("Email is still empty before making API request");
+//       setError("Email is missing or empty.");
+//       return; // Skip fetch if email is missing
+//     }
+
+//     const fetchReportsByEmail = async () => {
+//       try {
+//         console.log("Fetching reports for email:", email); // Log email for debugging
+
+//         const response = await fetch(`/api/storeReport?email=${email}`);
+
+//         if (!response.ok) {
+//           throw new Error(`Failed to fetch reports, status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log('Fetched reports:', data);
+
+//         if (data.reports && data.reports.length > 0) {
+//           const sortedReports = data.reports.sort((a, b) => {
+//             const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+//             const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+//             return dateB - dateA;
+//           });
+//           setReports(sortedReports);
+//           setReportVisibility(new Array(sortedReports.length).fill(false)); // Initialize visibility for each report
+//         } else {
+//           console.log('No reports available for the given email.');
+//           setReports([]);
+//         }
+//       } catch (err) {
+//         console.error('Error fetching reports:', err);
+//         setError(`Error fetching reports: ${err.message}`);
+//       } finally {
+//         setLoading(false);  
+//       }
+//     };
+
+//     fetchReportsByEmail();
+//   }, [email, isEmailFetched]); // Trigger when email or isEmailFetched changes
+
+//   // Handle Go Back Logic
+//   const goBack = () => {
+//     if (document.referrer.includes('/report')) {
+//       router.push('/'); // Redirect to home if coming from report page
+//     } else {
+//       router.back(); // Go back to the previous page
+//     }
+//   };
+
+//   // Handle toggle visibility of report sections
+//   const toggleVisibility = (section) => {
+//     setVisibility((prevVisibility) => ({
+//       ...prevVisibility,
+//       [section]: !prevVisibility[section],  
+//     }));
+//   };
+
+//   // Toggle visibility for individual reports
+//   const toggleIndividualReportVisibility = (index) => {
+//     setReportVisibility((prevVisibility) => {
+//       const newVisibility = [...prevVisibility];
+//       newVisibility[index] = !newVisibility[index];
+//       return newVisibility;
+//     });
+//   };
+
+//   // Handle report download
+//   const downloadReport = (analysis) => {
+//     const blob = new Blob([analysis], { type: 'application/pdf' });
+//     const link = document.createElement('a');
+//     link.href = URL.createObjectURL(blob);
+//     link.download = 'report.pdf';
+//     link.click();
+//   };
+
+//   if (error) {
+//     return <div>Error: {error}</div>;
+//   }
+
+//   return (
+//     <div className='min-h-screen bg-cover' style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack}>
+//         <IoIosArrowBack />
+//       </div>
+//       <div className="text-white">
+//         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
+//         <div className="mx-auto mt-5">
+//           {reportAnalysis && (
+//             <div>
+//               <div 
+//                 className="bg-purple-700 p-4 rounded-lg mt-2 cursor-pointer"
+//                 onClick={() => toggleVisibility('report')}
+//               >
+//                 Report ▼
+//               </div>
+
+//               {visibility.report && (
+//                 <div className="bg-transparent p-4 rounded-lg mt-2">
+//                   <div className="report-analysis">
+//                     <h4><strong>Analysis</strong></h4>
+//                     <div
+//                       className="analysis-content"
+//                       dangerouslySetInnerHTML={{
+//                         __html: reportAnalysis
+//                           .replace(/The user's/g, "You'r")
+//                           .replace(/\*/g, '')
+//                           .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
+//                           .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>') 
+//                           .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+//                           .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+//                           .replace(/(\.)/g, '.<br>'),
+//                       }}
+//                     />
+//                     <button onClick={() => downloadReport(reportAnalysis)}>Download Report</button>
+//                   </div>
+//                 </div>
+//               )}
+//             </div>
+//           )}
+
+//           <div 
+//             className="bg-purple-700 p-4 rounded-lg mt-2 cursor-pointer"
+//             onClick={() => toggleVisibility('previousReports')}
+//           >
+//             Previous Reports ▼
+//           </div>
+
+//           {visibility.previousReports && (
+//             <div className="mx-auto mt-5">
+//               {reports.length > 0 ? (
+//                 reports.map((report, index) => (
+//                   <div key={index} className="bg-transparent rounded-lg mt-2">
+//                     <div 
+//                       className="bg-purple-500 p-4 rounded-lg cursor-pointer"
+//                       onClick={() => toggleIndividualReportVisibility(index)}
+//                     >
+//                       {reportVisibility[index] ? 'Hide' : 'Show'} Report ▼
+//                     </div>
+
+//                     {reportVisibility[index] && (
+//                       <div className='m-2'>
+//                         <h2><strong>Role:</strong> {report.role}</h2>
+//                         <h3><strong>Email:</strong> {report.email}</h3>
+//                         <p><strong>Created At:</strong> {new Date(report.createdAt).toLocaleString()}</p>
+//                         <div className="report-analysis">
+//                           <h4><strong>Analysis</strong></h4>
+//                           <div
+//                             className="analysis-content"
+//                             dangerouslySetInnerHTML={{
+//                               __html: report.reportAnalysis
+//                                 .replace(/The user's/g, "You'r")
+//                                 .replace(/\*/g, '')
+//                                 .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br></br>')
+//                                 .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>') 
+//                                 .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+//                                 .replace(/(\.)/g, '.<br>'),
+//                             }}
+//                           />
+//                           <button onClick={() => downloadReport(report.reportAnalysis)}>Download Report</button>
+//                         </div>
+//                       </div>
+//                     )}
+//                   </div>
+//                 ))
+//               ) : (
+//                 <div>For Report Visit After 5 Min </div>
+//               )}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Report;
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { IoIosArrowBack } from "react-icons/io";
+// import { useRouter } from 'next/router';
+
+// function Oldreport() {
+//   const router = useRouter();
+
+//   const [email, setEmail] = useState('');
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [reportAnalysis, setReportAnalysis] = useState(null);
+//   const [reports, setReports] = useState([]);
+//   const [isEmailFetched, setIsEmailFetched] = useState(false);
+//   const [visibility, setVisibility] = useState({
+//     report: false,
+//     previousReports: false,
+//   });
+//   const [reportVisibility, setReportVisibility] = useState([]);
+
+//   // Fetch email from localStorage
+//   useEffect(() => {
+//     const userFromStorage = localStorage.getItem('user');
+//     if (userFromStorage) {
+//       const parsedUser = JSON.parse(userFromStorage);
+//       const email = parsedUser.email;
+
+//       // Debug: log the email fetched from localStorage
+//       console.log("Fetched email from localStorage:", email);
+
+//       if (email) {
+//         setEmail(email);
+//         setIsEmailFetched(true);
+//         setVisibility((prevVisibility) => ({
+//           ...prevVisibility,
+//           previousReports: true,
+//         }));
+//       } else {
+//         console.error("Email is missing in localStorage");
+//         setError("Email is missing in localStorage");
+//       }
+//     } else {
+//       console.error("No user data found in localStorage");
+//       setError("No user data found in localStorage");
+//     }
+//   }, []);
+
+//   // Fetch reports when email is set
+//   useEffect(() => {
+//     // Ensure email is set and fetched before calling the API
+//     if (email && isEmailFetched) {
+//       const fetchReportsByEmail = async () => {
+//         try {
+//           console.log("Fetching reports for email:", email);
+
+//           const response = await fetch(`/api/storeReport?email=${email}`);
+
+//           if (!response.ok) {
+//             throw new Error(`Failed to fetch reports, status: ${response.status}`);
+//           }
+
+//           const data = await response.json();
+//           console.log('Fetched reports:', data);
+
+//           if (data.reports && data.reports.length > 0) {
+//             const sortedReports = data.reports.sort((a, b) => {
+//               const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+//               const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+//               return dateB - dateA;
+//             });
+//             setReports(sortedReports);
+//             setReportVisibility(new Array(sortedReports.length).fill(false));
+//           } else {
+//             console.log('No reports available for the given email.');
+//             setReports([]);
+//           }
+//         } catch (err) {
+//           console.error('Error fetching reports:', err);
+//           setError(`Error fetching reports: ${err.message}`);
+//         } finally {
+//           setLoading(false);
+//         }
+//       };
+
+//       fetchReportsByEmail();
+//     } else {
+//       console.log("Waiting for email to be fetched and set.");
+//     }
+//   }, [email, isEmailFetched]);  // This will trigger once both are available
+
+//   // Handle Go Back Logic
+//   const goBack = () => {
+//     if (document.referrer.includes('/report')) {
+//       router.push('/');
+//     } else {
+//       router.back();
+//     }
+//   };
+
+//   // Handle toggle visibility of report sections
+//   const toggleVisibility = (section) => {
+//     setVisibility((prevVisibility) => ({
+//       ...prevVisibility,
+//       [section]: !prevVisibility[section],
+//     }));
+//   };
+
+//   // Toggle visibility for individual reports
+//   const toggleIndividualReportVisibility = (index) => {
+//     setReportVisibility((prevVisibility) => {
+//       const newVisibility = [...prevVisibility];
+//       newVisibility[index] = !newVisibility[index];
+//       return newVisibility;
+//     });
+//   };
+
+//   // Handle report download
+//   const downloadReport = (analysis) => {
+//     const blob = new Blob([analysis], { type: 'application/pdf' });
+//     const link = document.createElement('a');
+//     link.href = URL.createObjectURL(blob);
+//     link.download = 'report.pdf';
+//     link.click();
+//   };
+
+//   if (error) {
+//     return <div>Error: {error}</div>;
+//   }
+
+//   return (
+//     <div className='min-h-screen bg-cover' style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack}>
+//         <IoIosArrowBack />
+//       </div>
+//       <div className="text-white">
+//         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
+//         <div className="mx-auto mt-5">
+          
+
+//           {visibility.previousReports && (
+//             <div className="mx-auto mt-5">
+//               {reports.length > 0 ? (
+//                 reports.map((report, index) => (
+//                   <div key={index} className="bg-transparent rounded-lg mt-2">
+//                     <div
+//                       className="bg-purple-500 p-4 rounded-lg cursor-pointer"
+//                       onClick={() => toggleIndividualReportVisibility(index)}
+//                     >
+//                       {reportVisibility[index] ? 'Hide' : 'Show'} Report ▼
+//                     </div>
+
+//                     {reportVisibility[index] && (
+//                       <div className='m-2'>
+//                         <h2><strong>Role:</strong> {report.role}</h2>
+//                         {/* <h3><strong>Email:</strong> {report.email}</h3> */}
+//                         <p><strong>Created At:</strong> {new Date(report.createdAt).toLocaleString()}</p>
+//                         <div className="report-analysis">
+//                           <h4><strong>Analysis</strong></h4>
+//                           <div
+//   className="analysis-content"
+//   dangerouslySetInnerHTML={{
+//     __html: report.reportAnalysis
+//       .replace(/The user's/g, "You'r") // Replace "The user's" with "You'r"
+//       .replace(/\*/g, '') // Remove all * characters
+//       .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong><br/>') // Bold the overall score and add a line break
+//       // .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, 
+//       //   '<div class="section-header">$1</div>') // Wrap headings in <div> and add two line breaks after each
+//       .replace(/(Technical Proficiency:|Communication:|Decision-Making:|Confidence:|Language Fluency:)/g, 
+//         '<br/><br/><div class="section-header">$1</div>') // Wrap headings in <div> and add two line breaks after each
+//        // Wrap headings in <div> and add two line breaks after each
+//       .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>') // Recommendation header
+//       // .replace(/(\.)(?=\s)/g, '.<br/>') // Add <br/> after each period followed by a space
+//   }}
+// />
+//                           <button onClick={() => downloadReport(report.reportAnalysis)}>Download Report</button>
+//                         </div>
+//                       </div>
+//                     )}
+//                   </div>
+//                 ))
+//               ) : (
+//                 <div>For Report Visit After 5 Min </div>
+//               )}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Oldreport;
+import React, { useState, useEffect } from 'react';
+import { IoIosArrowBack } from "react-icons/io";
+import { useRouter } from 'next/router';
+
+function Oldreport() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reportAnalysis, setReportAnalysis] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [isEmailFetched, setIsEmailFetched] = useState(false);
+  const [visibility, setVisibility] = useState({
+    report: false,
+    previousReports: false,
+  });
+  const [reportVisibility, setReportVisibility] = useState([]);
+
+  // Fetch email from localStorage
+  useEffect(() => {
+    const userFromStorage = localStorage.getItem('user');
+    if (userFromStorage) {
+      const parsedUser = JSON.parse(userFromStorage);
+      const email = parsedUser.email;
+
+      // Debug: log the email fetched from localStorage
+      console.log("Fetched email from localStorage:", email);
+
+      if (email) {
+        setEmail(email);
+        setIsEmailFetched(true);
+        setVisibility((prevVisibility) => ({
+          ...prevVisibility,
+          previousReports: true,
+        }));
+      } else {
+        console.error("Email is missing in localStorage");
+        setError("Email is missing in localStorage");
+      }
+    } else {
+      console.error("No user data found in localStorage");
+      setError("No user data found in localStorage");
+    }
+  }, []);
+
+  // Fetch reports when email is set
+  useEffect(() => {
+    // Ensure email is set and fetched before calling the API
+    if (email && isEmailFetched) {
+      const fetchReportsByEmail = async () => {
+        try {
+          console.log("Fetching reports for email:", email);
+
+          const response = await fetch(`/api/storeReport?email=${email}`);
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch reports, status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Fetched reports:', data);
+
+          if (data.reports && data.reports.length > 0) {
+            const sortedReports = data.reports.sort((a, b) => {
+              const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+              const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+              return dateB - dateA;
+            });
+            setReports(sortedReports);
+            setReportVisibility(new Array(sortedReports.length).fill(false)); // Initialize visibility
+          } else {
+            console.log('No reports available for the given email.');
+            setReports([]);
+          }
+        } catch (err) {
+          console.error('Error fetching reports:', err);
+          setError(`Error fetching reports: ${err.message}`);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchReportsByEmail();
+    } else {
+      console.log("Waiting for email to be fetched and set.");
+    }
+  }, [email, isEmailFetched]);
+
+  // Handle Go Back Logic
+  const goBack = () => {
+    if (document.referrer.includes('/report')) {
+      router.push('/');
+    } else {
+      router.back();
+    }
+  };
+
+  // Handle toggle visibility of report sections
+  const toggleVisibility = (section) => {
+    setVisibility((prevVisibility) => ({
+      ...prevVisibility,
+      [section]: !prevVisibility[section],
+    }));
+  };
+
+  // Toggle visibility for individual reports
+  const toggleIndividualReportVisibility = (index) => {
+    setReportVisibility((prevVisibility) => {
+      const newVisibility = [...prevVisibility];
+      newVisibility[index] = !newVisibility[index];  // Toggle visibility at the given index
+      return newVisibility;
+    });
+  };
+
+  // Handle report download
+  const downloadReport = (analysis) => {
+    const blob = new Blob([analysis], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'report.pdf';
+    link.click();
+  };
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <div className='min-h-screen bg-cover' style={{ backgroundImage: "url('/BG.jpg')" }}>
+      <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack}>
+        <IoIosArrowBack />
+      </div>
+      <div className="text-white">
+        <h1 className="text-center  text-4xl font-bold">Interview Report</h1>
+        <div className="mx-auto  mt-5">
+          {visibility.previousReports && (
+            <div className="mx-auto  mt-5">
+              {reports.length > 0 ? (
+                reports.map((report, index) => (
+                  <div key={index} className="bg-transparent shadow-lg rounded-lg  p-2 max-w-lg mx-auto">
+                    <div
+                      className="bg-purple-500 text-white p-4 rounded-t-lg cursor-pointer flex justify-between items-center"
+                      onClick={() => toggleIndividualReportVisibility(index)}
+                    >
+                      <span>{reportVisibility[index] ? 'Hide' : 'Show'} Report ▼</span>
+                      <span className="text-sm">{new Date(report.createdAt).toLocaleString()}</span>
+                    </div>
+
+                    {reportVisibility[index] && (
+                      <div className='p-4'>
+                        <h2 className="text-lg font-semibold"><strong>Role:</strong> {report.role}</h2>
+                        <div className="report-analysis mt-4">
+                          <h4 className="text-xl font-semibold mb-2"><strong>Analysis</strong></h4>
+                          <div
+                            className="analysis-content mb-4"
+                            dangerouslySetInnerHTML={{
+                              __html: report.reportAnalysis
+                                .replace(/The user's/g, "You'r")
+                                .replace(/\*/g, '')
+                                .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong><br/>')
+                                .replace(/(Technical Proficiency:|Communication:|Decision-Making:|Confidence:|Language Fluency:|Overall|recommendations|recommendation)/g, 
+                                  '<br/><br/><div class="section-header">$1</div>')
+                                .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency|Overall|recommendations|recommendation)/g, 
+                                  '<br/><br/><div class="section-header">$1</div>')
+                                .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+                            }}
+                          />
+                          <button
+                            className="bg-blue-500 text-white py-2 px-4 rounded-lg mt-2 hover:bg-blue-600"
+                            onClick={() => downloadReport(report.reportAnalysis)}
+                          >
+                            Download Report
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center mt-5 text-gray-600">For Report Visit After 5 Min</div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Oldreport;
