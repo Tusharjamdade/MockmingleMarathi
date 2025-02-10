@@ -3251,7 +3251,7 @@
 
 
 import React, { useState, useEffect } from 'react'; 
-import { getApiResponseReport } from '/report'; 
+import { getApiResponseReport } from './api/report'; 
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from 'next/router';
 
