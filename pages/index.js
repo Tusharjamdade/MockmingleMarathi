@@ -114,7 +114,7 @@ export default function Home({ Logout, user }) {
       <div className="flex flex-col items-center text-center">
         {/* Logo */}
         <div className="w-20 h-20 mt-5 border-2 border-white rounded-full flex items-center justify-center">
-          <img src="Logoo.png" alt="Logo" className="w-16 h-16 object-contain" />
+          <img src="/Logoo.png" alt="Logo" className="w-16 h-16 object-contain" />
         </div>
 
         <h1 className="text-4xl font-bold mt-4 text-pink-400">Job</h1>
