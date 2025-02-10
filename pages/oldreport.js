@@ -770,7 +770,7 @@ function Oldreport() {
         try {
           console.log("Fetching reports for email:", email);
 
-          const response = await fetch(`/api/storeReport?email=${email}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/storeReport?email=${email}`);
 
           if (!response.ok) {
             throw new Error(`Failed to fetch reports, status: ${response.status}`);

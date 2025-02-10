@@ -3270,7 +3270,7 @@ function Report() {
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
-      router.push("/login");
+      router.push(`${process.env.NEXT_PUBLIC_HOST}/login`);
     } else {
       const userFromStorage = JSON.parse(localStorage.getItem('user'));
       if (userFromStorage) {
@@ -3312,7 +3312,7 @@ function Report() {
 
     const fetchJobRole = async () => {
       try {
-        const response = await fetch(`/api/getReportData?jobRoleId=${jobRoleId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/getReportData?jobRoleId=${jobRoleId}`);
         localStorage.setItem('status', "processing");
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -3346,7 +3346,7 @@ function Report() {
 
   const storeReport = async (jobRole, email, reportAnalysis) => {
     try {
-      const response = await fetch('/api/storeReport', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/storeReport`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

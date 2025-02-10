@@ -4234,21 +4234,21 @@ const QuestionForm = () => {
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
 
   const goodResponses = [
-    "Good, let's move to the next question.",
-    "Great job, let's move on to the next question.",
-    "Perfect, let's proceed to the next question.",
-    "Well done! Now, let’s move on to the next question.",
-    "Nice work, let's continue to the next question.",
-    "Excellent! Ready for the next question?",
-    "That's right, let's move to the next question.",
-    "You're doing great, let’s continue to the next one.",
-    "Awesome! Let’s keep going to the next question.",
-    "Nice! Now, let’s go to the next question.",
-    "Fantastic! Let’s keep moving with the next question.",
-    "You're on fire! Let's go ahead and continue.",
-    "Superb! Time for the next question.",
-    "Perfect answer, let's move on.",
-    "Good work! Let's proceed to the next question."
+    "Alright, let's move on to the next question.",
+    "Okay, let's continue to the next one.",
+    "Let's go ahead with the next question.",
+    "Let's move on to the next question now.",
+    "Proceeding to the next question.",
+    "Let's move forward to the next one.",
+    "Next question, please.",
+    "Let's go to the next one.",
+    "Moving on to the next question.",
+    "Let's continue with the next question.",
+    "Now, let's go to the next question.",
+    "Time to proceed with the next question.",
+    "Next question, let's go.",
+    "Let's keep going with the next question.",
+    "Let's continue with the next one."
   ];
   
   const badResponses = [
@@ -4306,7 +4306,7 @@ const QuestionForm = () => {
       }
 
       try {
-        const res = await fetch(`/api/fetchQuestions?email=${email}&_id=${userId}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
         if (!res.ok) {
           throw new Error(`Failed to fetch questions: ${res.statusText}`);
         }
@@ -4380,7 +4380,7 @@ const QuestionForm = () => {
 
   const submitAnswer = async (questionId, answer) => {
     try {
-      const res = await fetch('/api/saveAnswer', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -4440,7 +4440,7 @@ const QuestionForm = () => {
 
     const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
 
-    const responseText = Math.random() > 0.5 
+    const responseText = Math.random() > 0.15 
   ? goodResponses[Math.floor(Math.random() * goodResponses.length)] 
   : badResponses[Math.floor(Math.random() * badResponses.length)];
 
