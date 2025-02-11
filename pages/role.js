@@ -477,7 +477,7 @@ export default function Role() {
   
     // Replace this with a fetch request to your new API
     try {
-      const res = await fetch("/api/questionsFetch", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/questionsFetch`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
