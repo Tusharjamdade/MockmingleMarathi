@@ -1,12 +1,10 @@
 // pages/signup.js
 
 import React, { useState } from 'react'
-import Link from 'next/link'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { set } from 'mongoose';
+
 const SignUp = () => {
     const router = useRouter()
  
@@ -68,47 +66,6 @@ const SignUp = () => {
             }
           }
     }
-//     const handleSubmit = async (e) => {
-        
-//         e.preventDefault();
-//         if (password !== confirmPassword) {
-//             setPasswordError("Passwords do not match!");
-//         } else {
-//             setPasswordError("");
-//             // Submit the form (add your form submission logic here)
-//         }
-//         const data = {profileImg ,fullName, email,DOB, password,mobileNo,address,education }
-
-//         let res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
-//             method: 'Post',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(data)
-//         })
-//         let response = await res.json()
-//         // console.log(response)
-// setProfileImg('')
-//         setMobileNo('')
-//         setConfirmPassword('')
-//         setAddress('')
-//         setEducation('')
-//         setDOB('')
-//         setEmail('')
-//         setFullName('')
-//         setPassword('')
-//         toast.success('Your account has been created!', {
-//             position: "top-left",
-//             autoClose: 3000,
-//             hideProgressBar: false,
-//             closeOnClick: true,
-//             pauseOnHover: true,
-//             draggable: true,
-//             progress: undefined,
-//             theme: "light",
-//             });
-
-//     }
 
 const handleSubmit = async (e) => {
     e.preventDefault();

@@ -229,7 +229,7 @@ function Instruction() {
                 </div>
             </div>
             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-                <div className="relative w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
+                <div className="relative w-full mt-10 max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
                     <div className="text-center text-lg font-bold bg-purple-600 rounded-md py-2">
                         TIPS FOR THE INTERVIEW
                     </div>
