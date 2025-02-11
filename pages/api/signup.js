@@ -1,25 +1,25 @@
 // // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-// import User from "@/models/User"
-// import connectDb from "@/middleware/dbConnect"
-// var CryptoJS = require("crypto-js");
+import User from "@/models/User"
+import connectDb from "@/middleware/dbConnect"
+var CryptoJS = require("crypto-js");
 
-// const handler = async (req, res) => {
-//     if (req.method == 'POST') {
-//         const {profileImg,fullName,email,mobileNo,address,DOB,education} = req.body
-//         let u = new User({profileImg,fullName, email,mobileNo,address,DOB,education, password: CryptoJS.AES.encrypt(req.body.password,'secret123').toString()})
-//         await u.save()
+const handler = async (req, res) => {
+    if (req.method == 'POST') {
+        const {profileImg,fullName,email,mobileNo,address,DOB,education} = req.body
+        let u = new User({profileImg,fullName, email,mobileNo,address,DOB,education, password: CryptoJS.AES.encrypt(req.body.password,'secret123').toString()})
+        await u.save()
             
-//         res.status(200).json({ success: "success" })
-//         }
+        res.status(200).json({ success: "success" })
+        }
     
-//     else {
-//         res.status(400).json({ error: "this method is not allowed" })
-//     }
+    else {
+        res.status(400).json({ error: "this method is not allowed" })
+    }
 
 
-// }
+}
 
-// export default connectDb(handler)
+export default connectDb(handler)
 
 // import User from "@/models/User"
 // import connectDb from "@/middleware/dbConnect"
@@ -81,10 +81,16 @@
 
 // import User from "@/models/User";
 // import connectDb from "@/middleware/dbConnect";
+// import mongoose from "mongoose";
 // var CryptoJS = require("crypto-js");
 
 // const handler = async (req, res) => {
+//     if (mongoose.connections[0].readyState) return;
+//           await mongoose.connect(process.env.MONGODB_URI);
 //     if (req.method === 'POST') {
+        
+        
+        
 //         try {
 //             const { profileImg, fullName, email, mobileNo, address, DOB, education, password } = req.body;
 
@@ -122,6 +128,8 @@
 //             return res.status(500).json({ error: "An error occurred while creating the user. Please try again later." });
 //         }
 //     } else if (req.method === 'PUT') {
+//         if (mongoose.connections[0].readyState) return;
+//           await mongoose.connect(process.env.MONGODB_URI);
 //         try {
 //             const { email, profileImg, fullName, mobileNo, address, DOB, education, password } = req.body;
 
@@ -199,48 +207,48 @@
 // export default connectDb(handler);
 
 
-import bcrypt from 'bcryptjs';
+// // import bcrypt from 'bcryptjs';
 
-// Encrypt the password using bcrypt
-const salt = await bcrypt.genSalt(10);
-const hashedPassword = await bcrypt.hash(password, salt);
+// // // Encrypt the password using bcrypt
+// // const salt = await bcrypt.genSalt(10);
+// // const hashedPassword = await bcrypt.hash(password, salt);
 
-// Create new user
-let newUser = new User({
-  profileImg,
-  fullName,
-  email,
-  mobileNo,
-  address,
-  DOB,
-  education,
-  password: hashedPassword,
-});
-await newUser.save();
+// // // Create new user
+// // let newUser = new User({
+// //   profileImg,
+// //   fullName,
+// //   email,
+// //   mobileNo,
+// //   address,
+// //   DOB,
+// //   education,
+// //   password: hashedPassword,
+// // });
+// // await newUser.save();
 
-// Check if email already exists before proceeding with PUT method
-if (req.method === 'PUT') {
-  const { email, profileImg, fullName, mobileNo, address, DOB, education, password } = req.body;
-  const user = await User.findOne({ email });
+// // // Check if email already exists before proceeding with PUT method
+// // if (req.method === 'PUT') {
+// //   const { email, profileImg, fullName, mobileNo, address, DOB, education, password } = req.body;
+// //   const user = await User.findOne({ email });
 
-  if (!user) {
-    return res.status(404).json({ error: "User not found." });
-  }
+// //   if (!user) {
+// //     return res.status(404).json({ error: "User not found." });
+// //   }
 
-  // Handle password encryption conditionally
-  if (password) {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-  }
+// //   // Handle password encryption conditionally
+// //   if (password) {
+// //     const salt = await bcrypt.genSalt(10);
+// //     user.password = await bcrypt.hash(password, salt);
+// //   }
 
-  // Update fields
-  user.profileImg = profileImg || user.profileImg;
-  user.fullName = fullName || user.fullName;
-  user.mobileNo = mobileNo || user.mobileNo;
-  user.address = address || user.address;
-  user.DOB = DOB || user.DOB;
-  user.education = education || user.education;
+// //   // Update fields
+// //   user.profileImg = profileImg || user.profileImg;
+// //   user.fullName = fullName || user.fullName;
+// //   user.mobileNo = mobileNo || user.mobileNo;
+// //   user.address = address || user.address;
+// //   user.DOB = DOB || user.DOB;
+// //   user.education = education || user.education;
 
-  await user.save();
-  return res.status(200).json({ success: "User updated successfully." });
-}
+// //   await user.save();
+// //   return res.status(200).json({ success: "User updated successfully." });
+// // }

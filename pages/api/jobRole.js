@@ -3,8 +3,9 @@ import JobRole from '@/models/JobRole'; // Assuming the JobRole model is stored 
 
 const connectDb = async () => {
   if (mongoose.connections[0].readyState) return;
-  await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-};
+  await mongoose.connect(process.env.MONGODB_URI);
+
+}
 
 export default async function handler(req, res) {
   try {
