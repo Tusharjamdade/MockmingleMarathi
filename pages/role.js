@@ -124,50 +124,256 @@ export default function Role() {
   }, []);
 
   
-  // const getApiResponse = async (jobrole, level) => {
-  //   const url = `${process.env.NEXT_PUBLIC_HOST}/api/proxy`; // Replace with your Vercel proxy URL
-  //   const headers = {
-  //     "Content-Type": "application/json",
-  //   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();  // Prevent form from submitting normally
+  //   localStorage.removeItem("apiResponseStatus");
+    
+  //   // Declare formattedQuestions here once
+  //   let formattedQuestions = [];
+    
+  //   router.push("/instruction");
   
-  //   const data = {
-  //     model: "gemma:2b",
-  //     prompt: `give me 15 questions for ${jobrole} at ${level} level`,
-  //     stream: false,
-  //   };
-  
+  //   // Replace this with a fetch request to your new API
   //   try {
-  //     const response = await fetch(url, {
+  //     const res = await fetch("/api/questionsFetch", {
   //       method: "POST",
-  //       headers: headers,
-  //       body: JSON.stringify(data),
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         jobRole,
+  //         level,
+  //       }),
   //     });
   
-  //     if (response.ok) {
-  //       const responseData = await response.json();
-  //       return responseData.response; // Return the response from the API
+  //     // Check if the response is OK (status 200)
+  //     if (!res.ok) {
+  //       const errorData = await res.json();
+  //       throw new Error(errorData?.error || "Something went wrong. Please try again.");
+  //     }
+  
+  //     // Parse the response
+  //     const responseData = await res.json();
+  
+  //     console.log('Fetched Questions:', responseData);  // Debug: Log fetched questions
+  
+  //     const fetchedQuestions = responseData;
+  // console.log(fetchedQuestions);
+  
+  //     if (fetchedQuestions) {
+  //       // Check if the fetchedQuestions are in the expected format
+  //       if (typeof fetchedQuestions !== 'string') {
+  //         console.error('Fetched questions are not in expected string format:', fetchedQuestions);
+  //         return;
+  //       }
+  
+  //       // Use regex to match the questions
+  //       const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
+  //       const matchedQuestions = fetchedQuestions.match(questionsRegex);
+  
+  //       console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
+  
+  //       if (matchedQuestions) {
+  //         // Start with the "Introduce yourself" question as the first element
+  //         const firstName = user?.fullName?.split(' ')[0];
+  //         formattedQuestions = [{
+  //           questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+  //           answer: null,
+  //         }];
+  
+  //         // Add the fetched questions to the array
+  //         const additionalQuestions = matchedQuestions.map(questionText => ({
+  //           questionText: questionText.trim(),
+  //           answer: null,
+  //         }));
+  
+  //         // Prepend the fetched questions after the "Introduce yourself"
+  //         formattedQuestions.push(...additionalQuestions);
+  
+  //         // Set the questions in the state with the "Introduce yourself" as the first question
+  //         setQuestions(formattedQuestions);
+  //       } else {
+  //         console.error("No valid questions found in the fetched data.");
+  //       }
   //     } else {
-  //       console.error("Error fetching response from the API.");
-  //       return null;
+  //       console.error("No questions received from API.");
+  //     }
+  
+  //     console.log("Questions to be sent:", formattedQuestions);
+  
+  //     if (formattedQuestions && formattedQuestions.length > 0) {
+  //       const data = { jobRole, email, level, questions: formattedQuestions };
+  
+  //       try {
+  //         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRole`, {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify(data),
+  //         });
+  
+  //         if (!res.ok) {
+  //           const errorData = await res.json();
+  //           throw new Error(errorData?.error || "Something went wrong. Please try again.");
+  //         }
+  
+  //         const response = await res.json();
+  //         // console.log(response.data._id); // Log the successful response
+  
+  //         // Store the response _id in localStorage
+  //         if (response.data._id) {
+  //           // Remove the existing items if they exist
+  //           localStorage.removeItem("_id");
+  //           localStorage.removeItem("_idForReport");
+  
+  //           // Add the new items
+  //           localStorage.setItem("_id", response.data._id);
+  //           localStorage.setItem("_idForReport", response.data._id);
+  //         }
+  
+  //         // Store response status in localStorage to enable button on Instruction page
+  //         localStorage.setItem("apiResponseStatus", "success");
+  
+  //       } catch (error) {
+  //         console.error('Error:', error);
+  //         // Store response failure status in localStorage
+  //         localStorage.setItem("apiResponseStatus", "error");
+  //       }
+  //     } else {
+  //       console.error("No questions received. Please try again.");
   //     }
   //   } catch (error) {
-  //     console.error("Error in the fetch operation:", error);
-  //     return null;
+  //     console.error('Error during question fetch:', error);
+  //     localStorage.setItem("apiResponseStatus", "error");
   //   }
   // };
+  
   
   // const handleSubmit = async (e) => {
   //   e.preventDefault();  // Prevent form from submitting normally
   //   localStorage.removeItem("apiResponseStatus");
   
-  //   // Declare formattedQuestions here once
   //   let formattedQuestions = [];
   
   //   router.push("/instruction");
   
-  //   // Fetch the questions using the API
-  //   const fetchedQuestions = await getApiResponse(jobRole, level); // Call the function correctly here
+  //   const data = { jobRole, level };
   
+  //   const res = await fetch('/api/submitJobRole', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(data),
+  //   });
+  
+  //   if (!res.ok) {
+  //     const errorData = await res.json();
+  //     throw new Error(errorData?.error || "Something went wrong. Please try again.");
+  //   }
+  
+  //   const fetchedData = await res.json();
+  //   console.log('Fetched Data:', fetchedData); // Log to see the actual response
+  
+  //   setTimeout(() => {
+  //     if (fetchedData) {
+  //       console.log('API Message:', fetchedData);
+  //       // Handle background processing start message
+  //       console.error("Job role processing started, no questions available yet.");
+  //     } else if (fetchedData && fetchedData === 'Job role submitted. Background processing started.') {
+  //       // Now handle the question extraction process
+  //       const questionText = fetchedData || ''; // If message contains questions
+        
+  //       // Regular expression to match all numbered questions (1. Question)
+  //       const questionsRegex = /\d+\.\s(.*?)(?=\n|$)/g;
+  //       const matchedQuestions = [...questionText.matchAll(questionsRegex)].map(match => match[1]);
+  
+  //       console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
+  
+  //       if (matchedQuestions.length > 0) {
+  //         // Adding introductory question
+  //         const firstName = user?.fullName?.split(' ')[0];
+  //         formattedQuestions = [{
+  //           questionText: `hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+  //           answer: null,
+  //         }];
+  
+  //         // Add the matched questions to formattedQuestions
+  //         const additionalQuestions = matchedQuestions.map(questionText => ({
+  //           questionText: questionText.trim(),
+  //           answer: null,
+  //         }));
+  
+  //         formattedQuestions.push(...additionalQuestions);
+  //         setQuestions(formattedQuestions);
+  //       } else {
+  //         console.error("No valid questions found in the fetched data.");
+  //       }
+  //     } else {
+  //       console.error("No questions received. Please try again.");
+  //     }
+  //   }, 20000);
+  
+  //   setTimeout(async () => {
+  //     if (formattedQuestions && formattedQuestions.length > 0) {
+  //       const data = { jobRole, email, level, questions: formattedQuestions };
+  
+  //       try {
+  //         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRole`, {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify(data),
+  //         });
+  
+  //         if (!res.ok) {
+  //           const errorData = await res.json();
+  //           throw new Error(errorData?.error || "Something went wrong. Please try again.");
+  //         }
+  
+  //         const response = await res.json();
+  //         if (response.data._id) {
+  //           localStorage.removeItem("_id");
+  //           localStorage.removeItem("_idForReport");
+  //           localStorage.setItem("_id", response.data._id);
+  //           localStorage.setItem("_idForReport", response.data._id);
+  //         }
+  
+  //         localStorage.setItem("apiResponseStatus", "success");
+  
+  //       } catch (error) {
+  //         console.error('Error:', error);
+  //         localStorage.setItem("apiResponseStatus", "error");
+  //       }
+  //     } else {
+  //       console.error("No questions received. Please try again.");
+  //     }
+  //   }, 20000);
+  // };
+  
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();  // Prevent form from submitting normally
+  //   localStorage.removeItem("apiResponseStatus");
+    
+  //   // Declare formattedQuestions here once
+  //   let formattedQuestions = [];
+    
+  //   router.push("/instruction");
+  //   const data = { jobRole, level };
+  
+  //   // Fetch the questions from the API
+  //   const res = await fetch('/api/submitJobRole', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(data),
+  //   });
+  
+  //   const fetchedQuestions = await res.json();
   //   console.log('Fetched Questions:', fetchedQuestions); // Debug: Log fetched questions
   
   //   if (fetchedQuestions) {
@@ -177,9 +383,13 @@ export default function Role() {
   //       return;
   //     }
   
-  //     // Use regex to match the questions
-  //     const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
-  //     const matchedQuestions = fetchedQuestions.match(questionsRegex);
+  //     // Clean up the fetchedQuestions: Remove markdown headers and extra repetitions
+  //     const cleanedQuestions = fetchedQuestions
+  //       .replace(/##.*\n/g, '')  // Remove any markdown headers like "## 15 Questions for Python Developer"
+  //       .replace(/\n+$/, '')  // Remove trailing newlines
+  //       .replace(/(\d+\.\s.*?)(?=\n|$)/g, '$1\n') // Keep numbered questions
+  
+  //     const matchedQuestions = cleanedQuestions.match(/\d+\.\s.*?(?=\n|$)/g);
   
   //     console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
   
@@ -187,19 +397,19 @@ export default function Role() {
   //       // Start with the "Introduce yourself" question as the first element
   //       const firstName = user?.fullName?.split(' ')[0];
   //       formattedQuestions = [{
-  //         questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+  //         questionText: `Hello ${firstName}, can you tell me about yourself, including your educational background and previous work experience?`,
   //         answer: null,
   //       }];
-  
+        
   //       // Add the fetched questions to the array
   //       const additionalQuestions = matchedQuestions.map(questionText => ({
   //         questionText: questionText.trim(),
   //         answer: null,
   //       }));
-  
+        
   //       // Prepend the fetched questions after the "Introduce yourself"
   //       formattedQuestions.push(...additionalQuestions);
-  
+        
   //       // Set the questions in the state with the "Introduce yourself" as the first question
   //       setQuestions(formattedQuestions);
   //     } else {
@@ -255,7 +465,7 @@ export default function Role() {
   //   }
   // };
   
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();  // Prevent form from submitting normally
     localStorage.removeItem("apiResponseStatus");
@@ -265,97 +475,119 @@ export default function Role() {
     
     router.push("/instruction");
   
-    // const fetchedQuestions = await getApiResponse(jobRole,level);
-    const fetchedQuestions = await getApiResponse(jobRole,level);
+    // Replace this with a fetch request to your new API
+    try {
+      const res = await fetch("/api/questionsFetch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobRole,
+          level,
+        }),
+      });
   
-    console.log('Fetched Questions:', fetchedQuestions); // Debug: Log fetched questions
-  
-    if (fetchedQuestions) {
-      // Check if the fetchedQuestions are in the expected format
-      if (typeof fetchedQuestions !== 'string') {
-        console.error('Fetched questions are not in expected string format:', fetchedQuestions);
-        return;
+      // Check if the response is OK (status 200)
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData?.error || "Something went wrong. Please try again.");
       }
   
-      // Use regex to match the questions
-      const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
-      const matchedQuestions = fetchedQuestions.match(questionsRegex);
+      // Parse the response
+      const responseData = await res.json();
   
-      console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
+      console.log('Fetched Questions:', responseData.questions);  // Debug: Log fetched questions
   
-      if (matchedQuestions) {
-        // Start with the "Introduce yourself" question as the first element
-        const firstName = user?.fullName?.split(' ')[0];
-        formattedQuestions = [{
-          questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
-          answer: null,
-        }];
+      const fetchedQuestions = responseData.questions;
   
-        // Add the fetched questions to the array
-        const additionalQuestions = matchedQuestions.map(questionText => ({
-          questionText: questionText.trim(),
-          answer: null,
-        }));
+      if (fetchedQuestions) {
+        // Check if the fetchedQuestions is a string
+        if (typeof fetchedQuestions === 'string') {
+          // Use regex to match the questions in the string
+          const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
+          const matchedQuestions = fetchedQuestions.match(questionsRegex);
   
-        // Prepend the fetched questions after the "Introduce yourself"
-        formattedQuestions.push(...additionalQuestions);
+          console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
   
-        // Set the questions in the state with the "Introduce yourself" as the first question
-        setQuestions(formattedQuestions);
+          if (matchedQuestions) {
+            // Start with the "Introduce yourself" question as the first element
+            const firstName = user?.fullName?.split(' ')[0];
+            formattedQuestions = [{
+              questionText: ` hello ${firstName} Can you tell me about yourself, including your educational background and previous work experience?`,
+              answer: null,
+            }];
+  
+            // Add the fetched questions to the array
+            const additionalQuestions = matchedQuestions.map(questionText => ({
+              questionText: questionText.trim(),
+              answer: null,
+            }));
+  
+            // Prepend the fetched questions after the "Introduce yourself"
+            formattedQuestions.push(...additionalQuestions);
+  
+            // Set the questions in the state with the "Introduce yourself" as the first question
+            setQuestions(formattedQuestions);
+          } else {
+            console.error("No valid questions found in the fetched data.");
+          }
+        } else {
+          console.error('Fetched questions are not in expected string format:', fetchedQuestions);
+        }
       } else {
-        console.error("No valid questions found in the fetched data.");
+        console.error("No questions received from API.");
       }
-    } else {
-      console.error("No questions received from API.");
-    }
   
-    console.log("Questions to be sent:", formattedQuestions);
+      console.log("Questions to be sent:", formattedQuestions);
   
-    if (formattedQuestions && formattedQuestions.length > 0) {
-      const data = { jobRole, email, level, questions: formattedQuestions };
+      if (formattedQuestions && formattedQuestions.length > 0) {
+        const data = { jobRole, email, level, questions: formattedQuestions };
   
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRole`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRole`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          });
   
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData?.error || "Something went wrong. Please try again.");
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData?.error || "Something went wrong. Please try again.");
+          }
+  
+          const response = await res.json();
+          // console.log(response.data._id); // Log the successful response
+  
+          // Store the response _id in localStorage
+          if (response.data._id) {
+            // Remove the existing items if they exist
+            localStorage.removeItem("_id");
+            localStorage.removeItem("_idForReport");
+  
+            // Add the new items
+            localStorage.setItem("_id", response.data._id);
+            localStorage.setItem("_idForReport", response.data._id);
+          }
+  
+          // Store response status in localStorage to enable button on Instruction page
+          localStorage.setItem("apiResponseStatus", "success");
+  
+        } catch (error) {
+          console.error('Error:', error);
+          // Store response failure status in localStorage
+          localStorage.setItem("apiResponseStatus", "error");
         }
-  
-        const response = await res.json();
-        // console.log(response.data._id); // Log the successful response
-  
-        // Store the response _id in localStorage
-        if (response.data._id) {
-          // Remove the existing items if they exist
-          localStorage.removeItem("_id");
-          localStorage.removeItem("_idForReport");
-  
-          // Add the new items
-          localStorage.setItem("_id", response.data._id);
-          localStorage.setItem("_idForReport", response.data._id);
-        }
-  
-        // Store response status in localStorage to enable button on Instruction page
-        localStorage.setItem("apiResponseStatus", "success");
-  
-      } catch (error) {
-        console.error('Error:', error);
-        // Store response failure status in localStorage
-        localStorage.setItem("apiResponseStatus", "error");
+      } else {
+        console.error("No questions received. Please try again.");
       }
-    } else {
-      console.error("No questions received. Please try again.");
+    } catch (error) {
+      console.error('Error during question fetch:', error);
+      localStorage.setItem("apiResponseStatus", "error");
     }
   };
-  
-
   
   
 
