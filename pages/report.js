@@ -3269,57 +3269,57 @@ function Report() {
   const [isEmailFetched, setIsEmailFetched] = useState(false);  
 
 
-  const getApiResponseReport = async (reportData) => {
-    const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
-    const headers = {
-      "Content-Type": "application/json"
-    };
 
-    // Validate if reportData has questions
-    if (!reportData || !Array.isArray(reportData.questions)) {
-        console.error("Invalid reportData structure or missing questions.");
-        return null;
-    }
+//     const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
+//     const headers = {
+//       "Content-Type": "application/json"
+//     };
 
-    // Prepare the answers for API evaluation
-    const questionsWithAnswers = reportData.questions.map((question) => {
-      return {
-        questionText: question.questionText || 'No question provided',
-        answer: question.answer || 'No answer provided'
-      };
-    });
+//     // Validate if reportData has questions
+//     if (!reportData || !Array.isArray(reportData.questions)) {
+//         console.error("Invalid reportData structure or missing questions.");
+//         return null;
+//     }
 
-    // Prepare the data object for the API
-    const data = {
-      model: "llama3:latest",
-      prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
-      stream: false
-    };
+//     // Prepare the answers for API evaluation
+//     const questionsWithAnswers = reportData.questions.map((question) => {
+//       return {
+//         questionText: question.questionText || 'No question provided',
+//         answer: question.answer || 'No answer provided'
+//       };
+//     });
 
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data),
-      });
+//     // Prepare the data object for the API
+//     const data = {
+//       model: "llama3:latest",
+//       prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+//       stream: false
+//     };
 
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData && responseData.response) {
-          return responseData.response; // Return the report if available
-        } else {
-          console.error("API did not return the expected response format.");
-          return null;
-        }
-      } else {
-        console.error(`Error fetching response from the API: ${response.statusText}`);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error in the fetch operation:", error);
-      return null;
-    }
-};
+//     try {
+//       const response = await fetch(url, {
+//         method: "POST",
+//         headers: headers,
+//         body: JSON.stringify(data),
+//       });
+
+//       if (response.ok) {
+//         const responseData = await response.json();
+//         if (responseData && responseData.response) {
+//           return responseData.response; // Return the report if available
+//         } else {
+//           console.error("API did not return the expected response format.");
+//           return null;
+//         }
+//       } else {
+//         console.error(`Error fetching response from the API: ${response.statusText}`);
+//         return null;
+//       }
+//     } catch (error) {
+//       console.error("Error in the fetch operation:", error);
+//       return null;
+//     }
+// };
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push(`${process.env.NEXT_PUBLIC_HOST}/login`);
@@ -3336,6 +3336,7 @@ function Report() {
   useEffect(() => {
     localStorage.removeItem('_id');
     const idFromLocalStorage = localStorage.getItem('_idForReport');
+    
     const emailFromLocalStorage = localStorage.getItem('user'); // Retrieve user data from localStorage
 
     if (emailFromLocalStorage) {
@@ -3373,8 +3374,30 @@ function Report() {
         setReportData(data.data);
         localStorage.removeItem('status');
         localStorage.setItem('status', "model processing");
-        const analysisData = await getApiResponseReport(data.data);
-        setReportAnalysis(analysisData);
+
+
+        // const analysisData = await getApiResponseReport(data.data);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/report`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data:data.data,
+          }),
+        });
+    
+        // Check if the response is OK (status 200)
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData?.error || "Something went wrong. Please try again.");
+        }
+    
+        // Parse the response
+        const analysisData = await res.json();
+console.log("model return this report ",analysisData);
+
+        // setReportAnalysis(analysisData);
         localStorage.removeItem('status');
         localStorage.setItem('status', "model 5 min");
 
@@ -3382,7 +3405,7 @@ function Report() {
         setJobRole(data.data.role);
 
         await storeReport(data.data.role, data.data.email, analysisData);
-        localStorage.removeItem('_idForReport');
+        // localStorage.removeItem('_idForReport');
         localStorage.removeItem('status');
         localStorage.setItem('store',"success");
         setIsEmailFetched(true);  
@@ -3421,32 +3444,32 @@ function Report() {
     }
   };
 
-  const downloadReport = (reportAnalysis) => {
-    const formattedHTML = reportAnalysis
-      .replace(/The user's/g, "You'r")
-      .replace(/\*\*(.*?)\*\*/g, (match, p1) => `</br><strong>${p1}</strong>`)
-      .replace(/\*/g, '')
-      .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
-      .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
-      .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>')
-      .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
-      .replace(/(\.)/g, '.<br>');
+  // const downloadReport = (reportAnalysis) => {
+  //   const formattedHTML = reportAnalysis
+  //     .replace(/The user's/g, "You'r")
+  //     .replace(/\*\*(.*?)\*\*/g, (match, p1) => `</br><strong>${p1}</strong>`)
+  //     .replace(/\*/g, '')
+  //     .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
+  //     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+  //     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>')
+  //     .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+  //     .replace(/(\.)/g, '.<br>');
 
-    const htmlContent = `
-      <html>
-        <head><title>Report Analysis</title></head>
-        <body>
-          ${formattedHTML}
-        </body>
-      </html>
-    `;
+  //   const htmlContent = `
+  //     <html>
+  //       <head><title>Report Analysis</title></head>
+  //       <body>
+  //         ${formattedHTML}
+  //       </body>
+  //     </html>
+  //   `;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'report-analysis.html';
-    link.click();
-  };
+  //   const blob = new Blob([htmlContent], { type: 'text/html' });
+  //   const link = document.createElement('a');
+  //   link.href = URL.createObjectURL(blob);
+  //   link.download = 'report-analysis.html';
+  //   link.click();
+  // };
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -3466,41 +3489,9 @@ function Report() {
       <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack} ><IoIosArrowBack /></div>
       <div className="text-white">
         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
+        <h1 className="text-center items-center align-middle text-4xl font-bold"> Report update after 5 min</h1>
 
-        <div className="mx-auto mt-5">
-          {reportAnalysis && (
-            <div>
-              <div 
-                className="bg-purple-700 p-4 rounded-lg mt-2 cursor-pointer"
-                onClick={() => setOpenReport(!openReport)}
-              >
-                Report ▼
-              </div>
-
-              {openReport && (
-                <div className="bg-transparent p-4 rounded-lg mt-2">
-                  <div className="report-analysis">
-                    <h4><strong>Analysis</strong></h4>
-                    <div
-                      className="analysis-content"
-                      dangerouslySetInnerHTML={{
-                        __html: reportAnalysis
-                          .replace(/The user's/g, "You'r")
-                          .replace(/\*/g, '')
-                          .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
-                          .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>') 
-                          .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
-                          .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
-                          .replace(/(\.)/g, '.<br>'),
-                      }}
-                    />
-                    <button onClick={() => downloadReport(reportAnalysis)}>Download Report</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+       
       </div>
     </div>
   );

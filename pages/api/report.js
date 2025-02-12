@@ -124,54 +124,144 @@
 //     }
 // };
 
-export const getApiResponseReport = async (reportData) => {
-    const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
-    const headers = {
-      "Content-Type": "application/json"
-    };
+// export const getApiResponseReport = async (reportData) => {
+//     const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
+//     const headers = {
+//       "Content-Type": "application/json"
+//     };
 
-    // Validate if reportData has questions
-    if (!reportData || !Array.isArray(reportData.questions)) {
-        console.error("Invalid reportData structure or missing questions.");
-        return null;
-    }
+//     // Validate if reportData has questions
+//     if (!reportData || !Array.isArray(reportData.questions)) {
+//         console.error("Invalid reportData structure or missing questions.");
+//         return null;
+//     }
 
-    // Prepare the answers for API evaluation
-    const questionsWithAnswers = reportData.questions.map((question) => {
-      return {
-        questionText: question.questionText || 'No question provided',
-        answer: question.answer || 'No answer provided'
-      };
-    });
+//     // Prepare the answers for API evaluation
+//     const questionsWithAnswers = reportData.questions.map((question) => {
+//       return {
+//         questionText: question.questionText || 'No question provided',
+//         answer: question.answer || 'No answer provided'
+//       };
+//     });
 
-    // Prepare the data object for the API
-    const data = {
-      model: "llama3:latest",
-      prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
-      stream: false
-    };
+//     // Prepare the data object for the API
+//     const data = {
+//       model: "llama3:latest",
+//       prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+//       stream: false
+//     };
+
+//     try {
+//       const response = await fetch(url, {
+//         method: "POST",
+//         headers: headers,
+//         body: JSON.stringify(data),
+//       });
+
+//       if (response.ok) {
+//         const responseData = await response.json();
+//         if (responseData && responseData.response) {
+//           return responseData.response; // Return the report if available
+//         } else {
+//           console.error("API did not return the expected response format.");
+//           return null;
+//         }
+//       } else {
+//         console.error(`Error fetching response from the API: ${response.statusText}`);
+//         return null;
+//       }
+//     } catch (error) {
+//       console.error("Error in the fetch operation:", error);
+//       return null;
+//     }
+// };
+
+
+export const config = {
+  runtime: "nodejs", // Ensure it's a Node.js function
+  maxDuration: 6400,
+};
+
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const { data } = req.body;
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(data),
-      });
+      // Call the getApiResponse function directly within the handler
+      const responseData = await getApiResponseReport(data);
 
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData && responseData.response) {
-          return responseData.response; // Return the report if available
-        } else {
-          console.error("API did not return the expected response format.");
-          return null;
-        }
+      if (responseData) {
+        console.log('Fetched responseData:', responseData);  
+        
+        // Return responseData directly as a JSON response
+        return res.status(200).json(responseData);
       } else {
-        console.error(`Error fetching response from the API: ${response.statusText}`);
-        return null;
+        return res.status(500).json({
+          error: "Error: No questions fetched from the API.",
+        });
       }
     } catch (error) {
-      console.error("Error in the fetch operation:", error);
-      return null;
+      console.error('Error during processing:', error);
+      return res.status(500).json({
+        error: "Error during background processing.",
+      });
     }
-};
+  }
+
+  // If the method is not POST, return a 405 Method Not Allowed response
+  return res.status(405).json({ error: 'Method Not Allowed' });
+}
+
+// The API function to fetch questions
+export const getApiResponseReport = async (reportData) => {
+      const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
+      const headers = {
+        "Content-Type": "application/json"
+      };
+  
+      // Validate if reportData has questions
+      if (!reportData || !Array.isArray(reportData.questions)) {
+          console.error("Invalid reportData structure or missing questions.");
+          return null;
+      }
+  
+      // Prepare the answers for API evaluation
+      const questionsWithAnswers = reportData.questions.map((question) => {
+        return {
+          questionText: question.questionText || 'No question provided',
+          answer: question.answer || 'No answer provided'
+        };
+      });
+  
+      // Prepare the data object for the API
+      const data = {
+        model: "llama3:latest",
+        prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+        stream: false
+      };
+  
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(data),
+        });
+  
+        if (response.ok) {
+          const responseData = await response.json();
+          if (responseData && responseData.response) {
+            return responseData.response; // Return the report if available
+          } else {
+            console.error("API did not return the expected response format.");
+            return null;
+          }
+        } else {
+          console.error(`Error fetching response from the API: ${response.statusText}`);
+          return null;
+        }
+      } catch (error) {
+        console.error("Error in the fetch operation:", error);
+        return null;
+      }
+  };
+  
