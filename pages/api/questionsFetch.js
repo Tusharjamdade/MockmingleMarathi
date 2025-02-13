@@ -70,7 +70,7 @@
 
  export const config = {
   runtime: "nodejs", // Ensure it's a Node.js function
-  maxDuration: 10,
+  maxDuration: 60,
 };
 
 export default async function handler(req, res) {
