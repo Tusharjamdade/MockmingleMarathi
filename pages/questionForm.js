@@ -4409,7 +4409,7 @@ const QuestionForm = () => {
   const speakQuestion = (questionText) => {
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(questionText);
-    utterance.lang = 'en-IN';
+    utterance.lang = 'en-US';
     utterance.pitch = 1;
     utterance.rate = 1;
 
