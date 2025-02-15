@@ -225,7 +225,7 @@ function Instruction() {
             </button>
             <div className="absolute top-10 right-10">
                 <div className="rounded-full flex items-center justify-center">
-                    <img src="/Logoo.png" alt="Logo" className="w-16 h-16" />
+                    <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
                 </div>
             </div>
             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
