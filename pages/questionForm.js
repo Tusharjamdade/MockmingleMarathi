@@ -4214,7 +4214,7 @@
 
 
 
-<<<<<<< HEAD
+
 // import { useState, useEffect } from 'react';
 // import { useRouter } from 'next/router';
 
@@ -4970,8 +4970,6 @@
 
 
 
-=======
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -4991,7 +4989,7 @@ const QuestionForm = () => {
   const [interviewComplete, setInterviewComplete] = useState(false);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
 
-<<<<<<< HEAD
+
   const [micTimeout, setMicTimeout] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
 
@@ -5013,26 +5011,10 @@ const QuestionForm = () => {
     "Let’s continue with the next one, things are going well!"
   ];
 
-=======
-  const goodResponses = [
-    "Alright, let's move on to the next question.",
-    "Okay, let's continue to the next one.",
-    "Let's go ahead with the next question.",
-    "Let's move on to the next question now.",
-    "Proceeding to the next question.",
-    "Let's move forward to the next one.",
-    "Next question, please.",
-    "Let's go to the next one.",
-    "Moving on to the next question.",
-    "Let's continue with the next question.",
-    "Now, let's go to the next question.",
-    "Time to proceed with the next question.",
-    "Next question, let's go.",
-    "Let's keep going with the next question.",
-    "Let's continue with the next one."
-  ];
+
   
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+  
+
   const badResponses = [
     "Um, okay, let's move to the next question.",
     "Not quite, but let's move to the next question.",
@@ -5050,17 +5032,14 @@ const QuestionForm = () => {
     "Not exactly what we needed, but let's continue.",
     "Close, but not quite there, let’s move on."
   ];
-<<<<<<< HEAD
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-=======
-  
+
+ 
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Access localStorage only in the browser
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       const token = localStorage.getItem('token');
       if (!token) {
         router.push('/login');
@@ -5074,10 +5053,7 @@ const QuestionForm = () => {
     }
   }, []);
 
-<<<<<<< HEAD
-=======
-  // Get _id from localStorage after the component is mounted
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -5105,11 +5081,9 @@ const QuestionForm = () => {
         const data = await res.json();
         console.log('Fetched questions:', data);
         
-<<<<<<< HEAD
-        setQuestions(data);
-=======
+
         setQuestions(data);  // Set the fetched questions in state
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       } catch (error) {
         console.error('Error fetching questions:', error);
         alert('An error occurred while fetching the questions.');
@@ -5161,26 +5135,22 @@ const QuestionForm = () => {
         const answer = recordedText;
         setAnswers((prevAnswers) => [
           ...prevAnswers,
-<<<<<<< HEAD
+
           { questionId: currentQuestion._id, answer: answer }
-=======
-          { questionId: currentQuestion._id, answer: answer } // Store answer with question ID
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
-        ]);
+     ]);
         submitAnswer(currentQuestion._id, answer);
         handleNext();
       } else {
         recognition.start();
         setIsListening(true);
         setLoading(true);
-<<<<<<< HEAD
+
 
         if (micTimeout) {
           clearTimeout(micTimeout);
           setMicTimeout(null);
         }
-=======
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       }
     }
   };
@@ -5194,11 +5164,11 @@ const QuestionForm = () => {
         },
         body: JSON.stringify({
           _id: userId,
-<<<<<<< HEAD
+
           email: user?.email,
-=======
+
           email: user?.email,  // Assuming user?.email is the email you're passing
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
           questionId: questionId,
           answer: answer,
         }),
@@ -5229,7 +5199,7 @@ const QuestionForm = () => {
     };
 
     speechSynthesis.speak(utterance);
-<<<<<<< HEAD
+
 
     if (!isListening && !isAnswerSubmitted) {
       const timeout = setTimeout(() => {
@@ -5241,29 +5211,22 @@ const QuestionForm = () => {
 
       setMicTimeout(timeout);
     }
-=======
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
   };
 
   useEffect(() => {
     if (questions.length > 0) {
       const currentQuestion = questions[currentQuestionIndex];
-<<<<<<< HEAD
       const cleanedQuestionText = currentQuestion.questionText.replace(/(currentQuestion|[,*])/g, "");
       speakQuestion(cleanedQuestionText);
     }
   }, [currentQuestionIndex, questions]);
 
-=======
+
       
       // Clean up the question text by removing "currentQuestion", commas, and asterisks
-      const cleanedQuestionText = currentQuestion.questionText.replace(/(currentQuestion|[,*])/g, "");
+      
   
-      speakQuestion(cleanedQuestionText);
-    }
-  }, [currentQuestionIndex, questions]);
-  
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   const handleNext = () => {
     const currentQuestion = questions[currentQuestionIndex];
     const answer = recordedText.trim();
@@ -5274,29 +5237,26 @@ const QuestionForm = () => {
     const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
 
     const responseText = Math.random() > 0.15 
-<<<<<<< HEAD
       ? goodResponses[Math.floor(Math.random() * goodResponses.length)] 
       : badResponses[Math.floor(Math.random() * badResponses.length)];
-=======
-  ? goodResponses[Math.floor(Math.random() * goodResponses.length)] 
-  : badResponses[Math.floor(Math.random() * badResponses.length)];
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
+  
 
     speakResponse(responseText);
 
     if (answer) {
       setAnswers((prevAnswers) => [
         ...prevAnswers,
-<<<<<<< HEAD
-        { questionId: currentQuestion._id, answer: answer }
-=======
+
+    
+
         { questionId: currentQuestion._id, answer: answer } // Store the answer
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       ]);
     }
 
     if (currentQuestionIndex === questions.length - 1) {
-<<<<<<< HEAD
+
       speakResponse("Your interview has ended.");
       setInterviewComplete(true);
       setIsModalVisible(true);
@@ -5310,7 +5270,7 @@ const QuestionForm = () => {
     if (micTimeout) {
       clearTimeout(micTimeout);
       setMicTimeout(null);
-=======
+
      
       speakResponse("Your interview has ended.");
       setInterviewComplete(true);  // Set interview as complete
@@ -5319,7 +5279,7 @@ const QuestionForm = () => {
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);  // Move to the next question
       setRecordedText('');  // Clear recorded text for the next question
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
     }
   };
 
@@ -5336,21 +5296,18 @@ const QuestionForm = () => {
     speechSynthesis.speak(utterance);
   };
 
-<<<<<<< HEAD
+
   const handleModalClose = () => {
     setIsModalVisible(false);
     router.push('/report');
   };
-=======
+
  
 
-  const handleModalClose = () => {
-    setIsModalVisible(false); // Close modal
-    router.push('/report'); // Redirect to index page
-  };
+ 
   
   
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
 
   const handleBeforeUnload = (event) => {
     if (!interviewComplete) {
@@ -5366,11 +5323,10 @@ const QuestionForm = () => {
 
   const handleExitConfirmation = () => {
     setIsExitModalVisible(false);
-<<<<<<< HEAD
     router.push('/report');
-=======
+
     router.push('/report'); // Redirect to /report page
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   };
 
   const handlePopState = () => {
@@ -5380,10 +5336,8 @@ const QuestionForm = () => {
   };
 
   useEffect(() => {
-<<<<<<< HEAD
-=======
+
     // Prevent the user from navigating away when interview is incomplete
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
     window.history.pushState(null, document.title);
     window.addEventListener('popstate', handlePopState);
 
@@ -5399,12 +5353,9 @@ const QuestionForm = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [interviewComplete]);
-<<<<<<< HEAD
-    
-=======
 
 
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   return (
     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center " style={{ backgroundImage: "url('/BG.jpg')" }}>
       <div className="flex justify-center">
@@ -5447,8 +5398,7 @@ const QuestionForm = () => {
         </div>
       )}
 
-<<<<<<< HEAD
-=======
+
       <div className="mt-6 flex hidden justify-center">
         <button
           onClick={handleNext}
@@ -5459,18 +5409,17 @@ const QuestionForm = () => {
         </button>
       </div>
 
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       {/* Modal for interview end */}
       {isModalVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-sm">
             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
             <button
-<<<<<<< HEAD
-              onClick={() => setIsModalVisible(false)}
-=======
+
+          
               onClick={handleModalClose}
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
             >
               OK
@@ -5478,7 +5427,7 @@ const QuestionForm = () => {
           </div>
         </div>
       )}
-<<<<<<< HEAD
+
       {isExitModalVisible && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div className="bg-white p-6 rounded-lg max-w-sm">
@@ -5499,7 +5448,7 @@ const QuestionForm = () => {
   </div>
 )}
 
-=======
+
 
 {isExitModalVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -5522,7 +5471,7 @@ const QuestionForm = () => {
           </div>
         </div>
       )}
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
     </div>
   );
 };
