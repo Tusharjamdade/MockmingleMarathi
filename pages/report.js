@@ -3251,13 +3251,21 @@
 
 
 import React, { useState, useEffect } from 'react'; 
+<<<<<<< HEAD
 
+=======
+import { getApiResponseReport } from './api/report'; 
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from 'next/router';
 
 function Report() { 
   const router = useRouter(); 
+<<<<<<< HEAD
 
+=======
+  const [openReport, setOpenReport] = useState(false);
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
   const [reportData, setReportData] = useState(null); 
   const [user, setUser] = useState('');
   const [email, setEmail] = useState(''); 
@@ -3270,6 +3278,59 @@ function Report() {
 
 
 
+<<<<<<< HEAD
+=======
+//     const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
+//     const headers = {
+//       "Content-Type": "application/json"
+//     };
+
+//     // Validate if reportData has questions
+//     if (!reportData || !Array.isArray(reportData.questions)) {
+//         console.error("Invalid reportData structure or missing questions.");
+//         return null;
+//     }
+
+//     // Prepare the answers for API evaluation
+//     const questionsWithAnswers = reportData.questions.map((question) => {
+//       return {
+//         questionText: question.questionText || 'No question provided',
+//         answer: question.answer || 'No answer provided'
+//       };
+//     });
+
+//     // Prepare the data object for the API
+//     const data = {
+//       model: "llama3:latest",
+//       prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+//       stream: false
+//     };
+
+//     try {
+//       const response = await fetch(url, {
+//         method: "POST",
+//         headers: headers,
+//         body: JSON.stringify(data),
+//       });
+
+//       if (response.ok) {
+//         const responseData = await response.json();
+//         if (responseData && responseData.response) {
+//           return responseData.response; // Return the report if available
+//         } else {
+//           console.error("API did not return the expected response format.");
+//           return null;
+//         }
+//       } else {
+//         console.error(`Error fetching response from the API: ${response.statusText}`);
+//         return null;
+//       }
+//     } catch (error) {
+//       console.error("Error in the fetch operation:", error);
+//       return null;
+//     }
+// };
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push(`${process.env.NEXT_PUBLIC_HOST}/login`);
@@ -3355,7 +3416,11 @@ console.log("model return this report ",analysisData);
         setJobRole(data.data.role);
 
         await storeReport(data.data.role, data.data.email, analysisData);
+<<<<<<< HEAD
         
+=======
+        // localStorage.removeItem('_idForReport');
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
         localStorage.removeItem('status');
         localStorage.setItem('store',"success");
         setIsEmailFetched(true);  
@@ -3388,13 +3453,46 @@ console.log("model return this report ",analysisData);
       }
 
       const result = await response.json();
+<<<<<<< HEAD
       localStorage.removeItem('_idForReport');
+=======
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
       console.log('Report stored successfully:', result);
     } catch (err) {
       console.error('Error storing report:', err);
     }
   };
 
+<<<<<<< HEAD
+=======
+  // const downloadReport = (reportAnalysis) => {
+  //   const formattedHTML = reportAnalysis
+  //     .replace(/The user's/g, "You'r")
+  //     .replace(/\*\*(.*?)\*\*/g, (match, p1) => `</br><strong>${p1}</strong>`)
+  //     .replace(/\*/g, '')
+  //     .replace(/(Overall Score: \d+\/10)/g, '<strong>$1</strong></br>')
+  //     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency) Report/g, '<h5><strong>$1 Report</strong></h5>')
+  //     .replace(/(Technical Proficiency|Communication|Decision-Making|Confidence|Language Fluency)/g, '<strong>$1</strong>')
+  //     .replace(/Recommendation:/g, '<h6><strong>Recommendation:</strong></h6>')
+  //     .replace(/(\.)/g, '.<br>');
+
+  //   const htmlContent = `
+  //     <html>
+  //       <head><title>Report Analysis</title></head>
+  //       <body>
+  //         ${formattedHTML}
+  //       </body>
+  //     </html>
+  //   `;
+
+  //   const blob = new Blob([htmlContent], { type: 'text/html' });
+  //   const link = document.createElement('a');
+  //   link.href = URL.createObjectURL(blob);
+  //   link.download = 'report-analysis.html';
+  //   link.click();
+  // };
+
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -3414,9 +3512,13 @@ console.log("model return this report ",analysisData);
       <div className="text-white">
         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
         <h1 className="text-center items-center align-middle text-4xl font-bold"> Report update after 5 min</h1>
+<<<<<<< HEAD
         <iframe width="420" height="345" src="https://www.youtube.com/embed/L1nDUbFKnwY"></iframe>
         <iframe src="https://read.bookcreator.com/aWAhdfUWXPQR1UPW7fJOHnfObsb2/_or2hLPmR3WlS34sPH_WKQ" height="550" allow="clipboard-write self https://read.bookcreator.com"></iframe>
         
+=======
+
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
        
       </div>
     </div>

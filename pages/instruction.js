@@ -33,7 +33,11 @@
 
 //     return (
 //         <>
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 //         <button onClick={() => router.back()} className="absolute font-bold text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
 //           &laquo;
 //         </button>
@@ -43,7 +47,11 @@
 //           </div>
 //         </div>
 //            <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 //       <div className="relative w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
 //         {/* Back Button */}
 
@@ -171,6 +179,7 @@
 // export default Instruction;
 
 
+<<<<<<< HEAD
 // import React, { useState, useEffect } from 'react';
 // import { useRouter } from 'next/router';
 
@@ -319,12 +328,15 @@
 // export default Instruction;
 
 
+=======
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 function Instruction() {
     const router = useRouter();
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+<<<<<<< HEAD
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const slides = [
@@ -409,6 +421,8 @@ function Instruction() {
 
         return () => clearInterval(interval);
     }, []);
+=======
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 
     // Function to handle text-to-speech
     const speak = (text) => {
@@ -416,6 +430,7 @@ function Instruction() {
         utterance.lang = 'en-US'; // Set language to English
         window.speechSynthesis.speak(utterance);
     };
+<<<<<<< HEAD
 
     useEffect(() => {
         // Speak the instructions when the component is loaded
@@ -425,6 +440,17 @@ function Instruction() {
     }, []); // Empty dependency array to run effect only once on mount
 
     useEffect(() => {
+=======
+    
+    useEffect(() => {
+        // Speak the instructions when the component is loaded
+        speak('Hi, I am Shakti, your interview trainer! Here are some essential tips to help you prepare for your upcoming interview.');
+        
+        // No need to return anything here, just ensuring speak is called once 
+        }, []); // Empty dependency array to run effect only once on mount
+        
+        useEffect(() => {
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
         // Function to check the API response status
         const checkApiResponseStatus = () => {
             const responseStatus = localStorage.getItem("apiResponseStatus"); // Check if apiResponseStatus exists in localStorage
@@ -447,13 +473,22 @@ function Instruction() {
         // Remove apiResponseStatus from localStorage
         localStorage.removeItem("apiResponseStatus");
 
+<<<<<<< HEAD
         router.push("/questionForm");
+=======
+        router.push("/questionForm");   
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
     };
 
     return (
         <>
+<<<<<<< HEAD
             <button onClick={() => router.back()} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
                 <img src="/2.svg" className=' top-10 left-10 ' alt="Back" />
+=======
+            <button onClick={() => router.back()} className="absolute font-bold text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
+                &laquo;
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
             </button>
             <div className="absolute top-10 right-10">
                 <div className="rounded-full flex items-center justify-center">
@@ -461,6 +496,7 @@ function Instruction() {
                 </div>
             </div>
             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+<<<<<<< HEAD
                 <div className="relative w-full mt-10 max-w-md p-6  rounded-xl shadow-lg text-white">
                     <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">INSTRUCTIONS FOR THE INTERVIEW</div>
                     <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
@@ -496,6 +532,33 @@ function Instruction() {
             </div>
             </div>
 
+=======
+                <div className="relative w-full mt-10 max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
+                    <div className="text-center text-lg font-bold bg-purple-600 rounded-md py-2">
+                        TIPS FOR THE INTERVIEW
+                    </div>
+
+                    <ul className="mt-4 space-y-2 text-sm">
+                        <li>01. Research the company and job role.</li>
+                        <li>02. Understand the job description properly.</li>
+                        <li>03. Prepare answers for common interview questions.</li>
+                        <li>04. Practice your introduction (Tell me about yourself).</li>
+                        <li>05. Update your resume and Carry multiple copies.</li>
+                        <li>06. Dress professionally and neatly.</li>
+                        <li>07. Keep all necessary documents in a folder.</li>
+                        <li>08. Learn about the company’s recent news and projects.</li>
+                        <li>09. Be ready with questions to ask the interviewer.</li>
+                        <li>10. Get proper sleep before the interview.</li>
+                    </ul>
+
+                    <div className="mt-6 text-center">
+                        <button onClick={handleButtonClick} disabled={!isButtonEnabled} className={`${isButtonEnabled ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-300 cursor-not-allowed'} px-4 py-2 rounded-md text-white`}>
+                            I am ready to begin
+                        </button>
+                    </div>
+                </div>
+            </div>
+>>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
         </>
     );
 }
