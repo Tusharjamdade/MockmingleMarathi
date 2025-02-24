@@ -427,14 +427,7 @@ function Instruction() {
     };
 
 
-    useEffect(() => {
-        // Speak the instructions when the component is loaded
-        speak('Hi, I am Shakti, your interview trainer! Here are some essential tips to help you prepare for your upcoming interview.');
-
-        // No need to return anything here, just ensuring speak is called once
-    }, []); // Empty dependency array to run effect only once on mount
-
-    
+ 
 
 
         useEffect(() => {
