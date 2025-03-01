@@ -340,61 +340,61 @@ function Instruction() {
             id: 1,
             title: "Understand the job role",
             img: '/Shawn.png',
-            content: " Understanding the job role means researching its key responsibilities, required skills, and expectations. This helps you tailor your resume, answer interview questions confidently, and demonstrate how your abilities align with the position.",
+            content: "1. Understanding the job role means researching its key responsibilities, required skills, and expectations. This helps you tailor your resume, answer interview questions confidently, and demonstrate how your abilities align with the position.",
         },
         {
             id: 2,
             img: '/Job_Discrioption.png',
             title: "Understand the Job Description",
-            content: "Carefully read and analyze the job description to grasp the key qualifications, duties, and expectations. Prepare examples of how your skills and experiences match the job requirements",
+            content: "2. Carefully read and analyze the job description to grasp the key qualifications, duties, and expectations. Prepare examples of how your skills and experiences match the job requirements",
         },
         {
             id: 3,
             img: '/companys_background..png',
             title: "Understand the company's background",
-            content: "Understanding the company's background means learning about its history, mission, values, products, services, and industry position. This helps you align your answers in interviews and show genuine interest in the organization",
+            content: "3. Understanding the company's background means learning about its history, mission, values, products, services, and industry position. This helps you align your answers in interviews and show genuine interest in the organization",
         },
         {
             id: 4,
             img: '/Self_Introduction.png',
             title: "Practice Your Self Introduction",
-            content: " Introduce yourself briefly, highlight key skills, experience, and achievements, and connect them to the job role",
+            content: "4. Introduce yourself briefly, highlight key skills, experience, and achievements, and connect them to the job role",
         },
         {
             id: 5,
             img: '/Resume.png',
             title: "Update Your Resume and Carry 1/2 copies",
-            content: "Ensure your resume and other application materials are updated, tailored to the job, and neatly organized. Bring multiple copies of your resume and any other requested documents",
+            content: "5. Ensure your resume and other application materials are updated, tailored to the job, and neatly organized. Bring multiple copies of your resume and any other requested documents",
         },
         {
             id: 6,
             img: '/Yourself_Professionally.png',
             title: "Present Yourself Professionally",
-            content: "Dress appropriately for the industry and company culture. Pay attention to grooming and personal hygiene to make a positive impression",
+            content: "6. Dress appropriately for the industry and company culture. Pay attention to grooming and personal hygiene to make a positive impression",
         },
         {
             id: 7,
             img: '/Essential_Documents.png',
             title: "Gather and Organize Essential Documents",
-            content: "Collect and neatly organize all necessary documents, such as certificates, references, and identification. Use a folder or portfolio to keep everything tidy and easily accessible",
+            content: "7. Collect and neatly organize all necessary documents, such as certificates, references, and identification. Use a folder or portfolio to keep everything tidy and easily accessible",
         },
         {
             id: 8,
             img: '/Company_News.png',
             title: "Stay Up-to-Date on Company News",
-            content: "Research the company's recent news, achievements, and initiatives. This demonstrates your interest in the company and can provide valuable conversation topics",
+            content: "8. Research the company's recent news, achievements, and initiatives. This demonstrates your interest in the company and can provide valuable conversation topics",
         },
         {
             id: 9,
             img: '/Thoughtful_Questions.png',
             title: " Prepare Thoughtful Questions",
-            content: 'Develop a list of insightful questions to ask the interviewer, such as "What are the biggest challenges facing the team?" or "Can you tell me more about the company culture?',
+            content: '9. Develop a list of insightful questions to ask the interviewer, such as "What are the biggest challenges facing the team?" or "Can you tell me more about the company culture?',
         },
         {
             id: 10,
             img: '/Rest_Preparation.png',
             title: " Get Adequate Rest and Preparation",
-            content: 'Ensure you get sufficient sleep and time to prepare before the interview. This will help you feel confident, focused, and ready to make a positive impression',
+            content: '10. Ensure you get sufficient sleep and time to prepare before the interview. This will help you feel confident, focused, and ready to make a positive impression',
         },
     ];
 
@@ -482,7 +482,7 @@ function Instruction() {
                 </div>
                 <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
 
-                    <div className="relative w-full mt-10 max-w-md p-6  rounded-xl shadow-lg text-white">
+                    <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg">
                         <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">INSTRUCTIONS FOR THE INTERVIEW</div>
                         <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
                             {/* Header Badge */}{slides.map((slide, index) => (
