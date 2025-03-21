@@ -177,10 +177,10 @@
 // };
 
 
-export const config = {
-  runtime: "nodejs", // Ensure it's a Node.js function
-  maxDuration: 300,
-};
+// export const config = {
+//   runtime: "nodejs", // Ensure it's a Node.js function
+//   maxDuration: 300,
+// };
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -239,7 +239,7 @@ export const getApiResponseReport = async (reportData) => {
 
         // prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube embed links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
 
-        prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+        prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
 
         stream: false
       };

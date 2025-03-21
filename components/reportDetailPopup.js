@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from 'next/router';
@@ -6,7 +7,8 @@ import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { jsPDF } from "jspdf";
 
-function Oldreport() {
+function ReportDetailPopup({ user, isOpen, setIsOpen }) {
+  if (!isOpen ) return null;
   const router = useRouter();
 
   const [email, setEmail] = useState('');
@@ -19,6 +21,11 @@ function Oldreport() {
     previousReports: false,
   });
   const [reportVisibility, setReportVisibility] = useState([]);
+
+  const handleClosee = (e) => {
+    e.stopPropagation();  // Prevent the click event from propagating to the parent
+    setIsOpen(false); // Close the modal
+  };
 
   const extractScore = (report, scoreType) => {
     // console.log("Extracting score from:", report);s
@@ -45,8 +52,7 @@ function Oldreport() {
 
     return 0; // Return 0 if no score is found
   };
-  // Extract score based on the scoreType passed (Technical Proficiency, Communication, etc.)
-  // Extract score and detailed feedback for a specific category
+  
   const extractScoreAndFeedback = (report, category) => {
     // console.log(report);
 
@@ -93,10 +99,10 @@ function Oldreport() {
 
   // Fetch email from localStorage
   useEffect(() => {
-    const userFromStorage = localStorage.getItem('user');
+    const userFromStorage = user
     if (userFromStorage) {
-      const parsedUser = JSON.parse(userFromStorage);
-      const email = parsedUser.email;
+      // const parsedUser = JSON.parse(userFromStorage);
+      const email = userFromStorage.email;
 
       if (email) {
         setEmail(email);
@@ -263,19 +269,22 @@ function Oldreport() {
   if (error) {
     return <div>Error: {error}</div>;
   }
-  
+
+
+
+
   const ScoreCard = ({ label, score, feedback }) => {
     const isOverallScore = label === 'Overall Score';
     const maxScore = isOverallScore ? 50 : 10;  // Set max score to 50 for Overall Score, else 10
     const scoreText = isOverallScore ? `${score}/50` : `${score}/10`; // Display score accordingly
     
     return (
-      <div className="card-container">
+      <div className="card-container text-black">
         <div className="card relative w-full h-full">
           {/* Front Side */}
           <div className="front flex justify-center items-center p-4 bg-[#b393f8] rounded-lg">
             <div>
-              <h5 className=" text-xl font-semibold">{label}</h5>
+              <h5 className="text-xl font-semibold">{label}</h5>
               <div className="mt-4">
                 <CircularProgressbar
                   value={score}
@@ -307,42 +316,59 @@ function Oldreport() {
   };
   
 
-  return (
-    <div className='min-h-screen bg-cover' style={{ backgroundImage: "url('/BG.jpg')" }}>
-      <div className='absolute top-5 left-3 text-4xl cursor-pointer ' onClick={goBack}>
-        <IoIosArrowBack />
-      </div>
-      <div>
-        <h1 className="text-center text-4xl text-white font-bold">Interview Report</h1>
+return (
+    <div
+      className="modal-background text-white"
+      onClick={handleClosee} // Close modal if clicked outside
+    >
+      <div
+        className="modal-container"
+        onClick={(e) => e.stopPropagation()} // Prevent closing if clicked inside modal
+      >
+        <div className="modal-header">
+          <div className="back-button" onClick={handleClosee}>
+            <IoIosArrowBack />
+          </div>
+          <h1 className="text-center">Interview Report</h1>
+        </div>
+        
         <div className="mx-auto mt-5">
           {visibility.previousReports && (
             <div className="mx-auto">
               {reports && reports.length > 0 ? (
                 reports.map((report, index) => (
-                  <div key={index} className="bg-transparent shadow-lg rounded-lg p-2 max-w-2xl mx-auto">
+                  <div
+                    key={index}
+                    className="bg-transparent shadow-lg rounded-lg p-2 max-w-2xl mx-auto"
+                  >
                     <div
                       className="bg-purple-500 text-white p-4 rounded-t-lg cursor-pointer flex justify-between items-center"
                       onClick={() => toggleIndividualReportVisibility(index)}
                     >
-                      <span>{reportVisibility[index] ? 'Hide' : 'Show'} Report ▼</span>
+                      {/* Hide the toggle text if the report is visible */}
+                      <span>{reportVisibility[index] ? 'Hide Report' : 'Show Report'} ▼</span>
                       <span className="text-sm">{new Date(report.createdAt).toLocaleString()}</span>
                     </div>
 
                     {reportVisibility[index] && (
                       <div className="p-4">
-                        <h2 className="text-lg text-white font-semibold"><strong>Role:</strong> {report.role}</h2>
+                        <h2 className="text-lg font-semibold">
+                          <strong>Role:</strong> {report.role}
+                        </h2>
                         <div className="report-analysis mt-4">
-                          <h4 className="text-xl text-white font-semibold mb-2"><strong>Analysis</strong></h4>
+                          <h4 className="text-xl font-semibold mb-2">
+                            <strong>Analysis</strong>
+                          </h4>
 
-                          <div className="grid grid-cols-2 gap-5 mt-5">
-                            {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency','Overall Score'||'Overall'||'Overall Performance'].map((category) => {
+                          <div className="score-cards-container">
+                            {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency', 'Overall Score'].map((category) => {
                               const { score, feedback } = extractScoreAndFeedback(report, category);
                               return <ScoreCard key={category} label={category} score={score} feedback={feedback} />;
                             })}
                           </div>
 
                           <button
-                            className="bg-blue-500 text-white py-2 px-4 rounded-lg mt-4 hover:bg-blue-600"
+                            className="button mt-4"
                             onClick={() => downloadReport(report.reportAnalysis, report)}
                           >
                             Download Report
@@ -360,10 +386,8 @@ function Oldreport() {
         </div>
       </div>
     </div>
+
   );
 }
 
-export default Oldreport;
-
-
-
+export default ReportDetailPopup;

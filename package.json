@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.3",
-    
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "classnames": "^2.5.1",
@@ -23,6 +22,7 @@
     "git": "^0.1.5",
     "gsap": "^3.12.5",
     "jspdf": "^3.0.0",
+    "lucide-react": "^0.483.0",
     "mongoose": "^8.9.2",
     "next": "^14.2.22",
     "react": "^18.3.1",

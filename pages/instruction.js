@@ -61,14 +61,14 @@
 
 //         {/* Instructions List */}
 //         <ul className="mt-4 space-y-2 text-sm">
-//           <li>01. Research the company and job role.</li>
+//           <li>01. Research the collage and job role.</li>
 //           <li>02. Understand the job description properly.</li>
 //           <li>03. Prepare answers for common interview questions.</li>
 //           <li>04. Practice your introduction (Tell me about yourself).</li>
 //           <li>05. Update your resume and Carry multiple copies.</li>
 //           <li>06. Dress professionally and neatly.</li>
 //           <li>07. Keep all necessary documents in a folder.</li>
-//           <li>08. Learn about the company’s recent news and projects.</li>
+//           <li>08. Learn about the collage’s recent news and projects.</li>
 //           <li>09. Be ready with questions to ask the interviewer.</li>
 //           <li>10. Get proper sleep before the interview.</li>
 //         </ul>
@@ -150,14 +150,14 @@
 //                     </div>
 
 //                     <ul className="mt-4 space-y-2 text-sm">
-//                         <li>01. Research the company and job role.</li>
+//                         <li>01. Research the collage and job role.</li>
 //                         <li>02. Understand the job description properly.</li>
 //                         <li>03. Prepare answers for common interview questions.</li>
 //                         <li>04. Practice your introduction (Tell me about yourself).</li>
 //                         <li>05. Update your resume and Carry multiple copies.</li>
 //                         <li>06. Dress professionally and neatly.</li>
 //                         <li>07. Keep all necessary documents in a folder.</li>
-//                         <li>08. Learn about the company’s recent news and projects.</li>
+//                         <li>08. Learn about the collage’s recent news and projects.</li>
 //                         <li>09. Be ready with questions to ask the interviewer.</li>
 //                         <li>10. Get proper sleep before the interview.</li>
 //                     </ul>
@@ -332,8 +332,22 @@ import { useRouter } from 'next/router';
 function Instruction() {
     const router = useRouter();
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-
+    const[collageName,setCollageName]=useState('')
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        if (!localStorage.getItem("token")) {
+          router.push("/login");
+        } else {
+          const userFromStorage = JSON.parse(localStorage.getItem('user'));
+        //   console.log(userFromStorage);
+          
+          if (userFromStorage) {
+            
+            setCollageName(userFromStorage.collageName || '');  // Initialize email here directly
+          }
+        }
+      }, []);
 
     const slides = [
         {
@@ -350,9 +364,9 @@ function Instruction() {
         },
         {
             id: 3,
-            img: '/companys_background..png',
-            title: "Understand the company's background",
-            content: "3. Understanding the company's background means learning about its history, mission, values, products, services, and industry position. This helps you align your answers in interviews and show genuine interest in the organization",
+            img: '/collages_background..png',
+            title: "Understand the collage's background",
+            content: "3. Understanding the collage's background means learning about its history, mission, values, products, services, and industry position. This helps you align your answers in interviews and show genuine interest in the organization",
         },
         {
             id: 4,
@@ -370,7 +384,7 @@ function Instruction() {
             id: 6,
             img: '/Yourself_Professionally.png',
             title: "Present Yourself Professionally",
-            content: "6. Dress appropriately for the industry and company culture. Pay attention to grooming and personal hygiene to make a positive impression",
+            content: "6. Dress appropriately for the industry and collage culture. Pay attention to grooming and personal hygiene to make a positive impression",
         },
         {
             id: 7,
@@ -380,15 +394,15 @@ function Instruction() {
         },
         {
             id: 8,
-            img: '/Company_News.png',
-            title: "Stay Up-to-Date on Company News",
-            content: "8. Research the company's recent news, achievements, and initiatives. This demonstrates your interest in the company and can provide valuable conversation topics",
+            img: '/collage_News.png',
+            title: "Stay Up-to-Date on collage News",
+            content: "8. Research the collage's recent news, achievements, and initiatives. This demonstrates your interest in the collage and can provide valuable conversation topics",
         },
         {
             id: 9,
             img: '/Thoughtful_Questions.png',
             title: " Prepare Thoughtful Questions",
-            content: '9. Develop a list of insightful questions to ask the interviewer, such as "What are the biggest challenges facing the team?" or "Can you tell me more about the company culture?',
+            content: '9. Develop a list of insightful questions to ask the interviewer, such as "What are the biggest challenges facing the team?" or "Can you tell me more about the collage culture?',
         },
         {
             id: 10,
@@ -457,13 +471,73 @@ function Instruction() {
             return () => clearInterval(intervalId);
         }, []); // Empty dependency array to run effect only once on mount
 
-        const handleButtonClick = () => {
+        const handleButtonClick = async(e) => {
             // Remove apiResponseStatus from localStorage
             localStorage.removeItem("apiResponseStatus");
 
 
             router.push("/questionForm");
 
+            try {
+                // const collageName = "Dynamic Crane Engineers Pvt. Ltd.";  // You can replace this with dynamic data
+        
+                // 1. Attempt to get the existing collage data by collageName using GET method
+                const getRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive?collageName=${collageName}`, {
+                    method: 'GET',  // Use GET method to check if the collage exists
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+        
+                let isActive = 1;  // Default is 1 if collage doesn't exist
+                let collageExists = false;
+        
+                if (getRes.ok) {
+                    const collageData = await getRes.json();
+                    if (collageData?.isActive !== undefined) {
+                        isActive = collageData.isActive + 1;  // collage exists, increment isActive
+                        collageExists = true;
+                    }
+                }
+        
+                // 2. Prepare the data to be saved
+                const data = { collageName, isActive };
+        
+                let finalRes;
+        
+                // 3. Use PUT if the collage already exists, else POST to create
+                if (collageExists) {
+                    // collage exists, update with PUT method
+                    finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+                } else {
+                    // collage doesn't exist, create with POST method
+                    finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+                }
+        
+                if (!finalRes.ok) {
+                    const errorData = await finalRes.json();
+                    throw new Error(errorData?.error || "Failed to save collage data.");
+                }
+        
+                const finalResponse = await finalRes.json();
+                if (finalResponse.success) {
+                    console.log("collage data updated/created successfully");
+                }
+            } catch (error) {
+                console.error("Error:", error.message);
+            }
 
 
         };
