@@ -939,13 +939,13 @@
 //   const speak = (text) => {
 //     const utterance = new SpeechSynthesisUtterance(text);
 //     utterance.lang = 'en-US'; // Set language to English
-  
-    
+
+
 //     window.speechSynthesis.speak(utterance);
 //   };
-  
 
- 
+
+
 // // console.log("this is User",user);
 
 
@@ -963,7 +963,7 @@
 //   }
 // }, []); // Only runs once when the component is mounted
 
-  
+
 //   useEffect(() => {
 //     // Initialize Speech Recognition API
 
@@ -1142,7 +1142,7 @@
 //               </button>
 //             </Link>
 //           </div>
-          
+
 //         </div>
 //       </div>
 //     </>
@@ -1402,17 +1402,17 @@
 //       setIsIphone(true);
 //     }
 
-    
-    
+
+
 //     // Delay speech synthesis for 1 second after page load
 //     const timeoutId = setTimeout(() => {
 //       // Check if the device is iOS and adjust the speech message accordingly
 //       if (isIphone) {
 //         const userFromStorage = JSON.parse(localStorage.getItem('user'));
-      
+
 //           // console.log(userFromStorage);
 //           setUserr(userFromStorage);
-        
+
 //           // No need to speak until the user is set
 //           if (userFromStorage) {
 //             // Speak the instructions once user data is loaded
@@ -1421,10 +1421,10 @@
 //           }
 //       } else {
 //         const userFromStorage = JSON.parse(localStorage.getItem('user'));
-      
+
 //           // console.log(userFromStorage);
 //           setUserr(userFromStorage);
-        
+
 //           // No need to speak until the user is set
 //           if (userFromStorage) {
 //             // Speak the instructions once user data is loaded
@@ -1596,7 +1596,7 @@
 //             <div className="mt-6 flex justify-center pb-10">
 //               <button
 //                 className="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600"
-               
+
 //               >
 //                 TAP TO CONTINUE
 //               </button>
@@ -1604,7 +1604,7 @@
 //           )}
 
 //           {/* GET STARTED button */}
-         
+
 //             <div className="mt-6 flex justify-center pb-10">
 //               <Link href={'/role'}>
 //                 <button className="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600">
@@ -1612,7 +1612,7 @@
 //                 </button>
 //               </Link>
 //             </div>
-        
+
 //         </div>
 //       </div>
 //     </>
@@ -1739,11 +1739,14 @@ export default function Home({ Logout, user }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="min-h-screen bg-gradient-to-b text-white px-4 bg-cover flex flex-col items-center justify-center" style={{ backgroundImage: "url('/bg.gif')" }}>
+      <div
+        className="min-h-screen bg-gradient-to-b text-white px-4 bg-cover flex flex-col items-center justify-center"
+        style={{ backgroundImage: "url('/bg.gif')" }}
+      >
         {/* Navigation Bar */}
-        <nav className="flex justify-between items-center py-4 px-6 bg-black bg-opacity-50 w-full">
+        <nav className="flex justify-between items-center mb-20 py-4 px-6 bg-black bg-opacity-50 w-full">
           <div className="text-white text-lg font-bold">Shakkti AI</div>
-          <ul className="flex space-x-6 text-sm">
+          <ul className="flex space-x-6 text-sm items-center">
             <li className="hover:text-purple-400 cursor-pointer">Home</li>
             <Link href={'/oldreport'}>
               <li className="relative hover:text-purple-400 cursor-pointer" onClick={handleReportClick}>
@@ -1754,89 +1757,280 @@ export default function Home({ Logout, user }) {
               </li>
             </Link>
             <div className="relative">
-              {user?.value && (
+              {user?.value ? (
                 <div className="relative">
                   <MdAccountCircle className="text-2xl md:text-3xl mx-2 cursor-pointer" onClick={toggleDropdown} />
                   {dropdown && (
-                    <div className="absolute right-0 shadow-xl top-10 rounded-md w-40 border-2 border-solid border-gray-300">
+                    <div className="absolute right-0 shadow-xl top-10 rounded-md w-40 border border-gray-300 bg-white text-black">
                       <ul>
                         <Link href={'/profile'}>
-                          <li className="hover:text-blue-700 text-sm font-bold p-3 cursor-pointer border-b-2 border-solid border-gray-300 hover:bg-gray-100">Profile</li>
+                          <li className="hover:text-blue-700 text-sm font-bold p-3 cursor-pointer border-b border-gray-300 hover:bg-gray-100">Profile</li>
                         </Link>
-                        <li onClick={Logout} className="hover:text-red-700 text-sm font-bold p-3 cursor-pointer border-b-2 border-solid border-gray-300 hover:bg-gray-100">Logout</li>
+                        <li onClick={Logout} className="hover:text-red-700 text-sm font-bold p-3 cursor-pointer border-b border-gray-300 hover:bg-gray-100">Logout</li>
                       </ul>
                     </div>
                   )}
                 </div>
-              )}
-              {!user?.value && (
+              ) : (
                 <Link href="/login">
-                  <div className="ml-4">
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition ease-in-out duration-200">Login</button>
-                  </div>
+                  <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">Login</button>
                 </Link>
               )}
             </div>
           </ul>
         </nav>
 
-        {/* Header Section */}
-        <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 mt-5 border-2 border-white rounded-full flex items-center justify-center">
+        {/* Main Content */}
+        <div className="flex flex-col items-center   text-center w-full">
+          <div className="w-20 h-20  border-2 border-white rounded-full flex items-center justify-center">
             <img src="/Logo.png" alt="Logo" className="w-16 h-16 object-contain" />
           </div>
 
           {isIphone && firstName && (
-            <div onClick={() => speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`)} >
-              <h1 className="text-4xl font-bold mt-4 text-pink-400 glow-text">
-  Job
-</h1>
-<h2 className="text-3xl font-bold text-pink-400 glow-text">
-  Interview
-</h2>
-
+            <div onClick={() => speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`)}>
+              <h1 className="text-4xl font-bold mt-4 text-pink-400">Job</h1>
+              <h2 className="text-3xl font-bold text-pink-400">Interview</h2>
             </div>
           )}
 
-          {!isIphone && firstName && (
-            <>
-              <h1 className="text-4xl font-bold mt-4 text-pink-400">Job</h1>
-              <h2 className="text-3xl font-bold text-pink-500">Interview</h2>
-            </>
-          )}
-          
-          <div className="flex justify-center mt-4 mb-4">
-            <img src="/home.png" alt="Job Interview" className="max-w-sm w-full h-auto object-contain" />
+          {/* Hero Section */}
+          <div className="relative  mb-10 flex flex-col md:flex-row items-center justify-center text-white ">
+            {/* Increase the image size */}
+            <img src="/mock.png" alt="Robot" className="w-96 lg:-ml-[10rem] md:w-[50rem] rounded-lg" />
+
+            <div className="text-center md:text-left max-w-2xl">
+              {/* Increase font size for text */}
+              <h1 className="text-3xl md:text-4xl font-semibold leading-snug">
+                Get Interview Ready With Expert Feedback <br />
+                & Personalized Practice With <span className="text-pink-500">MockMingle</span>
+              </h1>
+              <div className="mt-6 flex flex-col md:flex-row gap-4 justify-center">
+                <Link href={'/role'}>
+                  <button className="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600">
+                    GET STARTED
+                  </button>
+                </Link>
+
+              </div>
+            </div>
           </div>
 
-          <p className="text-center text-gray-300 max-w-lg mx-auto">
-            Landing your dream job starts with a great interview. We provide expert tips, real-world insights, and proven strategies to help you impress employers and stand out from the competition.
-          </p>
+        </div>
+      </div>
 
-          <ul className="mt-4 text-center space-y-2 text-gray-200">
-            <li>✅ <span className="text-pink-400">Interview Preparation</span> - Master common questions.</li>
-            <li>✅ <span className="text-pink-400">Resume & Cover Letter Tips</span> - Showcase your skills.</li>
-            <li>✅ <span className="text-pink-400">Career Coaching</span> - Get expert guidance.</li>
-          </ul>
+      <div className=" text-gray-900 p-8 min-h-screen bg-cover" style={{ backgroundImage: "url('/whitebg.jpg')" }}>
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Are You Interview-Ready? Test Yourself with <span className="text-indigo-600">MockMingle</span>
+        </h1>
 
-          <div className="mt-6 flex justify-center pb-10">
-            <p className="text-lg font-semibold text-gray-200">
-              Please speak the phrase <span className="text-pink-500">"I am ready"</span> to proceed.
+
+        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
+          <div
+            className="transform rounded-lg gap-10"
+            style={{
+              transform: "rotateY(50deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p1.jpeg"
+              width={300}
+
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl shadow-gray-300"
+            />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">1</span>
+              <h2 className="text-xl font-semibold text-purple-700">Try Your Practice</h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              Test your interview skills, identify weaknesses, and refine your responses in a risk-free environment. Boost your confidence and reduce interview anxiety before the real challenge!
             </p>
           </div>
+        </div>
 
-        
-OR
-          {/* GET STARTED button */}
-          <div className="mt-6 flex justify-center pb-10">
-            <Link href={'/role'}>
-              <button className="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600">
-                GET STARTED
-              </button>
-            </Link>
+
+        <div
+          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
+          style={{ perspective: "1000px" }}
+        >
+          {/* Image Section */}
+          <div
+            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            style={{
+              transform: "rotateY(130deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p2.jpeg"
+              width={300}
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-300"
+            />
+          </div>
+
+          {/* Text Section */}
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">2</span>
+              <h2 className="text-xl font-semibold text-purple-700">Real-time Interview Practice Conducted by AI</h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              Get live, AI-driven mock interviews with instant feedback on tone, confidence, and accuracy, saving time with data-driven insights.
+            </p>
+          </div>
+        </div>
+
+
+
+
+        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
+          <div
+            className="transform rounded-lg"
+            style={{
+              transform: "rotateY(50deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p3.jpg"
+              width={300}
+
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
+            />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">3</span>
+              <h2 className="text-xl font-semibold text-purple-700">Flexible Interview Timing</h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              Practice Anytime, Anywhere – No fixed schedules, instant access for busy students and professionals, ensuring stress-free, flexible preparation.
+            </p>
+          </div>
+        </div>
+
+
+        <div
+          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
+          style={{ perspective: "1000px" }}
+        >
+          {/* Image Section */}
+          <div
+            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            style={{
+              transform: "rotateY(330deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p4.png"
+              width={300}
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
+            />
+          </div>
+
+          {/* Text Section */}
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">4</span>
+              <h2 className="text-xl font-semibold text-purple-700">Gamified Experience</h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              MockMingle uses gamification with scores, badges, and leaderboards to make learning fun, motivating, and rewarding while tracking your progress.
+            </p>
+          </div>
+        </div>
+
+        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
+          <div
+            className="transform rounded-lg"
+            style={{
+              transform: "rotateY(50deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p5.png"
+              width={300}
+
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
+            />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">5</span>
+              <h2 className="text-xl font-semibold text-purple-700"> Get Expert Feedback</h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              Get detailed insights from AI and industry experts on communication, technical skills, and performance, with personalized improvement suggestions for better interview success.
+            </p>
+          </div>
+        </div>
+
+
+        <div
+          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
+          style={{ perspective: "1000px" }}
+        >
+          {/* Image Section */}
+          <div
+            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            style={{
+              transform: "rotateY(330deg)",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            <img
+              src="/p6.jpg"
+              width={300}
+              alt="Preparation is the key"
+              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
+            />
+          </div>
+
+          {/* Text Section */}
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">6</span>
+              <h2 className="text-xl font-semibold text-purple-700">Get Suggestions in Video Format
+              </h2>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
+              Get AI-driven or expert video suggestions with step-by-step guidance on answers, posture, and tone for easier, more engaging improvement.
+            </p>
+          </div>
+        </div>
+
+
+      </div>
+      <div className=" relative bg-blue-950 grid grid-cols-1 lg:grid-cols-2">
+        <div className=" ">
+          <img src="/footermock.png" className="" />
+        </div>
+        <div className="text-center mt-5">
+          <h2 className="text-gray-300 text-2xl">Contact Us</h2>
+          <h2 className="text-gray-300 text-3xl mt-2 font-bold">info@shakktii.in</h2>
+          <div>
+
           </div>
         </div>
       </div>
+
+
+
+
+
+
     </>
   );
 }
