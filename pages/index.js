@@ -1859,9 +1859,9 @@ export default function Home({ Logout, user }) {
         >
           {/* Image Section */}
           <div
-            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            className="transform rounded-lg mr-10  sm:order-first lg:order-last"
             style={{
-              transform: "rotateY(130deg)",
+              transform: "rotateY(330deg)",
               transformStyle: "preserve-3d",
             }}
           >
@@ -1869,7 +1869,7 @@ export default function Home({ Logout, user }) {
               src="/p2.jpeg"
               width={300}
               alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-300"
+              className="rounded-lg h-40 lg:ml-32 shadow-2xl order-1 shadow-gray-300"
             />
           </div>
 
@@ -1923,7 +1923,7 @@ export default function Home({ Logout, user }) {
         >
           {/* Image Section */}
           <div
-            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            className="transform rounded-lg lg:ml-32 mr-10 sm:order-first lg:order-last"
             style={{
               transform: "rotateY(330deg)",
               transformStyle: "preserve-3d",
@@ -1984,7 +1984,7 @@ export default function Home({ Logout, user }) {
         >
           {/* Image Section */}
           <div
-            className="transform rounded-lg mr-10 sm:order-first lg:order-last"
+            className="transform rounded-lg mr-10 lg:ml-32 sm:order-first lg:order-last"
             style={{
               transform: "rotateY(330deg)",
               transformStyle: "preserve-3d",
