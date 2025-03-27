@@ -1,6 +1,6 @@
 // pages/signup.js
 
-import React, { useState } from 'react'
+import React, { useState ,useEffect} from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
@@ -19,6 +19,21 @@ const SignUp = () => {
     const [passwordError, setPasswordError] = useState("");
     const [DOB, setDOB] = useState("");
     const [profileImg, setProfileImg] = useState("");
+
+const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      router.push("/admin/login");
+    } else {
+      const userFromStorage = JSON.parse(localStorage.getItem('user'));
+      if (userFromStorage) {
+        setUser(userFromStorage);
+        
+      }
+    }
+  }, []);
+
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);

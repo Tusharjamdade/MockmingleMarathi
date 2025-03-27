@@ -201,8 +201,10 @@ import { Edit } from 'lucide-react';
 import EditPopup from '../../components/editPopup'; 
 import ReportDetailPopup from '../../components/reportDetailPopup'; 
 import Chart from '../../components/chart'; // Import the Chart component/components/Chart'; // Import the Chart component
+import { useRouter } from 'next/router';
 
 function EmployeeProfiles() { 
+  const router = useRouter();
   const [users, setUsers] = useState([]); 
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [isReportOpen, setIsReportOpen] = useState(false); 
@@ -221,10 +223,19 @@ function EmployeeProfiles() {
 
 
 
+const [user, setUser] = useState(null);
 
-console.log(chartData);
-
-
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      router.push("/admin/login");
+    } else {
+      const userFromStorage = JSON.parse(localStorage.getItem('user'));
+      if (userFromStorage) {
+        setUser(userFromStorage);
+        
+      }
+    }
+  }, []);
 
 
   // Fetch user data and their report data in one go

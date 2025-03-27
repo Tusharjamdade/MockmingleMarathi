@@ -2,13 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import 'react-circular-progressbar/dist/styles.css';
+import {useRouter} from 'next/router';
 
 
 export default function Index() {
+
+  const router = useRouter();
   // State to hold the active test count, loading state, and total users
   const [activeTests, setActiveTests] = useState(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalCompleteTest, setTotalCompleteTest] = useState(0);
+
+
+ const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      router.push("/admin/login");
+    } else {
+      const userFromStorage = JSON.parse(localStorage.getItem('user'));
+      if (userFromStorage) {
+        setUser(userFromStorage);
+        
+      }
+    }
+  }, []);
+
 
   useEffect(() => {
     const collageName = 'SPPU'; // Example company name

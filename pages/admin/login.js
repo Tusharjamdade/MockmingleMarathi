@@ -110,8 +110,9 @@ export default function Login() {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen  relative overflow-hidden">
-            <img src="/bg.jpg" className="absolute  w-full h-full object-cover z-[-1]" alt="background" />
+        <div className="flex justify-center items-center min-h-screen bg-slate-300 w-full relative overflow-hidden">
+            <img src="/
+            " className="absolute  w-full h-full object-cover z-[-1]" alt="background" />
             <img src="/Logoo.png" className="absolute top-4 right-8 w-20 mb-4" alt="Logo" />
             
             <div className="bg-transparent text-center p-6 w-full max-w-md rounded-lg">
@@ -156,13 +157,13 @@ export default function Login() {
                         LOG IN
                     </button>
                 </form>
-                
+{/*                 
                 <a href="#" className="text-pink-400 text-sm mt-4 block">Forgot Password?</a>
                 
                 <div className=" text-sm mt-4">
                     Don't have an account? 
                     <a href="/signup" className="font-bold text-pink-400">Sign up</a>
-                </div>
+                </div> */}
             </div>
 
             <ToastContainer />
