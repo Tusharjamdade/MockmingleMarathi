@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { FcSpeaker } from 'react-icons/fc';
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
@@ -16,13 +16,16 @@ const QuestionForm = () => {
   const [recognition, setRecognition] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [answers, setAnswers] = useState([]);
-  const [interviewComplete, setInterviewComplete] = useState(false);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const [isIphone, setIsIphone] = useState(false);
-
-  const [micTimeout, setMicTimeout] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+  const [interviewComplete, setInterviewComplete] = useState(false);
+  const [micTimeout, setMicTimeout] = useState(null);
+  const [silenceTimeout, setSilenceTimeout] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  // Use a ref instead of state to avoid re-renders
+  const isSpeakingRef = useRef(false);
+  const questionSpokenRef = useRef(false);
 
   const [collageName, setCollageName] = useState('');
 
@@ -100,34 +103,34 @@ const QuestionForm = () => {
     "Perfect, let's go ahead with the next question.",
     "Let's move on to the next question now and keep going strong!",
     "Wonderful! Proceeding to the next question.",
-    "Let’s move forward to the next one with excitement!",
-    "Next question, please—let's dive right in!",
-    "Let’s go to the next one and keep the momentum going.",
+    "Let's move forward to the next one with excitement!",
+    "Next question, please, let's dive right in!",
+    "Let's go to the next one and keep the momentum going.",
     "Moving on to the next question, excited to see what's next!",
     "Let's continue with the next question and keep up the good work!",
-    "Now, let’s go to the next question and stay on track!",
-    "Time to proceed with the next question—let’s keep it up!",
-    "Next question, let’s go, we’re doing great!",
-    "Let’s keep going with the next question and stay positive!",
-    "Let’s continue with the next one, things are going well!"
+    "Now, let's go to the next question and stay on track!",
+    "Time to proceed with the next question, let's keep it up!",
+    "Next question, let's go, we're doing great!",
+    "Let's keep going with the next question and stay positive!",
+    "Let's continue with the next one, things are going well!"
   ];
 
   const badResponses = [
     "Um, okay, let's move to the next question.",
     "Not quite, but let's move to the next question.",
     "Hmm, not exactly, let's continue to the next question.",
-    "Well, that’s not right, but let’s go on to the next one.",
-    "Close enough, let’s move on to the next question.",
-    "It’s not perfect, but let’s proceed to the next one.",
-    "Hmm, I see where you’re going, but let’s move to the next one.",
-    "That’s not the answer we were looking for, but let’s continue.",
+    "Well, that's not right, but let's go on to the next one.",
+    "Close enough, let's move on to the next question.",
+    "It's not perfect, but let's proceed to the next one.",
+    "Hmm, I see where you're going, but let's move to the next one.",
+    "That's not the answer we were looking for, but let's continue.",
     "Not quite right, but let's continue to the next question.",
-    "Almost, but we’ll keep going.",
-    "I think we missed it, let’s move on.",
-    "Hmm, not quite, but let’s keep going.",
-    "That’s a bit off, but let's move to the next one.",
+    "Almost, but we'll keep going.",
+    "I think we missed it, let's move on.",
+    "Hmm, not quite, but let's keep going.",
+    "That's a bit off, but let's move to the next one.",
     "Not exactly what we needed, but let's continue.",
-    "Close, but not quite there, let’s move on."
+    "Close, but not quite there, let's move on."
   ];
 
   useEffect(() => {
@@ -308,7 +311,7 @@ const QuestionForm = () => {
       
       // Basic error handling
       recognitionInstance.onerror = function(event) {
-        console.error('Speech recognition error:', event.error);
+        console.error('Speech recognition error:', event);
         if (event.error === 'no-speech') {
           console.log('No speech detected, continuing to listen...');
           // Don't stop listening for no-speech errors
@@ -357,6 +360,25 @@ const QuestionForm = () => {
     };
   }, []);
 
+  // Helper function to speak a feedback response before moving on
+  const speakFeedbackAndMoveOn = () => {
+    // Choose a response randomly (70% good responses, 30% bad responses)
+    const useGoodResponse = Math.random() < 0.7;
+    const responses = useGoodResponse ? goodResponses : badResponses;
+    const feedbackText = responses[Math.floor(Math.random() * responses.length)];
+    
+    // Clean up any special characters that might cause issues with speech
+    const cleanFeedback = feedbackText.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
+    
+    console.log('🗣️ SPEAKING FEEDBACK:', cleanFeedback);
+    
+    // Speak the feedback with the female voice
+    speakResponse(cleanFeedback, () => {
+      // After speaking is complete, move to the next question
+      handleNext();
+    });
+  };
+  
   const handleMicClick = useCallback(() => {
     // Handle simple speech recognition start/stop
     if (!recognition) {
@@ -378,6 +400,13 @@ const QuestionForm = () => {
       
       // Process the recorded answer
       setTimeout(() => {
+        // IMPORTANT: Always clear the question timer when processing an answer
+        if (questionTimerRef.current) {
+          console.log('🔄 CLEARING TIMER on answer submission');
+          clearTimeout(questionTimerRef.current);
+          questionTimerRef.current = null;
+        }
+        
         if (!questions.length || currentQuestionIndex >= questions.length) {
           console.error('No questions available');
           setLoading(false);
@@ -396,31 +425,117 @@ const QuestionForm = () => {
         console.log('Final answer:', answer);
         
         if (answer && answer !== 'Listening...') {
+          // Set answer as submitted to prevent auto-progression
+          setIsAnswerSubmitted(true);
+          
           setAnswers(prevAnswers => [
             ...prevAnswers,
             { questionId: currentQuestion._id, answer: answer }
           ]);
           submitAnswer(currentQuestion._id, answer);
           setLoading(false);
-          handleNext();
+          speakFeedbackAndMoveOn();
         } else {
-          speakResponse("I couldn't hear your answer. Let's try again.");
-          setLoading(false);
+          // User turned on mic but stopped without speaking
+          console.log('User stopped mic without speaking');
+          const noSpeechMessage = "I couldn't hear your answer. Moving to the next question.";
+          speakResponse(noSpeechMessage);
+          setTimeout(() => {
+            if (currentQuestion && currentQuestion._id) {
+              // Store the answer
+              const noAnswerText = "No answer provided - user stopped mic";
+              submitAnswer(currentQuestion._id, noAnswerText);
+            }
+            
+            setLoading(false);
+            
+            // Check if this is the last question
+            if (currentQuestionIndex >= questions.length - 1) {
+              console.log('This was the last question - showing completion modal');
+              setIsModalVisible(true);
+            } else {
+              // Move to the next question directly instead of using handleNext() to avoid potential issues
+              setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+              setRecordedText('');
+              setIsAnswerSubmitted(false);
+            }
+          }, 3000);
         }
       }, 500);
     } else {
       // START RECORDING
       console.log('Starting speech recognition');
       
+      // CRITICAL: Clear the question timer when mic is activated
+      // This prevents "Time's up" from interrupting while speaking
+      if (questionTimerRef.current) {
+        console.log('🎤 STOPPING TIMER when microphone activated');
+        clearTimeout(questionTimerRef.current);
+        questionTimerRef.current = null;
+      }
+      
       // Check if questions are available
       if (!questions.length) {
-        alert('Please wait while questions are loading or try refreshing the page.');
+        alert('No questions loaded');
         return;
       }
       
       // Clear previous text
       setRecordedText('Listening...');
       setIsListening(true);
+      
+      // Set a timeout for speech recognition if user turns on mic but doesn't speak (Scenario 3)
+      const silenceTimeout = setTimeout(() => {
+        if (isListening && (recordedText === 'Listening...' || !recordedText.trim())) {
+          console.log('SCENARIO 3: No speech detected after turning on mic - stopping and moving to next question');
+          
+          // First stop the recognition
+          try {
+            recognition.stop();
+          } catch (e) {
+            console.error('Error stopping recognition:', e);
+          }
+          
+          setIsListening(false);
+          setLoading(true);
+          
+          // Create a message about the timeout
+          const noSpeechMessage = "I didn't hear any speech after you turned on the microphone. Moving to the next question.";
+          speakResponse(noSpeechMessage);
+          
+          // Save this as the answer and move to next question
+          setTimeout(() => {
+            if (questions.length > 0 && currentQuestionIndex < questions.length) {
+              const currentQuestion = questions[currentQuestionIndex];
+              
+              if (currentQuestion && currentQuestion._id) {
+                // Store the answer
+                const noAnswerText = "No answer provided - no speech detected";
+                submitAnswer(currentQuestion._id, noAnswerText);
+              }
+              
+              setLoading(false);
+              
+              // Check if this is the last question
+              if (currentQuestionIndex >= questions.length - 1) {
+                console.log('This was the last question - showing completion modal');
+                setIsModalVisible(true);
+              } else {
+                // Move to the next question
+                setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+                setRecordedText('');
+                setIsAnswerSubmitted(false);
+              }
+            } else {
+              console.error('No valid questions to process in silence timeout');
+              setLoading(false);
+            }
+          }, 3000);
+        }
+      }, 15000); // 15 seconds of silence after turning on mic
+      
+      // Store the silence timeout ID
+      setSilenceTimeout(silenceTimeout);
       
       // Verify microphone access
       navigator.mediaDevices.getUserMedia({ audio: true })
@@ -473,150 +588,814 @@ const QuestionForm = () => {
     }
   };
 
-  const speakQuestion = useCallback((questionText) => {
-    window.speechSynthesis.cancel();
-
-    const cleanedQuestionText = questionText.replace(/(currentQuestion|[,*])/g, "").trim();
-
-    setIsSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(cleanedQuestionText);
-
-    utterance.lang = 'en-US';
-    utterance.pitch = 1;
-    utterance.rate = 0.9;
-    utterance.volume = 1;
-
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice =>
-      voice.name.includes('Female') || voice.name.includes('Google') || voice.name.includes('Microsoft')
-    );
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+  /**
+   * Speech Synthesis System
+   * A centralized module for handling all speech synthesis in the application
+   */
+  
+  // Central speech utility that handles all speech with improved reliability
+  const speechManager = {
+    // Speech queue to prevent interruptions
+    queue: [],
+    speaking: false,
+    
+    // Initialize the speech service
+    init() {
+      // Pre-load voices for better selection
+      if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+      }
+    },
+    
+    // Get the best available voice
+    getBestVoice() {
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Try to find a high-quality female voice first
+      const preferredVoice = voices.find(voice => 
+        (voice.name.includes('Female') && voice.name.includes('Google')) ||
+        voice.name.includes('Microsoft Zira') ||
+        voice.name.includes('Samantha')
+      );
+      
+      if (preferredVoice) return preferredVoice;
+      
+      // Fall back to any female voice
+      const femaleVoice = voices.find(voice => 
+        voice.name.includes('Female') || 
+        voice.name.includes('woman') ||
+        voice.name.includes('Girl')
+      );
+      
+      if (femaleVoice) return femaleVoice;
+      
+      // Use the default voice if no preference found
+      return voices[0];
+    },
+    
+    // Speak a question with appropriate parameters
+    speakQuestion(text, onComplete) {
+      const cleanText = text.replace(/(currentQuestion|[,*])/g, "").trim();
+      this.speak(cleanText, {
+        rate: 0.9,
+        pitch: 1.0,
+        onComplete: onComplete,
+        priority: 'high'
+      });
+    },
+    
+    // Speak a response with appropriate parameters
+    speakResponse(text, onComplete) {
+      this.speak(text, {
+        rate: 1.0,
+        pitch: 1.0,
+        onComplete: onComplete,
+        priority: 'medium'
+      });
+    },
+    
+    // Main speech function with advanced options
+    speak(text, options = {}) {
+      if (!text) return;
+      
+      // Default options
+      const settings = {
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 1.0,
+        lang: 'en-US',
+        onComplete: null,
+        onError: null,
+        priority: 'medium', // 'high', 'medium', 'low'
+        ...options
+      };
+      
+      // Don't queue if already speaking and this is low priority
+      if (this.speaking && settings.priority === 'low') {
+        console.log('Already speaking, skipping low priority speech');
+        return;
+      }
+      
+      // Cancel all speech if this is high priority
+      if (settings.priority === 'high') {
+        try {
+          window.speechSynthesis.cancel();
+          this.queue = [];
+          this.speaking = false;
+        } catch (e) {}
+      }
+      
+      // Set speaking indicators
+      setIsSpeaking(true);
+      isSpeakingRef.current = true;
+      this.speaking = true;
+      
+      try {
+        // Create utterance with all settings
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = settings.rate;
+        utterance.pitch = settings.pitch;
+        utterance.volume = settings.volume;
+        utterance.lang = settings.lang;
+        
+        // Try to set a good voice
+        const voice = this.getBestVoice();
+        if (voice) {
+          utterance.voice = voice;
+        }
+        
+        // Completion handler
+        utterance.onend = () => {
+          this.speaking = false;
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+          
+          if (typeof settings.onComplete === 'function') {
+            settings.onComplete();
+          }
+        };
+        
+        // Error handler
+        utterance.onerror = (err) => {
+          console.error('Speech synthesis error:', err);
+          this.speaking = false;
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+          
+          if (typeof settings.onError === 'function') {
+            settings.onError(err);
+          } else if (typeof settings.onComplete === 'function') {
+            // Fall back to completion handler if error handler not provided
+            settings.onComplete();
+          }
+        };
+        
+        // Actually speak the text
+        window.speechSynthesis.speak(utterance);
+        
+        // Failsafe - if speech doesn't complete in 10 seconds, force reset
+        setTimeout(() => {
+          if (this.speaking) {
+            console.log('Speech timeout reached, forcing completion');
+            this.speaking = false;
+            setIsSpeaking(false);
+            isSpeakingRef.current = false;
+            
+            if (typeof settings.onComplete === 'function') {
+              settings.onComplete();
+            }
+          }
+        }, 10000);
+        
+      } catch (e) {
+        console.error('Error in speech synthesis:', e);
+        this.speaking = false;
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        
+        if (typeof settings.onError === 'function') {
+          settings.onError(e);
+        } else if (typeof settings.onComplete === 'function') {
+          settings.onComplete();
+        }
+      }
     }
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      startMicTimeout();
-    };
-
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      startMicTimeout();
-    };
-
-    speechSynthesis.speak(utterance);
+  };
+  
+  // Initialize speech manager
+  useEffect(() => {
+    speechManager.init();
   }, []);
+  
+  // Simplified speak functions that use the manager
+  const speakResponse = (text, onComplete) => {
+    // Use the speech manager
+    if (!text) return;
+    
+    // Clean the text of any special characters including programming symbols
+    const cleanText = text.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
+    
+    // Create the utterance directly for better voice control
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Create utterance
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'en-US';
+      utterance.volume = 1.0;
+      
+      // Set female voice if available
+      const femaleVoice = getFemaleVoice();
+      if (femaleVoice) utterance.voice = femaleVoice;
+      
+      // Set completion callback
+      if (onComplete) {
+        utterance.onend = onComplete;
+      }
+      
+      // Speak
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error('Error speaking response:', e);
+      if (onComplete) onComplete();
+    }
+  };
+  
+  const speakQuestionText = (text, onComplete) => {
+    speechManager.speakQuestion(text, onComplete);
+  };
 
-  const startMicTimeout = () => {
+  // ======== DIRECT TIMER SYSTEM ========
+  // This is a completely new timer implementation with no dependencies on other code
+  // Global question timer
+  const questionTimerRef = useRef(null);
+
+  // EXTREMELY SIMPLIFIED TIMER SYSTEM
+  // This system only cares about:
+  // 1. When a question is spoken → Start 20-second timer
+  // 2. If mic is turned on → Cancel timer
+  // 3. If timer expires → Go to next question
+  
+  // Direct timer function with no state checks
+  const startQuestionTimer = () => {
+    console.log('⏱️ STARTING 20-SECOND TIMER for question', currentQuestionIndex + 1);
+    
+    // Always clear any existing timer first
+    if (questionTimerRef.current) {
+      clearTimeout(questionTimerRef.current);
+      questionTimerRef.current = null;
+    }
+    
+    // Set a pure timeout that will execute after 20 seconds
+    const timerId = setTimeout(() => {
+      // When timer finishes, log the state
+      console.log('⏱️ 20-SECOND TIMER EXPIRED for question', currentQuestionIndex + 1);
+      console.log('⏱️ Current state: isListening =', isListening);
+      
+      // ONLY check if mic is active - that's all that matters
+      if (!isListening) {
+        console.log('⏱️ AUTO-PROGRESSING: Timer expired');
+        
+        // Force update UI state
+        setIsAnswerSubmitted(true);
+        setRecordedText('No answer provided - timed out');
+        
+        // Stop any ongoing listening
+        if (isListening && recognition) {
+          try {
+            recognition.stop();
+            setIsListening(false);
+          } catch (e) {}
+        }
+        
+        // Save the timeout answer
+        if (questions.length > 0 && currentQuestionIndex < questions.length) {
+          const currentQuestion = questions[currentQuestionIndex];
+          if (currentQuestion && currentQuestion._id) {
+            submitAnswer(currentQuestion._id, "No answer provided - timed out");
+          }
+        }
+        
+        // Cancel any previous speech before announcing
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {}
+        
+        // Announce timeout with proper speech handling
+        try {
+          // First, cancel any previous speech
+          forceStopAllSpeech();
+          
+          // Choose from a variety of timeout messages
+          const timeoutMessages = [
+            "Time's up. Let's move to the next question.",
+            "We've run out of time. Moving to the next question.",
+            "Let's continue to the next question since time is up.",
+            "Time's up for this question. Let's proceed to the next one."
+          ];
+          
+          const timeoutMessage = timeoutMessages[Math.floor(Math.random() * timeoutMessages.length)];
+          console.log('⏱️ SPEAKING TIMEOUT MESSAGE:', timeoutMessage);
+          
+          const utterance = new SpeechSynthesisUtterance(timeoutMessage);
+          utterance.lang = 'en-US';
+          utterance.volume = 1.0;
+          
+          // Set female voice if available
+          const femaleVoice = getFemaleVoice();
+          if (femaleVoice) utterance.voice = femaleVoice;
+          
+          // Add unique ID to track this specific utterance
+          utterance.timeoutId = Date.now().toString();
+          
+          utterance.onend = () => {
+            console.log('⏱️ TIMEOUT SPEECH COMPLETED');
+            // Move to next question after speech ends
+            moveToNextQuestion();
+          };
+          
+          utterance.onerror = () => {
+            console.log('⏱️ TIMEOUT SPEECH ERROR');
+            // Move to next question even if speech fails
+            moveToNextQuestion();
+          };
+          
+          // Start speaking with a small delay to ensure cancellation is complete
+          setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+          }, 100);
+          
+          // Failsafe: If speech doesn't trigger callbacks, still move on
+          setTimeout(moveToNextQuestion, 3000);
+        } catch (e) {
+          // If speech fails completely, just move on
+          console.error('⏱️ CANNOT SPEAK TIMEOUT MESSAGE:', e);
+          moveToNextQuestion();
+        }
+      } else {
+        console.log('⏱️ NOT AUTO-PROGRESSING: User has activated mic');
+      }
+    }, 20000); // 20 seconds
+    
+    // Store the timer ID in a ref so it persists across renders
+    questionTimerRef.current = timerId;
+    return timerId;
+  }
+  
+  // SIMPLIFIED function to move to next question
+  const moveToNextQuestion = () => {
+    console.log('⏱️ MOVING TO NEXT QUESTION from', currentQuestionIndex);
+    
+    // Stop any ongoing speech before changing questions
+    forceStopAllSpeech();
+    
+    // Clear any existing timer
+    if (questionTimerRef.current) {
+      clearTimeout(questionTimerRef.current);
+      questionTimerRef.current = null;
+    }
+    
+    // Stop any ongoing listening
+    if (isListening) {
+      try {
+        if (recognition) {
+          recognition.stop();
+        }
+        setIsListening(false);
+      } catch (e) {}
+    }
+    
+    if (currentQuestionIndex >= questions.length - 1) {
+      // This was the last question
+      setIsModalVisible(true);
+    } else {
+      // Simply move to the next question
+      const nextIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(nextIndex);
+    }
+  };
+  
+
+
+  // ======== QUESTION CHANGE HANDLER ========
+  // Handles both initial load and subsequent question changes
+  // SIMPLIFIED question change handler - pure focus on mic and timer
+  useEffect(() => {
+    console.log('🔄 QUESTION INDEX CHANGED TO', currentQuestionIndex);
+    
+    // ===== COMPLETE RESET =====
+    // Reset all timers
+    if (questionTimerRef.current) {
+      clearTimeout(questionTimerRef.current);
+      questionTimerRef.current = null;
+    }
+    
     if (micTimeout) {
       clearTimeout(micTimeout);
       setMicTimeout(null);
     }
-
-    const timeout = setTimeout(() => {
-      if (!isListening && !isAnswerSubmitted) {
-        const timeoutMessage = "You're too late to turn on the mic. Moving to the next question.";
-        console.log(timeoutMessage);
-
-        setIsSpeaking(true);
-        const utterance = new SpeechSynthesisUtterance(timeoutMessage);
-        utterance.lang = 'en-US';
-        utterance.pitch = 1;
-        utterance.rate = 1;
-
-        utterance.onend = () => {
-          setIsSpeaking(false);
-          setTimeout(() => {
-            setIsAnswerSubmitted(true);
-            setRecordedText('No answer provided - timed out');
-            handleNext();
-          }, 500);
-        };
-
-        speechSynthesis.speak(utterance);
+    
+    if (silenceTimeout) {
+      clearTimeout(silenceTimeout);
+      setSilenceTimeout(null);
+    }
+    
+    // Reset all speech
+    forceStopAllSpeech();
+    
+    // Reset all listening
+    if (isListening) {
+      try {
+        if (recognition) {
+          recognition.stop();
+        }
+        setIsListening(false);
+      } catch (e) {}
+    }
+    
+    // Reset all state
+    setIsAnswerSubmitted(false);
+    const resetTimerId = setTimeout(() => {
+      if (isAnswerSubmitted) {
+        console.log('🔄 SECONDARY RESET of isAnswerSubmitted for question', currentQuestionIndex + 1);
+        setIsAnswerSubmitted(false);
       }
-    }, 20000);
-
-    setMicTimeout(timeout);
-  };
-
-  useEffect(() => {
+    }, 100);
+    
+    // Stop any ongoing listening
+    if (isListening) {
+      try {
+        if (recognition) {
+          recognition.stop();
+        }
+        setIsListening(false);
+      } catch (e) {}
+    }
+    
+    // Only process if we have questions
     if (questions.length > 0 && currentQuestionIndex < questions.length) {
       const currentQuestion = questions[currentQuestionIndex];
+      
       if (currentQuestion && currentQuestion.questionText) {
-        speakQuestion(currentQuestion.questionText);
-      } else {
-        console.error('Question or question text is undefined');
+        console.log(`🔄 LOADING QUESTION ${currentQuestionIndex + 1}:`, 
+                    currentQuestion.questionText.substring(0, 30) + '...');
+        
+        // Reset all state related to this question
+        setRecordedText('');
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        
+        // Stop any recognition
+        try {
+          if (isListening && recognition) {
+            recognition.stop();
+            setIsListening(false);
+          }
+        } catch (e) {}
+        
+        // Clear all timers
+        if (questionTimerRef.current) {
+          clearTimeout(questionTimerRef.current);
+          questionTimerRef.current = null;
+        }
+        
+        // Store the question text locally to prevent state changes affecting it
+        const questionText = currentQuestion.questionText;
+        console.log('🗣️ WILL SPEAK QUESTION SOON:', questionText.substring(0, 30) + '...');
+        
+        // Wait for a short time to let previous cleanup complete
+        setTimeout(() => {
+          try {
+            // Final check before speaking
+            if (isAnswerSubmitted) {
+              console.log('🔄 FINAL RESET of isAnswerSubmitted before speaking');
+              setIsAnswerSubmitted(false);
+            }
+            
+            // Force stop any previous speech
+            try {
+              window.speechSynthesis.cancel();
+            } catch (e) {
+              console.error('Error canceling speech:', e);
+            }
+            
+            // Speak the CURRENT question with the stored questionText
+            if (currentQuestionIndex === questions.indexOf(currentQuestion)) {
+              console.log('🗣️ DEFINITELY SPEAKING QUESTION', currentQuestionIndex + 1);
+              // Try primary speech system
+              try {
+                speakQuestion(questionText);
+              } catch (e) {
+                console.error('PRIMARY SPEECH FAILED:', e);
+                // If that fails, try the emergency direct speech
+                speakDirectly(questionText);
+              }
+            } else {
+              console.log('🔄 NOT SPEAKING - QUESTION INDEX CHANGED');
+              // Question index changed while we were waiting, do nothing
+            }
+          } catch (e) {
+            console.error('CRITICAL ERROR SPEAKING QUESTION:', e);
+            // If speech fails, at least start the timer
+            startTimerDirectly();
+          }
+        }, 500);
       }
     }
-  }, [currentQuestionIndex, questions, speakQuestion]);
+  }, [questions, currentQuestionIndex]);
+  
+  // ======== QUESTION SPEAKING HANDLER ========
+  // COMPLETELY REBUILT SPEECH SYSTEM to prevent repetition
+  // This system ensures proper speech queue management and prevents duplicate speech
+  const speechQueue = useRef([]);
+  const currentlySpeakingText = useRef('');
 
+  // Simple function to get female voice
+  const getFemaleVoice = () => {
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      let femaleVoice = null;
+      
+      // Try to find a female voice in this order
+      // 1. English US female voice
+      femaleVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.includes('en-US'));
+      
+      // 2. Any female voice
+      if (!femaleVoice) femaleVoice = voices.find(v => v.name.toLowerCase().includes('female'));
+      
+      // 3. Microsoft Zira (known female voice)
+      if (!femaleVoice) femaleVoice = voices.find(v => v.name.includes('Zira'));
+      
+      // 4. Common female voice names
+      if (!femaleVoice) {
+        const femaleNames = ['samantha', 'karen', 'lisa', 'amy', 'victoria'];
+        for (const name of femaleNames) {
+          const match = voices.find(v => v.name.toLowerCase().includes(name));
+          if (match) {
+            femaleVoice = match;
+            break;
+          }
+        }
+      }
+      
+      if (femaleVoice) {
+        console.log('🔈 Using female voice:', femaleVoice.name);
+      }
+      
+      return femaleVoice;
+    } catch (e) {
+      console.error('Error getting voices:', e);
+      return null;
+    }
+  };
+
+  // SIMPLIFIED DIRECT SPEECH FUNCTION - completely reliable
+  const speakDirectly = (text) => {
+    // Clean the text of any special characters including programming symbols
+    const cleanText = text.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
+    
+    // Basic fallback speech - directly use the Web Speech API with minimal processing
+    console.log('🔊 EMERGENCY DIRECT SPEECH:', cleanText.substring(0, 30) + '...');
+    
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      // Create a simple utterance
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'en-US';
+      utterance.volume = 1.0;
+      
+      // Set female voice if available
+      const femaleVoice = getFemaleVoice();
+      if (femaleVoice) utterance.voice = femaleVoice;
+      
+      // Speak immediately
+      window.speechSynthesis.speak(utterance);
+      
+      // Start timer after a fixed delay
+      setTimeout(() => {
+        startTimerDirectly();
+      }, 5000);
+      
+      return true;
+    } catch (e) {
+      console.error('🔊 EMERGENCY SPEECH FAILED:', e);
+      return false;
+    }
+  };
+
+  // Main function to speak the current question with guaranteed execution
+  const speakQuestion = (questionText) => {
+    console.log(`🗣️ PREPARING TO SPEAK QUESTION ${currentQuestionIndex + 1}`);
+    
+    // First, completely clear any speech
+    forceStopAllSpeech();
+    
+    // Always clear any existing timers before speaking
+    if (questionTimerRef.current) {
+      clearTimeout(questionTimerRef.current);
+      questionTimerRef.current = null;
+    }
+    
+    // Enhanced cleaning for question text
+    let cleanedText = "";
+    if (questionText) {
+      // First remove code-specific characters and patterns
+      cleanedText = questionText
+        .replace(/\`\`\`[\s\S]*?\`\`\`/g, '') // Remove code blocks
+        .replace(/\`[^\`]*\`/g, '') // Remove inline code
+        .replace(/\*\*|__|\*|_|\~/g, '') // Remove markdown formatting
+        .replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '') // Remove special chars
+        .replace(/(currentQuestion)/g, '') // Remove specific words
+        .trim();
+    }
+    if (!cleanedText) {
+      console.error('🗣️ EMPTY QUESTION TEXT - SKIPPING SPEECH');
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      startQuestionTimer();
+      return;
+    }
+    
+    // Mark as speaking
+    setIsSpeaking(true);
+    isSpeakingRef.current = true;
+    
+    // Store the current question text to prevent repeats
+    currentlySpeakingText.current = cleanedText;
+    
+    // Always reset isAnswerSubmitted when speaking a question
+    if (isAnswerSubmitted) {
+      setIsAnswerSubmitted(false);
+    }
+    
+    try {
+      console.log(`🗣️ SPEAKING QUESTION ${currentQuestionIndex + 1}:`, cleanedText.substring(0, 50) + '...');
+      
+      // Create the utterance
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      utterance.volume = 1.0;
+      
+      // Set female voice if available
+      const femaleVoice = getFemaleVoice();
+      if (femaleVoice) utterance.voice = femaleVoice;
+      
+      // Store unique ID to prevent duplicate callbacks
+      const speechId = Date.now().toString();
+      utterance.speechId = speechId;
+      
+      // When speech ends, start the timer
+      utterance.onend = () => {
+        // Verify this is still the current speech
+        if (utterance.speechId !== speechId) {
+          console.log('🗣️ Ignoring speech end event for old utterance');
+          return;
+        }
+        
+        console.log('🗣️ FINISHED SPEAKING QUESTION, STARTING TIMER');
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        currentlySpeakingText.current = '';
+        
+        // Double-check isAnswerSubmitted is false before starting timer
+        if (isAnswerSubmitted) {
+          console.log('🗣️ FORCE RESETTING isAnswerSubmitted before starting timer');
+          setIsAnswerSubmitted(false);
+        }
+        
+        // Start the timer AFTER speech completes
+        startQuestionTimer();
+      };
+      
+      // If speech fails, still start the timer
+      utterance.onerror = (e) => {
+        console.log('🗣️ SPEECH ERROR, STARTING TIMER ANYWAY', e);
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        currentlySpeakingText.current = '';
+        startQuestionTimer();
+      };
+      
+      // Speak with a 50ms delay to ensure the speech queue is properly cleared
+      setTimeout(() => {
+        // Before speaking, cancel any previous speech one more time
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {}
+        
+        // Start speaking
+        window.speechSynthesis.speak(utterance);
+        
+        // FAILSAFE: If speech doesn't trigger callbacks, force start the timer
+        setTimeout(() => {
+          if (isSpeakingRef.current && currentlySpeakingText.current === cleanedText) {
+            console.log('🗣️ SPEECH TIMEOUT, FORCING TIMER START');
+            setIsSpeaking(false);
+            isSpeakingRef.current = false;
+            currentlySpeakingText.current = '';
+            startQuestionTimer();
+          }
+        }, 8000);
+      }, 150);
+    } catch (e) {
+      // If the main speech system fails, try the emergency direct speech
+      console.error('🗣️ MAIN SPEECH SYSTEM ERROR:', e);
+      
+      // Try emergency direct speech
+      if (speakDirectly(cleanedText)) {
+        console.log('🗣️ EMERGENCY SPEECH ACTIVATED');
+      } else {
+        // If even that fails, just start the timer
+        console.error('🗣️ ALL SPEECH SYSTEMS FAILED');
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        currentlySpeakingText.current = '';
+        startQuestionTimer();
+      }
+    }
+  };
+  
+  // Initialize voice list on component mount
+  useEffect(() => {
+    // Load voices
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          console.log('🔈 Loaded', voices.length, 'voices');
+          const femaleVoice = getFemaleVoice();
+          if (femaleVoice) {
+            console.log('🔈 Selected female voice:', femaleVoice.name);
+          }
+        }
+      };
+      
+      // Try loading voices immediately
+      loadVoices();
+      
+      // Set up event for when voices change
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      
+      return () => {
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    }
+  }, []);
+  
+  // Fully stop all speech and clear all queues
+  const forceStopAllSpeech = () => {
+    // Cancel ongoing speech synthesis
+    try {
+      console.log('🛑 FORCEFULLY STOPPING ALL SPEECH');
+      window.speechSynthesis.cancel();
+      speechQueue.current = [];
+      currentlySpeakingText.current = '';
+    } catch (e) {
+      console.error('Error stopping speech:', e);
+    }
+    
+    // Reset speaking state
+    setIsSpeaking(false);
+    isSpeakingRef.current = false;
+  };
+
+  // SIMPLIFIED version - focused only on moving to next question
   const handleNext = () => {
-    // Safety check - make sure questions are loaded and currentQuestion exists
-    if (!questions.length || currentQuestionIndex >= questions.length) {
-      console.error('No questions available or invalid question index');
-      return;
+    console.log('⏭️ HANDLING NEXT QUESTION');
+    
+    // Reset ALL state - simple and direct
+    if (questionTimerRef.current) {
+      clearTimeout(questionTimerRef.current);
+      questionTimerRef.current = null;
     }
     
-    const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion || !currentQuestion.questionText) {
-      console.error('Current question or question text is undefined');
-      return;
+    if (micTimeout) {
+      clearTimeout(micTimeout);
+      setMicTimeout(null);
     }
     
-    const answer = recordedText.trim();
-
-    // Process answer and question
-    const questionWords = currentQuestion.questionText.split(' ').map(word => word.toLowerCase());
-    const answerWords = answer.split(' ').map(word => word.toLowerCase());
-
-    const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
-
-    const responseText = Math.random() > 0.15
-      ? goodResponses[Math.floor(Math.random() * goodResponses.length)]
-      : badResponses[Math.floor(Math.random() * badResponses.length)];
-
-    speakResponse(responseText);
-
-    if (answer) {
-      setAnswers((prevAnswers) => [
-        ...prevAnswers,
-        { questionId: currentQuestion._id, answer: answer }
-      ]);
+    if (silenceTimeout) {
+      clearTimeout(silenceTimeout);
+      setSilenceTimeout(null);
     }
-
-    if (currentQuestionIndex === questions.length - 1) {
-      speakResponse("Your interview has ended.");
-      setInterviewComplete(true);
+    
+    // Stop ANY speech
+    forceStopAllSpeech();
+    
+    // Stop ANY listening
+    if (isListening && recognition) {
+      try {
+        recognition.stop();
+        setIsListening(false);
+      } catch (e) {
+        console.error('Error stopping recognition in handleNext:', e);
+      }
+    }
+    
+    // Clean up state
+    setRecordedText('');
+    
+    // IMPORTANT: Mark answer as submitted to prevent duplicate actions
+    setIsAnswerSubmitted(true);
+    
+    // Check if this is the last question
+    if (currentQuestionIndex >= questions.length - 1) {
       setIsModalVisible(true);
+      speakResponse("Your interview has ended. Thank you for your participation.");
+      setInterviewComplete(true);
       localStorage.removeItem("_id");
       updateIsActive();
     } else {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setRecordedText('');
-      setIsAnswerSubmitted(false);
-    }
-
-    if (micTimeout) {
-      clearTimeout(micTimeout);
-      setMicTimeout(null);
+      // Simply move to next question
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
     }
   };
 
-  const speakResponse = (responseText) => {
-    const utterance = new SpeechSynthesisUtterance(responseText);
-    utterance.lang = 'en-US';
-    utterance.pitch = 1;
-    utterance.rate = 1;
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
-
-    speechSynthesis.speak(utterance);
-  };
 
   const handleModalClose = () => {
     setIsModalVisible(false);
@@ -764,7 +1543,7 @@ const QuestionForm = () => {
       )}
 
       <div className="flex justify-center mb-8">
-        <img id="mainImage" src="main.gif" className="w-60 h-60 text-center rounded-full shadow-lg" alt="Shakti AI Logo" />
+        <img id="mainImage" src="mock.png" className="w-60 h-60 text-center rounded-full shadow-lg" alt="Shakti AI Logo" />
       </div>
 
       {questions.length > 0 && (
@@ -786,9 +1565,9 @@ const QuestionForm = () => {
             )}
           </div>
 
-          <div className="recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
+          <div className=" recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
             <h3 className="text-lg font-medium text-gray-300 mb-2">Your Answer:</h3>
-            <p className="text-white">
+            <p className=" text-white">
               {recordedText && recordedText !== 'Listening...' ? (
                 recordedText
               ) : (
