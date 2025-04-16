@@ -444,6 +444,10 @@ console.log("match Score",scoreMatch);
   }, [jobRoleId]);
 
   const storeReport = async (jobRole, email, reportAnalysis) => {
+    // Ensure collageName has a default value if it's undefined
+    const collageName = user?.collageName || 'Unknown College';
+    
+    console.log("Storing report for:", { jobRole, email, reportAnalysis, collageName });
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAndGetReport`, {
         method: 'POST',
@@ -453,7 +457,7 @@ console.log("match Score",scoreMatch);
         body: JSON.stringify({
           role: jobRole,
           email,
-          collageName: user?.collageName,
+          collageName,
           reportAnalysis,
         }),
       });

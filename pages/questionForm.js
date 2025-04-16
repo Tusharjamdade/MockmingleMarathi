@@ -1565,7 +1565,7 @@ const QuestionForm = () => {
             )}
           </div>
 
-          <div className=" recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
+          <div className="hidden recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
             <h3 className="text-lg font-medium text-gray-300 mb-2">Your Answer:</h3>
             <p className=" text-white">
               {recordedText && recordedText !== 'Listening...' ? (
