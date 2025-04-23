@@ -21,10 +21,14 @@ const JobRoleSchema = new mongoose.Schema({
       },
       answer: {
         type: String,
-        default: null, // This will hold the user's answer
+        default: null,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
       }
     }
   ],
-});
+}, { timestamps: true });
 
 export default mongoose.models.JobRole || mongoose.model('JobRole', JobRoleSchema);

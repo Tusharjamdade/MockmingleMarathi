@@ -1,7 +1,9 @@
-
 import JobRole from '../../models/JobRole';
-
+import mongoose from 'mongoose';
 export async function handler(req, res) {
+    if (!mongoose.connections[0].readyState) {
+        await mongoose.connect(process.env.MONGODB_URI)
+      }
   const { email ,_id} = req.query;
 
   if (!email) {

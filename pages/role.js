@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -66,8 +65,8 @@ export default function Role() {
       if (fetchedQuestions) {
         // Check if the fetchedQuestions is a string
         if (typeof fetchedQuestions === 'string') {
-          // Use regex to match the questions in the string
-          const questionsRegex = /\d+\.\s.*?(?=\n|$)/g;
+          // Enhanced regex to match questions in various formats
+          const questionsRegex = /\d+\.\s.*?(?=\n\d+\.\s|\n\n|$)/g;
           const matchedQuestions = fetchedQuestions.match(questionsRegex);
   
           console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
