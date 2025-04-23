@@ -159,7 +159,7 @@ export default function Login() {
                     </button>
                 </form>
                 
-                <a href="#" className="text-pink-400 text-sm mt-4 block">Forgot Password?</a>
+                <a href="/forgot-password" className="text-pink-400 text-sm mt-4 block">Forgot Password?</a>
                 
                 <div className="text-white text-sm mt-4">
                     Don't have an account? 

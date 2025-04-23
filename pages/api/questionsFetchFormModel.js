@@ -6,7 +6,7 @@
 //     const headers = {
 //       "Content-Type": "application/json"
 //     };
-//     const data = {
+//     const payload  = {
 //       model: "gemma:2b",
 //       prompt: `give mi 15 question to ${jobrole} this job role ${level} level`,
 //       stream: false
@@ -16,7 +16,7 @@
 //       const response = await fetch(url, {
 //         method: "POST",
 //         headers: headers,
-//         body: JSON.stringify(data),
+//         body: JSON.stringify(payload ),
 //       });
   
 //       if (response.ok) {
@@ -39,7 +39,7 @@
 //     "Content-Type": "application/json",
 //   };
 
-//   const data = {
+//   const payload  = {
 //     model: "gemma:2b",
 //     prompt: `give mi 15 question to ${jobrole} this job role for ${level} level`,
 //     stream: false,
@@ -49,7 +49,7 @@
 //     const response = await fetch(url, {
 //       method: "POST",
 //       headers: headers,
-//       body: JSON.stringify(data),
+//       body: JSON.stringify(payload ),
 //     });
 
 //     if (response.ok) {
@@ -114,7 +114,7 @@ export const getApiResponse = async (jobRole, level) => {
   const headers = {
     "Content-Type": "application/json",
   };
-  const data = {
+  const payload  = {
     model: "llama3:latest",
     prompt: `Give me 10 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
 
@@ -125,7 +125,7 @@ export const getApiResponse = async (jobRole, level) => {
     const response = await fetch(url, {
       method: "POST",
       headers: headers,
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload ),
     });
 
     if (response.ok) {
@@ -140,3 +140,82 @@ export const getApiResponse = async (jobRole, level) => {
     return null;
   }
 };
+
+
+
+// export const config = {
+//   runtime: 'nodejs',
+//   maxDuration: 300,
+// };
+
+// export default async function handler(req, res) {
+//   if (req.method !== 'POST') {
+//     return res.status(405).json({ error: 'Method Not Allowed' });
+//   }
+
+//   const { jobRole, level } = req.body;
+
+//   if (!jobRole || !level) {
+//     return res.status(400).json({ error: 'Job role and level are required.' });
+//   }
+
+//   try {
+//     const questions = await getApiResponse(jobRole, level);
+
+//     if (questions) {
+//       return res.status(200).json({
+//         message: 'Job role submitted. Questions fetched successfully.',
+//         questions,
+//       });
+//     } else {
+//       return res.status(500).json({ error: 'No questions fetched from Claude API.' });
+//     }
+//   } catch (error) {
+//     console.error('Error during processing:', error);
+//     return res.status(500).json({ error: 'Error during background processing.' });
+//   }
+// }
+
+// async function getApiResponse(jobRole, level) {
+//   const url = 'https://api.anthropic.com/v1/messages';
+
+//   const headers = {
+//     'Content-Type': 'application/json',
+//     'x-api-key': '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',
+//     'anthropic-version': '2023-06-01',
+//   };
+
+//   const prompt = `Give me 10 interview questions for the ${jobRole} role at ${level} level.`;
+
+//   const payload = {
+//     model: "claude-3-7-sonnet-20250219", // You can change to 'claude-3-sonnet-20240229' for a lighter model
+//     max_tokens: 1000,
+//     temperature: 0.7,
+//     messages: [
+//       {
+//         role: "user",
+//         content: prompt,
+//       },
+//     ],
+//   };
+
+//   try {
+//     const response = await fetch(url, {
+//       method: 'POST',
+//       headers,
+//       body: JSON.stringify(payload ),
+//     });
+
+//     const responseData = await response.json();
+
+//     if (response.ok && responseData?.content?.[0]?.text) {
+//       return responseData.content[0].text;
+//     } else {
+//       console.error('Claude API error:', responseData);
+//       return null;
+//     }
+//   } catch (error) {
+//     console.error('Error calling Claude API:', error);
+//     return null;
+//   }
+// }
