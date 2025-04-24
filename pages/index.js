@@ -1744,40 +1744,88 @@ export default function Home({ Logout, user }) {
         style={{ backgroundImage: "url('/bg.gif')" }}
       >
         {/* Navigation Bar */}
-        <nav className="flex justify-between items-center mb-20 py-4 px-6 bg-black bg-opacity-50 w-full">
-          <div className="text-white text-lg font-bold">Shakkti AI</div>
-          <ul className="flex space-x-6 text-sm items-center">
-            <li className="hover:text-purple-400 cursor-pointer">Home</li>
+        <nav className="flex justify-between items-center mb-20 py-4 px-6 backdrop-blur-md bg-black/40 w-full rounded-xl shadow-lg">
+          <div className="flex items-center gap-2">
+            <img src="/Logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <div className="text-white text-xl font-bold">Shakkti<span className="text-pink-500">AI</span></div>
+          </div>
+          
+          <ul className="hidden md:flex space-x-8 text-sm items-center">
+            <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">Home</li>
+            
+            <Link href={'/progress'}>
+              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
+                <span className="relative inline-flex">
+                  Progress
+                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
+                </span>
+              </li>
+            </Link>
+            
             <Link href={'/oldreport'}>
-              <li className="relative hover:text-purple-400 cursor-pointer" onClick={handleReportClick}>
+              <li className="relative hover:text-pink-400 cursor-pointer transition-colors font-medium" onClick={handleReportClick}>
                 Reports
                 {notification && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
                 )}
               </li>
             </Link>
-            <div className="relative">
-              {user?.value ? (
-                <div className="relative">
-                  <MdAccountCircle className="text-2xl md:text-3xl mx-2 cursor-pointer" onClick={toggleDropdown} />
-                  {dropdown && (
-                    <div className="absolute right-0 shadow-xl top-10 rounded-md w-40 border border-gray-300 bg-white text-black">
-                      <ul>
-                        <Link href={'/profile'}>
-                          <li className="hover:text-blue-700 text-sm font-bold p-3 cursor-pointer border-b border-gray-300 hover:bg-gray-100">Profile</li>
-                        </Link>
-                        <li onClick={Logout} className="hover:text-red-700 text-sm font-bold p-3 cursor-pointer border-b border-gray-300 hover:bg-gray-100">Logout</li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link href="/login">
-                  <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">Login</button>
-                </Link>
-              )}
-            </div>
           </ul>
+          
+          <div className="flex items-center gap-4">
+            {user?.value ? (
+              <div className="relative">
+                <div className="flex items-center gap-2 cursor-pointer group" onClick={toggleDropdown}>
+                  <MdAccountCircle className="text-2xl md:text-3xl text-white group-hover:text-pink-400 transition-colors" />
+                  <span className="hidden md:block text-sm font-medium text-white group-hover:text-pink-400 transition-colors">
+                    {firstName || 'Account'}
+                  </span>
+                </div>
+                
+                {dropdown && (
+                  <div className="absolute right-0 shadow-xl top-12 rounded-lg w-48 border border-gray-200 bg-white text-black overflow-hidden z-50">
+                    <ul>
+                      <Link href={'/profile'}>
+                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          Profile
+                        </li>
+                      </Link>
+                      <Link href={'/progress'}>
+                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                          </svg>
+                          My Progress
+                        </li>
+                      </Link>
+                      <li onClick={Logout} className="hover:text-red-700 text-sm font-medium p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 00-1 1v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 15.586V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        Logout
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login">
+                <button className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl font-medium">
+                  Login
+                </button>
+              </Link>
+            )}
+            
+            {/* Mobile menu button */}
+            <button className="md:hidden text-white hover:text-pink-400 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            </button>
+          </div>
         </nav>
 
         {/* Main Content */}
@@ -1794,34 +1842,99 @@ export default function Home({ Logout, user }) {
           )}
 
           {/* Hero Section */}
-          <div className="relative  mb-10 flex flex-col md:flex-row items-center justify-center text-white ">
-            {/* Increase the image size */}
-            <img src="/mock.png" alt="Robot" className="w-96 lg:-ml-[10rem] md:w-[50rem] rounded-lg" />
-
-            <div className="text-center md:text-left max-w-2xl">
-              {/* Increase font size for text */}
-              <h1 className="text-3xl md:text-4xl font-semibold leading-snug">
-                Get Interview Ready With Expert Feedback <br />
-                & Personalized Practice With <span className="text-pink-500">MockMingle</span>
-              </h1>
-              <div className="mt-6 flex flex-col md:flex-row gap-4 justify-center">
-                <Link href={'/role'}>
-                  <button className="bg-pink-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-pink-600">
-                    GET STARTED
-                  </button>
-                </Link>
-
+          <div className="relative mb-10 flex flex-col md:flex-row items-center justify-center text-white max-w-7xl mx-auto">
+            <div className="text-center md:text-left max-w-2xl md:mr-32 order-2 md:order-1 z-10">
+              <div className="flex flex-col gap-3">
+                <span className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium mb-2 w-fit animate-pulse">
+                  New: Progress Tracking & Analytics
+                </span>
+                
+                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                  Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-600">Interview Skills</span>
+                  <br />
+                  With AI-Powered Feedback
+                </h1>
+                
+                <p className="text-gray-300 text-lg mt-2">
+                  Practice with our AI interviewer, get instant feedback, and track your progress over time with detailed analytics.
+                </p>
+                
+                <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                  <Link href={'/role'}>
+                    <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
+                      START PRACTICING
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </Link>
+                  
+                  <Link href={'/progress'}>
+                    <button className="border-2 border-white hover:border-pink-400 text-white py-3 px-8 rounded-full text-lg font-semibold hover:text-pink-400 transition duration-300 flex items-center gap-2 group">
+                      VIEW PROGRESS
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            <div className="order-1 md:order-2 mb-8 md:mb-0">
+              <div className="relative">
+                <img 
+                  src="/mock.png" 
+                  alt="AI Interview Assistant" 
+                  className="relative w-full max-w-md md:max-w-xl rounded-lg" 
+                />
               </div>
             </div>
           </div>
+          
+
 
         </div>
       </div>
 
-      <div className=" text-gray-900 p-8 min-h-screen bg-cover" style={{ backgroundImage: "url('/whitebg.jpg')" }}>
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Are You Interview-Ready? Test Yourself with <span className="text-indigo-600">MockMingle</span>
-        </h1>
+      <div className="text-gray-900 p-8 py-20 min-h-screen bg-cover" style={{ backgroundImage: "url('/whitebg.jpg')" }}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-center mb-12">
+            Are You Interview-Ready? Test Yourself with <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Shakkti AI</span>
+          </h1>
+          
+          {/* New Feature Section */}
+          <div className="mb-24 bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="md:w-1/2">
+                <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  NEW FEATURE
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Track Your Interview Progress</h2>
+                <p className="text-gray-600 mb-6">
+                  Our new progress tracking system helps you visualize your improvement over time. See detailed charts of your performance across different skills and compare interview results to identify areas of growth.
+                </p>
+                <ul className="space-y-3 mb-6">
+                  {['Skill-specific analytics', 'Performance comparison', 'Growth visualization', 'Interview history'].map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/progress">
+                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition duration-300 shadow-md">
+                    View My Progress
+                  </button>
+                </Link>
+              </div>
+              <div className="md:w-1/2">
+                <img src="/analytics.svg" alt="Progress Analytics" className="w-full rounded-lg shadow-lg" />
+              </div>
+            </div>
+          </div>
 
 
         <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
@@ -2012,25 +2125,19 @@ export default function Home({ Logout, user }) {
         </div>
 
 
+        </div>
       </div>
-      <div className=" relative bg-blue-950 grid grid-cols-1 lg:grid-cols-2">
-        <div className=" ">
+      <div className="relative bg-blue-950 grid grid-cols-1 lg:grid-cols-2">
+        <div className="">
           <img src="/footermock.png" className="" />
         </div>
         <div className="text-center mt-5">
           <h2 className="text-gray-300 text-2xl">Contact Us</h2>
           <h2 className="text-gray-300 text-3xl mt-2 font-bold">info@shakktii.in</h2>
           <div>
-
           </div>
         </div>
       </div>
-
-
-
-
-
-
     </>
   );
 }

@@ -60,14 +60,63 @@ export default function Role() {
   
       console.log('Fetched Questions:', responseData.questions);  // Debug: Log fetched questions
   
-      const fetchedQuestions = responseData.questions;
+      let fetchedQuestions = responseData.questions;
   
       if (fetchedQuestions) {
         // Check if the fetchedQuestions is a string
         if (typeof fetchedQuestions === 'string') {
-          // Enhanced regex to match questions in various formats
-          const questionsRegex = /\d+\.\s.*?(?=\n\d+\.\s|\n\n|$)/g;
-          const matchedQuestions = fetchedQuestions.match(questionsRegex);
+          console.log('Raw response:', fetchedQuestions);
+          
+          // Pattern specifically designed for the example format
+          // Handle format like "**1. What is the difference between...**"
+          const matches = [];
+          
+          // Create an array to store all possible regex patterns
+          const patterns = [
+            // Bold number with asterisks pattern
+            { regex: /\*\*\d+\.\s+([^*]+?)\*\*/g, type: 'Bold with ** markers' },
+            
+            // Regular numbered list pattern with period
+            { regex: /^\s*\d+\.\s+([^(\n]+)/gm, type: 'Regular numbered list' },
+            
+            // Numbered list pattern with potential markdown
+            { regex: /\d+\.\s+([^\n(]+)/g, type: 'Simple number followed by text' }
+          ];
+          
+          // Try each pattern until we find matches
+          // Convert to string once outside the loop
+          const questionText = fetchedQuestions.toString();
+          
+          for (const pattern of patterns) {
+            let match;
+            pattern.regex.lastIndex = 0; // Reset regex for each use
+            
+            while ((match = pattern.regex.exec(questionText)) !== null) {
+              if (match[1]) {
+                const question = match[1].trim();
+                matches.push(question);
+                console.log(`Found ${pattern.type} question:`, question);
+              }
+            }
+            
+            // If we found any matches, stop trying patterns
+            if (matches.length > 0) {
+              console.log(`Found ${matches.length} questions using pattern: ${pattern.type}`);
+              break;
+            }
+          }
+          
+          // Remove extra formatting from the questions
+          const cleanedMatches = matches.map(q => {
+            // Remove any remaining markdown or unnecessary characters
+            return q.replace(/\*\*/g, '').trim();
+          });
+          
+          const matchedQuestions = cleanedMatches.length > 0 ? cleanedMatches : null;
+          console.log('Extracted questions:', cleanedMatches);
+          
+          // For debugging
+          console.log('Total questions found:', cleanedMatches.length);
   
           console.log('Matched Questions:', matchedQuestions); // Debug: Log matched questions
   

@@ -110,7 +110,7 @@ export default async function handler(req, res) {
 
 // The API function to fetch questions
 export const getApiResponse = async (jobRole, level) => {
-  const url = "http://139.59.42.156:11434/api/generate";
+  const url = "http://139.59.75.143:11434/api/generate";
   const headers = {
     "Content-Type": "application/json",
   };

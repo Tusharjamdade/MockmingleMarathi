@@ -20,8 +20,8 @@ export async function handler(req, res) {
         return res.status(404).json({ message: 'Job role not found' });
       }
 
+      // Using the original array order instead of sorting by creation date
       const questions = jobRole.questions
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map(q => ({
           questionText: q.questionText,
           answer: q.answer || '', // Provide an empty string if the answer is null

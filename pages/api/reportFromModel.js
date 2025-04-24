@@ -214,7 +214,7 @@ export default async function handler(req, res) {
 
 // The API function to fetch questions
 export const getApiResponseReport = async (reportData) => {
-      const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
+      const url = "http://139.59.75.143:11434/api/generate";  // Consider passing URL dynamically
       const headers = {
         "Content-Type": "application/json"
       };

@@ -178,7 +178,8 @@ const QuestionForm = () => {
         if (Array.isArray(data) && data.length > 0) {
           console.log(`Successfully fetched ${data.length} questions`);
           setQuestions(data);
-          // Reset current index when loading new questions
+          // Always start with the first question (index 0)
+          console.log('Starting with question index: 0');
           setCurrentQuestionIndex(0);
         } else {
           console.error('No questions were returned from the API');
