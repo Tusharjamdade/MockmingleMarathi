@@ -469,11 +469,26 @@ After fixing, please refresh the page.`);
     
     console.log('🗣️ SPEAKING FEEDBACK:', cleanFeedback);
     
-    // Speak the feedback with the female voice
-    speakResponse(cleanFeedback, () => {
-      // After speaking is complete, move to the next question
+    // CRITICAL: Set a failsafe timeout to move to next question
+    // This ensures we'll move on even if speech fails
+    const failsafeTimeout = setTimeout(() => {
+      console.log('⚠️ FAILSAFE: Moving to next question after speech timeout');
       handleNext();
-    });
+    }, 5000);
+    
+    // Speak the feedback with the female voice
+    try {
+      speakResponse(cleanFeedback, () => {
+        // Clear the failsafe when speech completes normally
+        clearTimeout(failsafeTimeout);
+        // After speaking is complete, move to the next question
+        handleNext();
+      });
+    } catch (error) {
+      console.error('Error in speakResponse:', error);
+      clearTimeout(failsafeTimeout);
+      handleNext();
+    }
   };
   
   const submitAnswer = async (questionId, answer) => {
@@ -528,6 +543,7 @@ After fixing, please refresh the page.`);
 
       // Process the recorded answer
       if (recordedText.trim()) {
+        console.log('🔄 PROCESSING ANSWER WITH TEXT:', recordedText.substring(0, 30) + '...');
         // Store the answer
         const currentAnswers = [...answers];
         currentAnswers[currentQuestionIndex] = recordedText;
@@ -546,22 +562,50 @@ After fixing, please refresh the page.`);
         // Mark answer as submitted
         setIsAnswerSubmitted(true);
         
-        // Speak feedback and move to next question
-        speakFeedbackAndMoveOn();
-      } else {
-        // Handle case where mic was stopped without speaking
-        const noAnswerText = "No answer provided - user stopped mic";
-        submitAnswer(questions[currentQuestionIndex]._id, noAnswerText);
+        // IMPORTANT: Set loading to false to ensure UI updates
         setLoading(false);
         
-        // Move to next question
+        // SUPER IMPORTANT: DIRECT QUESTION PROGRESSION
+        // This is the safest approach - just move to the next question directly
+        console.log('⏭️ DIRECTLY MOVING to next question');
+        
+        // Check if this is the last question
         if (currentQuestionIndex >= questions.length - 1) {
-          console.log('This was the last question - showing completion modal');
+          console.log('🏁 LAST QUESTION - showing completion modal');
           setIsModalVisible(true);
         } else {
+          // Simply increment to next question
+          console.log(`⏭️ Moving from question ${currentQuestionIndex + 1} to ${currentQuestionIndex + 2}`);
           setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-          setRecordedText('');
-          setIsAnswerSubmitted(false);
+          setTimeout(() => {
+            // Reset state for next question
+            setRecordedText('');
+            setIsAnswerSubmitted(false);
+          }, 100);
+        }
+      } else {
+        console.log('🔄 PROCESSING EMPTY ANSWER');
+        // Handle case where mic was stopped without speaking
+        const noAnswerText = "No answer provided - user stopped mic";
+        if (questions[currentQuestionIndex] && questions[currentQuestionIndex]._id) {
+          submitAnswer(questions[currentQuestionIndex]._id, noAnswerText);
+        }
+        setLoading(false);
+        
+        // DIRECT QUESTION PROGRESSION instead of using handleNext
+        // Check if this is the last question
+        if (currentQuestionIndex >= questions.length - 1) {
+          console.log('🏁 LAST QUESTION (no answer) - showing completion modal');
+          setIsModalVisible(true);
+        } else {
+          // Simply increment to next question
+          console.log(`⏭️ Moving from question ${currentQuestionIndex + 1} to ${currentQuestionIndex + 2} (no answer)`);
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+          setTimeout(() => {
+            // Reset state for next question
+            setRecordedText('');
+            setIsAnswerSubmitted(false);
+          }, 100);
         }
       }
     } else {
@@ -574,7 +618,7 @@ After fixing, please refresh the page.`);
       // CRITICAL: Clear the question timer when mic is activated
       // This prevents "Time's up" from interrupting while speaking
       if (questionTimerRef.current) {
-        console.log('🎤 STOPPING TIMER when microphone activated');
+        console.log('🎺 STOPPING TIMER when microphone activated');
         clearTimeout(questionTimerRef.current);
         questionTimerRef.current = null;
       }
@@ -846,50 +890,6 @@ After fixing, please refresh the page.`);
   
   // Initialize speech manager
   useEffect(() => {
-    speechManager.init();
-  }, []);
-  
-  // Simplified speak functions that use the manager
-  const speakResponse = (text, onComplete) => {
-    // Use the speech manager
-    if (!text) return;
-    
-    // Clean the text of any special characters including programming symbols
-    const cleanText = text.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
-    
-    // Create the utterance directly for better voice control
-    try {
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      // Create utterance
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'en-US';
-      utterance.volume = 1.0;
-      
-      // Set female voice if available
-      const femaleVoice = getFemaleVoice();
-      if (femaleVoice) utterance.voice = femaleVoice;
-      
-      // Set completion callback
-      if (onComplete) {
-        utterance.onend = onComplete;
-      }
-      
-      // Speak
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error('Error speaking response:', e);
-      if (onComplete) onComplete();
-    }
-  };
-  
-  const speakQuestionText = (text, onComplete) => {
-    speechManager.speakQuestion(text, onComplete);
-  };
-
-  // ======== DIRECT TIMER SYSTEM ========
-  // This is a completely new timer implementation with no dependencies on other code
   // Global question timer
   const questionTimerRef = useRef(null);
 
@@ -1427,6 +1427,11 @@ After fixing, please refresh the page.`);
 
   // SIMPLIFIED version - focused only on moving to next question
   const handleNext = () => {
+    // Clear the progression flag if it exists
+    if (window.questionProgressionStarted) {
+      window.questionProgressionStarted = false;
+    }
+    
     console.log('⏭️ HANDLING NEXT QUESTION');
     
     // Reset ALL state - simple and direct
@@ -1460,21 +1465,28 @@ After fixing, please refresh the page.`);
     
     // Clean up state
     setRecordedText('');
+    setLoading(false); // Ensure loading state is reset
     
     // IMPORTANT: Mark answer as submitted to prevent duplicate actions
     setIsAnswerSubmitted(true);
     
-    // Check if this is the last question
-    if (currentQuestionIndex >= questions.length - 1) {
-      setIsModalVisible(true);
-      speakResponse("Your interview has ended. Thank you for your participation.");
-      setInterviewComplete(true);
-      localStorage.removeItem("_id");
-      updateIsActive();
-    } else {
-      // Simply move to next question
-      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-    }
+    // Use setTimeout to ensure state updates have time to process
+    // This is critical for ensuring the UI updates properly
+    setTimeout(() => {
+      // Check if this is the last question
+      if (currentQuestionIndex >= questions.length - 1) {
+        console.log('🏁 REACHED LAST QUESTION - showing completion modal');
+        setIsModalVisible(true);
+        speakResponse("Your interview has ended. Thank you for your participation.");
+        setInterviewComplete(true);
+        localStorage.removeItem("_id");
+        updateIsActive();
+      } else {
+        // Simply move to next question
+        console.log(`🔄 MOVING FROM QUESTION ${currentQuestionIndex + 1} TO ${currentQuestionIndex + 2}`);
+        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      }
+    }, 100);
   };
 
 
@@ -1922,7 +1934,7 @@ After fixing, please refresh the page.`);
         </div>
       )}
     </div>
-  );
+  )})
 };
 
 export default QuestionForm;
