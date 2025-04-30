@@ -218,62 +218,98 @@ const QuestionForm = () => {
       recognitionInstance.lang = 'en-US';
       recognitionInstance.continuous = true; // Keep listening continuously
       recognitionInstance.interimResults = true; // Get partial results
+      // Prevent disconnection on short pauses
+      recognitionInstance.maxAlternatives = 1;
+      
+      // Current accumulated transcript - stored outside React state for reliability
+      let currentTranscript = '';
       
       // Reset state when recognition starts
       recognitionInstance.onstart = () => {
         console.log('Speech recognition started');
-        setRecordedText(''); // Reset recorded text
+        if (!isAnswerSubmitted) {
+          // Only reset text when actually starting a new recording
+          setRecordedText('');
+          currentTranscript = '';
+        }
         setIsListening(true);
       };
       
       // Handle speech results
       recognitionInstance.onresult = (event) => {
         if (event.results && event.results.length > 0) {
-          const transcript = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
+          // Get the latest transcript - accumulate it instead of replacing
+          const latestTranscript = event.results[event.results.length - 1][0].transcript;
+          
+          // Append latest transcript to current transcript if it's a new segment
+          // This is important to prevent repetition while maintaining continuous recording
+          if (event.results[event.results.length - 1].isFinal) {
+            currentTranscript = currentTranscript + ' ' + latestTranscript;
+          }
+          
+          // Create full transcript (current accumulated + latest interim result)
+          const fullTranscript = currentTranscript + ' ' + 
+              (event.results[event.results.length - 1].isFinal ? '' : latestTranscript);
           
           // Clean the transcript
-          const cleanText = transcript
+          const cleanText = fullTranscript
             .replace(/\s+/g, ' ') // Normalize spaces
             .trim();
           
+          // Update UI with the accumulating transcript
           setRecordedText(cleanText);
         }
       };
       
-      // Handle end of recognition
+      // Handle end of recognition - CRUCIAL IMPROVEMENT: Auto-restart for continuous speech
       recognitionInstance.onend = () => {
         console.log('Speech recognition service disconnected');
-        setIsListening(false);
         
-        // Reset state for next question
-        if (!isAnswerSubmitted) {
-          // If answer wasn't submitted, reset recognition
+        // If user is still supposed to be listening, automatically restart recognition
+        // This is the key fix to prevent microphone cutoff during speaking
+        if (isListening && !isAnswerSubmitted) {
+          console.log('Auto-restarting speech recognition to maintain continuous listening');
+          try {
+            // Preserve current transcript during auto-restart
+            // Small delay to ensure clean restart
+            setTimeout(() => {
+              try {
+                recognitionInstance.start();
+              } catch (e) {
+                console.error('Failed to auto-restart recognition:', e);
+                setIsListening(false);
+              }
+            }, 100);
+          } catch (e) {
+            console.error('Error in recognition auto-restart:', e);
+            setIsListening(false);
+          }
+        } else {
+          // Normal end of listening session
           setIsListening(false);
-          setRecordedText('');
         }
       };
       
       // Handle errors
       recognitionInstance.onerror = (event) => {
         console.error('Speech recognition error:', event);
-        setIsListening(false);
         
-        // Reset recognition on error
-        if (event.error === 'no-speech') {
-          console.log('No speech detected, waiting for speech...');
-          return;
+        // Only stop listening on critical errors, not for 'no-speech'
+        if (event.error !== 'no-speech') {
+          setIsListening(false);
         }
         
-        // Try to restart recognition after a short delay
-        setTimeout(() => {
-          try {
-            recognitionInstance.start();
-          } catch (e) {
-            console.error('Failed to restart recognition:', e);
-          }
-        }, 500);
+        // Auto-restart recognition after errors, maintaining text continuity
+        if (isListening && !isAnswerSubmitted) {
+          setTimeout(() => {
+            try {
+              recognitionInstance.start();
+            } catch (e) {
+              console.error('Failed to restart recognition after error:', e);
+              setIsListening(false);
+            }
+          }, 300);
+        }
       };
       
       return recognitionInstance;
@@ -374,6 +410,9 @@ const QuestionForm = () => {
       setIsListening(false);
       setLoading(true);
       
+      // Important: Set a flag to prevent auto-restart
+      window.stopRecognitionRequested = true;
+      
       try {
         recognition.stop();
       } catch (e) {
@@ -421,6 +460,9 @@ const QuestionForm = () => {
     } else {
       // START RECORDING
       console.log('Starting speech recognition');
+      
+      // Clear the flag to allow auto-restart
+      window.stopRecognitionRequested = false;
       
       // CRITICAL: Clear the question timer when mic is activated
       // This prevents "Time's up" from interrupting while speaking
@@ -1604,7 +1646,7 @@ const QuestionForm = () => {
             )}
           </div>
 
-          <div className="hidden recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
+          <div className=" recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
             <h3 className="text-lg font-medium text-gray-300 mb-2">Your Answer:</h3>
             <p className=" text-white">
               {recordedText && recordedText !== 'Listening...' ? (
