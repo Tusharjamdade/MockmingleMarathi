@@ -52,6 +52,8 @@ const QuestionForm = () => {
   // Use a ref instead of state to avoid re-renders
   const isSpeakingRef = useRef(false);
   const questionSpokenRef = useRef(false);
+  // Add questionTimerRef at the top level - IMPORTANT for React hooks rules
+  const questionTimerRef = useRef(null);
 
   const [collageName, setCollageName] = useState('');
 
@@ -890,8 +892,7 @@ After fixing, please refresh the page.`);
   
   // Initialize speech manager
   useEffect(() => {
-  // Global question timer
-  const questionTimerRef = useRef(null);
+  // Global question timer - using ref defined at component top level
 
   // EXTREMELY SIMPLIFIED TIMER SYSTEM
   // This system only cares about:
