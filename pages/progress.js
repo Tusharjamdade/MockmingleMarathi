@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Line, Radar, Bar } from 'react-chartjs-2';
+import InterviewProgress from '../components/InterviewProgress';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,6 +37,10 @@ export default function Progress() {
   const [sortedReports, setSortedReports] = useState([]);
   const [comparisonDates, setComparisonDates] = useState({ first: null, second: null });
   const [showComparison, setShowComparison] = useState(false);
+  const [interviewStats, setInterviewStats] = useState({
+    no_of_interviews: 1,
+    no_of_interviews_completed: 0,
+  });
   const router = useRouter();
 
   const getSelectedReport = () => {
@@ -53,10 +58,53 @@ export default function Progress() {
       router.push('/login');
       return;
     }
-    const email = JSON.parse(user).email;
+    const userData = JSON.parse(user);
+    const email = userData.email;
     setUserEmail(email);
+    
+    // Set interview stats from user data
+    setInterviewStats({
+      no_of_interviews: userData.no_of_interviews || 1,
+      no_of_interviews_completed: userData.no_of_interviews_completed || 0,
+    });
+    
     fetchReports(email);
+    fetchUserData(email);
   }, []);
+  
+  // Fetch the latest user data to get up-to-date interview stats
+  const fetchUserData = async (email) => {
+    if (!email) return;
+    
+    try {
+      const response = await fetch(`/api/editStudentProfile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          updatedData: {}
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          // Update local storage with latest user data
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // Update interview stats
+          setInterviewStats({
+            no_of_interviews: data.user.no_of_interviews || 1,
+            no_of_interviews_completed: data.user.no_of_interviews_completed || 0,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const fetchReports = async (email) => {
     if (!email) return;
@@ -65,7 +113,32 @@ export default function Progress() {
       const response = await fetch(`/api/getAllReports?email=${encodeURIComponent(email)}`);
       const data = await response.json();
       if (Array.isArray(data)) {
+        // Generate some mock data with multiple job roles if needed for development
+        // Uncomment this code to add mock data for testing multiple roles
+        /*
+        const mockRoles = ['Software Engineer', 'Data Scientist', 'Product Manager', 'UX Designer'];
+        const mockData = [...data];
+        // Add more mock data with different roles if there's only one role
+        if (new Set(data.map(r => r.role)).size <= 1) {
+          for (let i = 0; i < 3; i++) {
+            const roleToCopy = mockRoles[i % mockRoles.length];
+            data.forEach(item => {
+              mockData.push({
+                ...item,
+                role: roleToCopy,
+                date: new Date(item.date).toISOString()
+              });
+            });
+          }
+        }
+        setReports(mockData);
+        */
+        
+        // Regular code path - use this for production
         setReports(data);
+        console.log('Fetched reports:', data); // Debug log
+        console.log('Unique roles found:', [...new Set(data.map(r => r.role))]); // Debug roles
+        
         // Sort reports by date and update sortedReports
         const sorted = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
         setSortedReports(sorted);
@@ -145,23 +218,43 @@ export default function Progress() {
     };
 
     // Prepare role-based data
-    const roles = [...new Set(reports.map(r => r.role))];
+    // Handle job roles explicitly - extract both role and jobRole fields
+    const roles = [...new Set(reports.map(r => r.role || r.jobRole || 'Unknown'))];
+    console.log('Roles for chart:', roles); // Debug roles
+    
+    // Ensure we have role names (handle empty strings or undefined)
+    const cleanedRoles = roles.map(role => role || 'Unknown Role').filter(Boolean);
+    
+    // Generate a wider range of colors for potentially many roles
+    const generateColors = (count) => {
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        const hue = (i * 137.5) % 360; // Golden ratio to distribute colors evenly
+        colors.push(`hsla(${hue}, 70%, 60%, 0.6)`);
+      }
+      return colors;
+    };
+    
     const roleData = {
-      labels: roles,
+      labels: cleanedRoles,
       datasets: [{
         label: 'Average Score by Role',
-        data: roles.map(role => {
-          const roleReports = reports.filter(r => r.role === role);
-          const avgScore = roleReports.reduce((acc, curr) => acc + (curr.scores?.overall || 0), 0) / roleReports.length;
+        data: cleanedRoles.map(role => {
+          // Match against either role or jobRole fields
+          const roleReports = reports.filter(r => 
+            (r.role === role) || 
+            (r.jobRole === role) || 
+            (role === 'Unknown Role' && (!r.role && !r.jobRole))
+          );
+          
+          if (roleReports.length === 0) return 0;
+          
+          // Calculate average score for this role
+          const totalScore = roleReports.reduce((acc, curr) => acc + (curr.scores?.overall || 0), 0);
+          const avgScore = totalScore / roleReports.length;
           return Math.round(avgScore); // Keep as score out of 50
         }),
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(255, 206, 86, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
-          'rgba(153, 102, 255, 0.5)'
-        ]
+        backgroundColor: generateColors(cleanedRoles.length)
       }]
     };
 
@@ -317,7 +410,8 @@ export default function Progress() {
               </div>
             </div>
           </div>
-          <div className="aspect-w-2 aspect-h-1 max-w-2xl mx-auto">
+          <div className="aspect-w-3 aspect-h-2 max-w-2xl mx-auto">
+
             <Radar
               data={chartData.radarData}
               options={{
@@ -379,6 +473,7 @@ export default function Progress() {
               {reports.length} total interviews
             </div>
           </div>
+          <div className="h-80"> {/* Added fixed height container */}
           <Bar
             data={chartData.roleData}
             options={{
@@ -396,15 +491,34 @@ export default function Progress() {
                       return value + '/50';
                     }
                   }
+                },
+                x: {
+                  ticks: {
+                    autoSkip: false,
+                    maxRotation: 45,
+                    minRotation: 45
+                  }
                 }
               },
               plugins: {
                 legend: {
                   display: false
+                },
+                tooltip: {
+                  callbacks: {
+                    title: function(context) {
+                      return `Role: ${context[0].label}`;
+                    },
+                    label: function(context) {
+                      return `Average Score: ${context.raw}/50`;
+                    }
+                  }
                 }
-              }
+              },
+              maintainAspectRatio: false
             }}
           />
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 transition-all duration-300 hover:shadow-xl">
@@ -566,7 +680,18 @@ export default function Progress() {
             <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg transition-all duration-300 hover:shadow-md">
               <div className="text-lg font-semibold text-gray-700">Best Performance</div>
               <div className="text-3xl text-orange-600 font-bold mt-2">
-                {reports.length > 0 ? Math.max(...reports.map(r => r.scores?.overall || 0)) : 0}/50
+                {reports.length > 0 ? (() => {
+                  // Extract all scores properly and find the maximum
+                  const scores = reports.map(r => {
+                    // Make sure we have a valid score
+                    const score = r.scores?.overall;
+                    return typeof score === 'number' && !isNaN(score) ? score : 0;
+                  });
+                  
+                  console.log('All scores for max calculation:', scores); // Debug all scores
+                  const maxScore = Math.max(...scores);
+                  return maxScore;
+                })() : 0}/50
               </div>
               <div className="text-sm text-gray-500 mt-1">Highest Score</div>
             </div>

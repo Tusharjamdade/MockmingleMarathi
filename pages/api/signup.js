@@ -1,22 +1,54 @@
-// // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import User from "@/models/User"
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import User from "../../models/User" // Fixed import path
 import connectDb from "@/middleware/dbConnect"
+import mongoose from "mongoose" // Added for direct connection check
 var CryptoJS = require("crypto-js");
 
 const handler = async (req, res) => {
-    if (req.method == 'POST') {
-        const {profileImg,fullName,email,mobileNo,address,DOB,education,collageName} = req.body
-        let u = new User({profileImg,fullName, email,mobileNo,address,DOB,education,collageName, password: CryptoJS.AES.encrypt(req.body.password,'secret123').toString()})
-        await u.save()
-            
-        res.status(200).json({ success: "success" })
+    try { vvsdftijsgggggvsuguyejjsjsgs
+        // Ensure database connection
+        if (!mongoose.connections[0].readyState) {
+            console.log('Connecting to MongoDB...');
+            await mongoose.connect(process.env.MONGODB_URI);
         }
-    
-    else {
-        res.status(400).json({ error: "this method is not allowed" })
+        
+        if (req.method == 'POST') {
+            const {profileImg,fullName,email,mobileNo,address,DOB,education,collageName} = req.body
+            
+            // Create new user with interview tracking fields explicitly defined
+            const userData = {
+                profileImg,
+                fullName, 
+                email,
+                mobileNo,
+                address,
+                DOB,
+                education,
+                collageName, 
+                password: CryptoJS.AES.encrypt(req.body.password,'secret123').toString()
+            };
+            
+            // Explicitly add the interview tracking fields
+            userData.no_of_interviews = 1;
+            userData.no_of_interviews_completed = 0;
+            
+            console.log('Creating new user with fields:', Object.keys(userData));
+            
+            let u = new User(userData);
+            await u.save();
+            
+            // Log the saved user (without sensitive info)
+            const savedUser = await User.findOne({ email }).select('-password');
+            console.log('Saved user with fields:', Object.keys(savedUser._doc));
+            
+            res.status(200).json({ success: "success" });
+        } else {
+            res.status(400).json({ error: "This method is not allowed" });
+        }
+    } catch (error) {
+        console.error('Error in signup handler:', error);
+        res.status(500).json({ error: error.message });
     }
-
-
 }
 
 export default connectDb(handler)

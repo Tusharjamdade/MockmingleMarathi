@@ -9,6 +9,7 @@ const QuestionForm = () => {
   const [questions, setQuestions] = useState([]);
   const [email, setEmail] = useState('');
   const [user, setUser] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [recordedText, setRecordedText] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -36,6 +37,8 @@ const QuestionForm = () => {
       const userFromStorage = JSON.parse(localStorage.getItem('user'));
       if (userFromStorage) {
         setCollageName(userFromStorage.collageName || '');
+        setUser(userFromStorage);
+        setUserEmail(userFromStorage.email || '');
       }
     }
   }, []);
@@ -1331,8 +1334,62 @@ const QuestionForm = () => {
     setIsExitModalVisible(false);
   };
 
-  const handleExitConfirmation = () => {
+  // Function to handle when user confirms exiting the interview
+  // This will also count it as a completed interview
+  const handleExitConfirmation = async () => {
     setIsExitModalVisible(false);
+    
+    try {
+      // First, initialize the interview fields if they don't exist
+      const initResponse = await fetch(`${process.env.NEXT_PUBLIC_HOST || ''}/api/initializeInterviewFields`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+        }),
+      });
+
+      if (!initResponse.ok) {
+        console.error('Failed to initialize interview fields');
+      } else {
+        const data = await initResponse.json();
+        console.log('Interview fields initialized:', data.message);
+      }
+
+      // Mark the interview as completed even though user exited early
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST || ''}/api/updateInterviewCount`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          action: 'complete',
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to update interview completion count');
+      } else {
+        const data = await response.json();
+        console.log('Interview marked as completed even though exited early');
+        
+        // Update the user data in localStorage with the updated counts
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = {
+          ...currentUser,
+          no_of_interviews: data.no_of_interviews,
+          no_of_interviews_completed: data.no_of_interviews_completed
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error handling exit confirmation:', error);
+    }
+    
+    // Continue with navigation and updating active status
     router.push('/report');
     updateIsActive();
   };
@@ -1416,6 +1473,64 @@ const QuestionForm = () => {
     } catch (error) {
       console.error('Network or other error:', error);
       alert('Error updating isActive value');
+    }
+  };
+
+  // Function to update the interview completion count when an interview is finished
+  const handleInterviewComplete = async () => {
+    try {
+      // First, initialize the interview fields if they don't exist
+      const initResponse = await fetch(`${process.env.NEXT_PUBLIC_HOST || ''}/api/initializeInterviewFields`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+        }),
+      });
+
+      if (!initResponse.ok) {
+        console.error('Failed to initialize interview fields');
+      } else {
+        const data = await initResponse.json();
+        console.log('Interview fields initialized:', data.message);
+      }
+
+      // Now update the interview completion count
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST || ''}/api/updateInterviewCount`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          action: 'complete',
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to update interview completion count');
+      } else {
+        const data = await response.json();
+        console.log('Interview completion count updated successfully');
+        
+        // Update the user data in localStorage with the updated counts
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = {
+          ...currentUser,
+          no_of_interviews: data.no_of_interviews,
+          no_of_interviews_completed: data.no_of_interviews_completed
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+
+      // Navigate to the report page
+      router.push('/oldreport');
+    } catch (error) {
+      console.error('Error updating interview completion count:', error);
+      // Still navigate to the report page even if there's an error
+      router.push('/oldreport');
     }
   };
 
@@ -1547,7 +1662,7 @@ const QuestionForm = () => {
               <p className="text-gray-300">Thanks for completing your interview. Your responses have been recorded.</p>
             </div>
             <button
-              onClick={handleModalClose}
+              onClick={handleInterviewComplete}
               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 focus:outline-none transform transition-all duration-200 hover:scale-105"
             >
               View Results

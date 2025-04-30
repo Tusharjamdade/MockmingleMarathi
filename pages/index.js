@@ -1631,6 +1631,7 @@ export default function Home({ Logout, user }) {
   const [dropdown, setDropdown] = useState(false);
   const [notification, setNotification] = useState(false); // State to track the notification
   const [firstName, setFirstName] = useState(null); // State to store the first name
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State to control mobile menu
   const router = useRouter(); // Next.js router to navigate to /role
   const recognition = useRef(null); // Reference to the speech recognition instance
   const [isRecognizing, setIsRecognizing] = useState(false); // To track whether recognition is ongoing
@@ -1724,6 +1725,7 @@ export default function Home({ Logout, user }) {
   }, [router, isRecognizing]);
 
   const toggleDropdown = () => setDropdown(prev => !prev);
+  const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
 
   // Function to simulate storing an item in localStorage and triggering the notification
   const handleReportClick = () => {
@@ -1750,6 +1752,7 @@ export default function Home({ Logout, user }) {
             <div className="text-white text-xl font-bold">Shakkti<span className="text-pink-500">AI</span></div>
           </div>
           
+          {/* Desktop Navigation */}
           <ul className="hidden md:flex space-x-8 text-sm items-center">
             <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">Home</li>
             
@@ -1772,12 +1775,13 @@ export default function Home({ Logout, user }) {
             </Link>
           </ul>
           
-          <div className="flex items-center gap-4">
+          {/* Desktop User Section */}
+          <div className="hidden md:flex items-center gap-4">
             {user?.value ? (
               <div className="relative">
                 <div className="flex items-center gap-2 cursor-pointer group" onClick={toggleDropdown}>
                   <MdAccountCircle className="text-2xl md:text-3xl text-white group-hover:text-pink-400 transition-colors" />
-                  <span className="hidden md:block text-sm font-medium text-white group-hover:text-pink-400 transition-colors">
+                  <span className="text-sm font-medium text-white group-hover:text-pink-400 transition-colors">
                     {firstName || 'Account'}
                   </span>
                 </div>
@@ -1818,14 +1822,69 @@ export default function Home({ Logout, user }) {
                 </button>
               </Link>
             )}
-            
-            {/* Mobile menu button */}
-            <button className="md:hidden text-white hover:text-pink-400 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          </div>
+          
+          {/* Mobile Menu Button - Single hamburger icon for mobile */}
+          <button 
+            className="md:hidden text-white focus:outline-none z-20" 
+            onClick={toggleMobileMenu}
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
               </svg>
-            </button>
-          </div>
+            )}
+          </button>
+          
+          {/* Mobile Navigation - Combining all navigation elements for mobile */}
+          {mobileMenuOpen && (
+            <div className="md:hidden fixed inset-0 bg-black bg-opacity-80 z-10 flex flex-col items-center justify-center">
+              <ul className="flex flex-col space-y-6 text-center items-center">
+                <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>Home</li>
+                
+                <Link href={'/progress'}>
+                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
+                    <span className="relative inline-flex">
+                      Progress
+                      <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
+                    </span>
+                  </li>
+                </Link>
+                
+                <Link href={'/oldreport'}>
+                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer relative" onClick={() => { handleReportClick(); toggleMobileMenu(); }}>
+                    Reports
+                    {notification && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
+                    )}
+                  </li>
+                </Link>
+                
+                {user?.value ? (
+                  <>
+                    <Link href={'/profile'}>
+                      <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
+                        Profile
+                      </li>
+                    </Link>
+                    <li className="text-white hover:text-red-400 font-medium text-xl cursor-pointer" onClick={() => { Logout(); toggleMobileMenu(); }}>
+                      Logout
+                    </li>
+                  </>
+                ) : (
+                  <Link href="/login">
+                    <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-2 rounded-full" onClick={toggleMobileMenu}>
+                      Login
+                    </li>
+                  </Link>
+                )}
+              </ul>
+            </div>
+          )}
         </nav>
 
         {/* Main Content */}

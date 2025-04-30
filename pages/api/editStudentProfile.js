@@ -26,10 +26,10 @@ export default async function handler(req, res) {
     }
   } else if (req.method === 'PUT') {
     try {
-      const { email, updatedData } = req.body;
+      const { email, updatedData = {} } = req.body;
 
-      if (!email || !updatedData) {
-        return res.status(400).json({ message: 'Email and updated data are required' });
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
       }
 
       const user = await User.findOne({ email });

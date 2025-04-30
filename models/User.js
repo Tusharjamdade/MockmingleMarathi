@@ -11,7 +11,9 @@ const UserSchema = new mongoose.Schema({
     password: {type:String , required:true },
     profileImg: {type:String },
     resetToken: { type: String },
-    resetTokenExpiry: { type: Date }
+    resetTokenExpiry: { type: Date },
+    no_of_interviews: {type :Number , required:true, default:1 },
+    no_of_interviews_completed: {type :Number , required:true, default:0 },
     
   },{timestamps:true});
 
