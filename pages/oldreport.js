@@ -29,13 +29,17 @@ function Oldreport() {
       return 0;
     }
 
-    const scoreRegex = new RegExp(`${scoreType}:[\s*\(]*\d+[\)\s]*\/\d+`, 'i');
+    const scoreRegex = new RegExp(`${scoreType}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+`, 'i');
     const match = report.reportAnalysis.match(scoreRegex);
 
     if (match) {
       const scoreText = match[0];
-      const numberMatch = scoreText.match(/(\d+)/);
-      return numberMatch ? parseInt(numberMatch[1], 10) : 0;
+      const numberMatch = scoreText.match(/\d+/g);
+      if (numberMatch) {
+        const score = parseInt(numberMatch[0], 10);
+        const total = parseInt(numberMatch[1], 10);
+        return { score, total };
+      }
     }
 
     return 0;
@@ -46,8 +50,12 @@ function Oldreport() {
       return { score: 0, feedback: 'No data available.' };
     }
 
-    const scoreRegex = new RegExp(`${category}:[\s*\(]*\d+[\)\s]*\/\d+`, 'i');
-    const feedbackRegex = new RegExp(`${category}:[\s*\(]*\d+[\)\s]*\/\d+\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i');
+    // Log the report content for debugging
+    console.log('Extracting score for:', category);
+    console.log('Report content:', report.reportAnalysis);
+
+    const scoreRegex = new RegExp(`${category}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+`, 'i');
+    const feedbackRegex = new RegExp(`${category}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+\\s*([^]*?)(?=[A-Z][a-zA-Z ]+:|$)`, 'i');
 
     const scoreMatch = report.reportAnalysis.match(scoreRegex);
     const feedbackMatch = report.reportAnalysis.match(feedbackRegex);
@@ -56,8 +64,8 @@ function Oldreport() {
     if (scoreMatch) {
       // Extract just the number from patterns like "7/10" or "30/50"
       const scoreText = scoreMatch[0];
-      const numberMatch = scoreText.match(/(\d+)/);
-      score = numberMatch ? parseInt(numberMatch[1], 10) : 0;
+      const numberMatch = scoreText.match(/\d+/g);
+      score = numberMatch ? parseInt(numberMatch[0], 10) : 0;
     }
 
     // Extract feedback text
@@ -294,8 +302,8 @@ function Oldreport() {
                         {paragraph.match(/(\d+)\/(10|50)/) ? (
                           (() => {
                             const scoreMatch = paragraph.match(/(\d+)\/(10|50)/);
-                            const scoreValue = scoreMatch ? parseInt(scoreMatch[1]) : 0;
-                            const maxValue = scoreMatch ? parseInt(scoreMatch[2]) : 10;
+                            const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+                            const maxValue = scoreMatch ? parseInt(scoreMatch[2], 10) : 10;
                             const percentage = (scoreValue / maxValue) * 100;
                             
                             return (
@@ -316,8 +324,8 @@ function Oldreport() {
                   // Check if line contains a score
                   else if (paragraph.match(/(\d+\/10|\d+\/50)/)) {
                     const scoreMatch = paragraph.match(/(\d+)\/(10|50)/);
-                    const scoreValue = scoreMatch ? parseInt(scoreMatch[1]) : 0;
-                    const maxValue = scoreMatch ? parseInt(scoreMatch[2]) : 10;
+                    const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+                    const maxValue = scoreMatch ? parseInt(scoreMatch[2], 10) : 10;
                     const percentage = (scoreValue / maxValue) * 100;
                     
                     return (
@@ -428,7 +436,9 @@ function Oldreport() {
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                           {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency', 'Overall Score'].map((category) => {
+                            // Get score and feedback
                             const { score, feedback } = extractScoreAndFeedback(report, category);
+                            
                             const isOverallScore = category === 'Overall Score';
                             const maxScore = isOverallScore ? 50 : 10;
                             const normalizedScore = isOverallScore ? score : score * 5; // Scale up for visual consistency
