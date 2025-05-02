@@ -25,121 +25,37 @@ function Oldreport() {
   const [showFullReport, setShowFullReport] = useState(false);
 
   const extractScore = (report, scoreType) => {
-    // console.log("Extracting score from:", report);
-
     if (!report || !report.reportAnalysis) {
-      return 0; // Return 0 if no report or reportAnalysis field is available
+      return 0;
     }
 
-    // Handle different score formats
-    let regexPatterns = [];
-    
-    // Check if this is Overall Score (which uses /50 instead of /10)
-    if (scoreType === 'Overall Score') {
-      // Format: "Overall Score: 30/50"
-      regexPatterns.push(new RegExp(`${scoreType}:\s*(\d+)\/50`, 'i'));
-      // Format: "Overall Score: (30/50)"
-      regexPatterns.push(new RegExp(`${scoreType}:\s*\((\d+)\/50\)`, 'i'));
-      // Format: "**Overall Score:** 30/50"
-      regexPatterns.push(new RegExp(`\*\*${scoreType}:\*\*\s*(\d+)\/50`, 'i'));
-      // Format: "Overall Score (Score: 30/50)"
-      regexPatterns.push(new RegExp(`${scoreType}\s*\(Score:\s*(\d+)\/50\)`, 'i'));
-    } else {
-      // Format: "Technical Proficiency: 7/10"
-      regexPatterns.push(new RegExp(`${scoreType}:\s*(\d+)\/10`, 'i'));
-      // Format: "Technical Proficiency: (7/10)"
-      regexPatterns.push(new RegExp(`${scoreType}:\s*\((\d+)\/10\)`, 'i'));
-      // Format: "**Technical Proficiency:** 7/10"
-      regexPatterns.push(new RegExp(`\*\*${scoreType}:\*\*\s*(\d+)\/10`, 'i'));
-      // Format: "Technical Proficiency (Score: 7/10)"
-      regexPatterns.push(new RegExp(`${scoreType}\s*\(Score:\s*(\d+)\/10\)`, 'i'));
+    const scoreRegex = new RegExp(`${scoreType}:[\s*\(]*\d+[\)\s]*\/\d+`, 'i');
+    const match = report.reportAnalysis.match(scoreRegex);
+
+    if (match) {
+      const scoreText = match[0];
+      const numberMatch = scoreText.match(/(\d+)/);
+      return numberMatch ? parseInt(numberMatch[1], 10) : 0;
     }
 
-    // Try each regex pattern until we find a match
-    for (const regex of regexPatterns) {
-      const match = report.reportAnalysis.match(regex);
-      if (match && match[1]) {
-        return parseInt(match[1], 10);
-      }
-    }
-
-    return 0; // Return 0 if no score is found
+    return 0;
   };
-  // Extract score based on the scoreType passed (Technical Proficiency, Communication, etc.)
-  // Extract score and detailed feedback for a specific category
-  const extractScoreAndFeedback = (report, category) => {
-    // console.log(report);
 
+  const extractScoreAndFeedback = (report, category) => {
     if (!report || !report.reportAnalysis) {
       return { score: 0, feedback: 'No data available.' };
     }
 
-    // Array of regex patterns to match different score formats
-    const scorePatterns = [];
-    const feedbackPatterns = [];
-    
-    // Handle different formats based on whether it's Overall Score or other categories
-    if (category === 'Overall Score') {
-      // Score patterns for Overall Score (using /50)
-      scorePatterns.push(
-        new RegExp(`${category}:\s*(\d+)\/50`, 'i'),                  // Overall Score: 30/50
-        new RegExp(`${category}:\s*\((\d+)\/50\)`, 'i'),             // Overall Score: (30/50)
-        new RegExp(`\*\*${category}:\*\*\s*(\d+)\/50`, 'i'),         // **Overall Score:** 30/50
-        new RegExp(`\*\*${category}\*\*:\s*(\d+)\/50`, 'i'),         // **Overall Score**: 30/50
-        new RegExp(`${category}\s*\(Score:\s*(\d+)\/50\)`, 'i')      // Overall Score (Score: 30/50)
-      );
-      
-      // Feedback patterns for Overall Score
-      feedbackPatterns.push(
-        new RegExp(`${category}:\s*(\d+/50)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i'),
-        new RegExp(`${category}:\s*\((\d+/50)\)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i'),
-        new RegExp(`\*\*${category}:\*\*\s*(\d+/50)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i'),
-        new RegExp(`\*\*${category}\*\*:\s*(\d+/50)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i')
-      );
-    } else {
-      // Score patterns for other categories (using /10)
-      scorePatterns.push(
-        new RegExp(`${category}:\s*(\d+)\/10`, 'i'),                  // Technical Proficiency: 7/10
-        new RegExp(`${category}:\s*\((\d+)\/10\)`, 'i'),             // Technical Proficiency: (7/10)
-        new RegExp(`\*\*${category}\*\*:\s*(\d+)\/10`, 'i'),         // **Technical Proficiency:** 7/10
-        new RegExp(`\*\*${category}\*\*:\s*(\d+)\/10`, 'i'),         // **Technical Proficiency**: 7/10
-        new RegExp(`${category}\s*\(Score:\s*(\d+)\/10\)`, 'i')      // Technical Proficiency (Score: 7/10)
-      );
-      
-      // Feedback patterns for other categories
-      feedbackPatterns.push(
-        new RegExp(`${category}:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
-        new RegExp(`${category}:\s*\((\d+/10)\)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
-        new RegExp(`\*\*${category}\*\*:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
-        new RegExp(`\*\*${category}\*\*:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i')
-      );
-    }
+    const scoreRegex = new RegExp(`${category}:[\s*\(]*\d+[\)\s]*\/\d+`, 'i');
+    const feedbackRegex = new RegExp(`${category}:[\s*\(]*\d+[\)\s]*\/\d+\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|$)`, 'i');
 
-    // Try to find a score match using all patterns
-    let scoreMatch = null;
-    for (const pattern of scorePatterns) {
-      const match = report.reportAnalysis.match(pattern);
-      if (match && match[1]) {
-        scoreMatch = match;
-        break;
-      }
-    }
+    const scoreMatch = report.reportAnalysis.match(scoreRegex);
+    const feedbackMatch = report.reportAnalysis.match(feedbackRegex);
 
-    // Try to find a feedback match using all patterns
-    let feedbackMatch = null;
-    for (const pattern of feedbackPatterns) {
-      const match = report.reportAnalysis.match(pattern);
-      if (match) {
-        feedbackMatch = match;
-        break;
-      }
-    }
-
-    // Extract numeric score from match
     let score = 0;
-    if (scoreMatch && scoreMatch[1]) {
+    if (scoreMatch) {
       // Extract just the number from patterns like "7/10" or "30/50"
-      const scoreText = scoreMatch[1];
+      const scoreText = scoreMatch[0];
       const numberMatch = scoreText.match(/(\d+)/);
       score = numberMatch ? parseInt(numberMatch[1], 10) : 0;
     }
@@ -512,13 +428,7 @@ function Oldreport() {
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                           {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency', 'Overall Score'].map((category) => {
-                            // First try to get score directly using the improved extractScore function
-                            let score = extractScore(report, category);
-                            // If that fails, try the more detailed extractScoreAndFeedback function
-                            const { score: detailedScore, feedback } = extractScoreAndFeedback(report, category);
-                            // Use whichever score is higher (non-zero)
-                            score = score > 0 ? score : detailedScore;
-                            
+                            const { score, feedback } = extractScoreAndFeedback(report, category);
                             const isOverallScore = category === 'Overall Score';
                             const maxScore = isOverallScore ? 50 : 10;
                             const normalizedScore = isOverallScore ? score : score * 5; // Scale up for visual consistency
