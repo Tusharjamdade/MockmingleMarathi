@@ -101,7 +101,7 @@ function Oldreport() {
       scorePatterns.push(
         new RegExp(`${category}:\s*(\d+)\/10`, 'i'),                  // Technical Proficiency: 7/10
         new RegExp(`${category}:\s*\((\d+)\/10\)`, 'i'),             // Technical Proficiency: (7/10)
-        new RegExp(`\*\*${category}:\*\*\s*(\d+)\/10`, 'i'),         // **Technical Proficiency:** 7/10
+        new RegExp(`\*\*${category}\*\*:\s*(\d+)\/10`, 'i'),         // **Technical Proficiency:** 7/10
         new RegExp(`\*\*${category}\*\*:\s*(\d+)\/10`, 'i'),         // **Technical Proficiency**: 7/10
         new RegExp(`${category}\s*\(Score:\s*(\d+)\/10\)`, 'i')      // Technical Proficiency (Score: 7/10)
       );
@@ -110,7 +110,7 @@ function Oldreport() {
       feedbackPatterns.push(
         new RegExp(`${category}:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
         new RegExp(`${category}:\s*\((\d+/10)\)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
-        new RegExp(`\*\*${category}:\*\*\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
+        new RegExp(`\*\*${category}\*\*:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i'),
         new RegExp(`\*\*${category}\*\*:\s*(\d+/10)\s*([^]*?)(?=\n[A-Z][a-zA-Z ]+:|Overall|$)`, 'i')
       );
     }
