@@ -29,54 +29,54 @@ function Oldreport() {
       return 0;
     }
 
-    const scoreRegex = new RegExp(`${scoreType}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+`, 'i');
-    const match = report.reportAnalysis.match(scoreRegex);
+    const patterns = [
+      // Pattern for "**Technical Proficiency (Score: 4/10)**"
+      new RegExp(`\\*\\*${scoreType}.*?\\(Score:\\s*(\\d+)\\/\\d+\\)\\*\\*`, 'i'),
+      // Pattern for "**Communication: 6/10**"
+      new RegExp(`\\*\\*${scoreType}.*?\\s*(\\d+)\\/\\d+\\*\\*`, 'i'),
+      // Pattern for "**Decision-Making (5/10)**"
+      new RegExp(`\\*\\*${scoreType}.*?\\((\\d+)\\/\\d+\\)\\*\\*`, 'i')
+    ];
 
-    if (match) {
-      const scoreText = match[0];
-      const numberMatch = scoreText.match(/\d+/g);
-      if (numberMatch) {
-        const score = parseInt(numberMatch[0], 10);
-        const total = parseInt(numberMatch[1], 10);
-        return { score, total };
+    let score = 0;
+    let feedback = 'No feedback available.';
+    let scoreMatch = null;
+
+    // Try each pattern until we find a match
+    for (const pattern of patterns) {
+      const match = report.reportAnalysis.match(pattern);
+      if (match) {
+        scoreMatch = match;
+        break;
       }
     }
 
-    return 0;
-  };
-
-  const extractScoreAndFeedback = (report, category) => {
-    if (!report || !report.reportAnalysis) {
-      return { score: 0, feedback: 'No data available.' };
-    }
-
-    // Log the report content for debugging
-    console.log('Extracting score for:', category);
-    console.log('Report content:', report.reportAnalysis);
-
-    const scoreRegex = new RegExp(`${category}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+`, 'i');
-    const feedbackRegex = new RegExp(`${category}:[\\s*\\(]*\\d+[\\)\\s]*\\/\\d+\\s*([^]*?)(?=[A-Z][a-zA-Z ]+:|$)`, 'i');
-
-    const scoreMatch = report.reportAnalysis.match(scoreRegex);
-    const feedbackMatch = report.reportAnalysis.match(feedbackRegex);
-
-    let score = 0;
     if (scoreMatch) {
-      // Extract just the number from patterns like "7/10" or "30/50"
-      const scoreText = scoreMatch[0];
-      const numberMatch = scoreText.match(/\d+/g);
-      score = numberMatch ? parseInt(numberMatch[0], 10) : 0;
+      // Extract score from the match
+      let scoreNumber = null;
+      if (scoreMatch[2]) {
+        scoreNumber = parseInt(scoreMatch[2], 10);
+      } else if (scoreMatch[1]) {
+        scoreNumber = parseInt(scoreMatch[1], 10);
+      }
+      
+      if (scoreNumber !== null) {
+        score = scoreNumber;
+        
+        // Extract feedback text between markdown headers
+        const feedbackStart = report.reportAnalysis.indexOf(scoreMatch[0]) + scoreMatch[0].length;
+        const nextHeader = report.reportAnalysis.indexOf('\n**', feedbackStart);
+        
+        feedback = report.reportAnalysis
+          .slice(feedbackStart, nextHeader !== -1 ? nextHeader : undefined)
+          .replace(/^\n+|\n+$/g, '')
+          .trim();
+      }
     }
-
-    // Extract feedback text
-    const feedback = feedbackMatch ? feedbackMatch[0] : 'No feedback available.';
 
     return { score, feedback };
   };
 
-  // Extract Overall Score
-
-  // Extract Recommendations
   const extractRecommendations = (report) => {
     const regex = /Recommendation:([\s\S]*?)(?=(\n|$))/i;
     const match = report.reportAnalysis.match(regex);
@@ -245,7 +245,6 @@ function Oldreport() {
     doc.setFontSize(12);
     doc.text("Recommendations:", marginX, marginY);
     marginY += 10;
-    doc.setFontSize(12);
     doc.text(extractRecommendations(report), marginX, marginY);
 
     // Save the PDF
@@ -437,7 +436,7 @@ function Oldreport() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                           {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency', 'Overall Score'].map((category) => {
                             // Get score and feedback
-                            const { score, feedback } = extractScoreAndFeedback(report, category);
+                            const { score, feedback } = extractScore(report, category);
                             
                             const isOverallScore = category === 'Overall Score';
                             const maxScore = isOverallScore ? 50 : 10;
@@ -565,7 +564,3 @@ function Oldreport() {
 }
 
 export default Oldreport;
-
-
-
-  
