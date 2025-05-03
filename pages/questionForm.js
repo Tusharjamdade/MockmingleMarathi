@@ -1719,7 +1719,7 @@ After fixing, please refresh the page.`);
       }
 
       // Navigate to the report page
-      router.push('/oldreport');
+      router.push('/report');
     } catch (error) {
       console.error('Error updating interview completion count:', error);
       // Still navigate to the report page even if there's an error
