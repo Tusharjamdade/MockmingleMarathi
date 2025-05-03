@@ -115,7 +115,7 @@ export const getApiResponse = async (jobRole, level) => {
     "Content-Type": "application/json",
   };
   const payload  = {
-    model: "llama3:latest",
+    model: "llama3.1:8b-instruct-q4_K_M",
     prompt: `Give me 10 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
 
     stream: false,
