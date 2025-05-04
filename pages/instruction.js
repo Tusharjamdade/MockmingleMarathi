@@ -1,354 +1,15 @@
-// import React, { useState, useEffect } from 'react';
-// import { useRouter } from 'next/router';
-
-// function Instruction() {
-//     const router = useRouter();
-//     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-
-//     useEffect(() => {
-//         // Function to check the API response status
-//         const checkApiResponseStatus = () => {
-//             const responseStatus = localStorage.getItem("apiResponseStatus");
-
-//             if (responseStatus === "success") {
-//                 setIsButtonEnabled(true); // Enable button if the response was successful
-//             } else {
-//                 setIsButtonEnabled(false); // Disable button if the response was not successful
-//             }
-//         };
-
-//         // Check API status every 1 second
-//         const intervalId = setInterval(checkApiResponseStatus, 1000);
-
-//         // Cleanup interval on component unmount
-//         return () => clearInterval(intervalId);
-//     }, []); // Empty dependency array to run effect only once on mount
-
-//     const handleButtonClick = () => {
-//         // Remove apiResponseStatus from localStorage
-//         localStorage.removeItem("apiResponseStatus");
-
-//         router.push("/questionForm");   
-//     };
-
-//     return (
-//         <>
-
-//         <button onClick={() => router.back()} className="absolute font-bold text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
-//           &laquo;
-//         </button>
-//         <div className="absolute top-10 right-10">
-//           <div className="  rounded-full flex items-center justify-center">
-//             <img src="/Logoo.png" alt="Logo" className="w-16 h-16" />
-//           </div>
-
-//   </div>
-
-
-
-//  <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-
-
-//       <div className="relative w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
-//         {/* Back Button */}
-
-//         {/* Logo */}
-
-//         {/* Instructions Header */}
-//         <div className="text-center text-lg font-bold bg-purple-600 rounded-md py-2">
-//           INSTRUCTIONS FOR THE INTERVIEW
-//         </div>
-
-//         {/* Instructions List */}
-//         <ul className="mt-4 space-y-2 text-sm">
-//           <li>01. Research the collage and job role.</li>
-//           <li>02. Understand the job description properly.</li>
-//           <li>03. Prepare answers for common interview questions.</li>
-//           <li>04. Practice your introduction (Tell me about yourself).</li>
-//           <li>05. Update your resume and Carry multiple copies.</li>
-//           <li>06. Dress professionally and neatly.</li>
-//           <li>07. Keep all necessary documents in a folder.</li>
-//           <li>08. Learn about the collage’s recent news and projects.</li>
-//           <li>09. Be ready with questions to ask the interviewer.</li>
-//           <li>10. Get proper sleep before the interview.</li>
-//         </ul>
-
-//         {/* Start Button */}
-//         <div className="mt-6 text-center">
-//           <button onClick={handleButtonClick} disabled={!isButtonEnabled} className={` ${isButtonEnabled ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-300 cursor-not-allowed'}  px-4 py-2 rounded-md text-white `}>
-//             I am ready to begin
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//         </>
-//     );
-// }
-
-// export default Instruction;
-
-
-// import React, { useState, useEffect } from 'react';
-// import { useRouter } from 'next/router';
-
-// function Instruction() {
-//     const router = useRouter();
-//     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-
-//     // Function to handle text-to-speech
-//     const speak = (text) => {
-//         const utterance = new SpeechSynthesisUtterance(text);
-//         utterance.lang = 'en-US'; // Set language to English
-//         window.speechSynthesis.speak(utterance);
-//     };
-
-//     useEffect(() => {
-//         // Function to check the API response status
-//         const checkApiResponseStatus = () => {
-//             const responseStatus = localStorage.getItem("apiResponseStatus");
-
-//             if (responseStatus === "success") {
-//                 setIsButtonEnabled(true); // Enable button if the response was successful
-//             } else {
-//                 setIsButtonEnabled(false); // Disable button if the response was not successful
-//             }
-//         };
-
-//         // Check API status every 1 second
-//         const intervalId = setInterval(checkApiResponseStatus, 1000);
-
-//         // Cleanup interval on component unmount
-//         return () => clearInterval(intervalId);
-//     }, []); // Empty dependency array to run effect only once on mount
-
-//     useEffect(() => {
-//         // Speak the instructions when the component is loaded
-//         speak('Hi, I am Shakti, your interview trainer! Here are some essential tips to help you prepare for your upcoming interview.');
-//     }, []); // Only run this once, when the component mounts
-
-//     const handleButtonClick = () => {
-//         // Remove apiResponseStatus from localStorage
-//         localStorage.removeItem("apiResponseStatus");
-
-//         router.push("/questionForm");   
-//     };
-
-//     return (
-//         <>
-//             <button onClick={() => router.back()} className="absolute font-bold text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
-//                 &laquo;
-//             </button>
-//             <div className="absolute top-10 right-10">
-//                 <div className="rounded-full flex items-center justify-center">
-//                     <img src="/Logoo.png" alt="Logo" className="w-16 h-16" />
-//                 </div>
-//             </div>
-//             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-//                 <div className="relative w-full max-w-md p-6 bg-gray-800 rounded-xl shadow-lg text-white">
-//                     <div className="text-center text-lg font-bold bg-purple-600 rounded-md py-2">
-//                         TIPS FOR THE INTERVIEW
-//                     </div>
-
-//                     <ul className="mt-4 space-y-2 text-sm">
-//                         <li>01. Research the collage and job role.</li>
-//                         <li>02. Understand the job description properly.</li>
-//                         <li>03. Prepare answers for common interview questions.</li>
-//                         <li>04. Practice your introduction (Tell me about yourself).</li>
-//                         <li>05. Update your resume and Carry multiple copies.</li>
-//                         <li>06. Dress professionally and neatly.</li>
-//                         <li>07. Keep all necessary documents in a folder.</li>
-//                         <li>08. Learn about the collage’s recent news and projects.</li>
-//                         <li>09. Be ready with questions to ask the interviewer.</li>
-//                         <li>10. Get proper sleep before the interview.</li>
-//                     </ul>
-
-//                     <div className="mt-6 text-center">
-//                         <button onClick={handleButtonClick} disabled={!isButtonEnabled} className={`${isButtonEnabled ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-300 cursor-not-allowed'} px-4 py-2 rounded-md text-white`}>
-//                             I am ready to begin
-//                         </button>
-//                     </div>
-//                 </div>
-//             </div>
-//         </>
-//     );
-// }
-
-// export default Instruction;
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import { useRouter } from 'next/router';
-
-// function Instruction() {
-//     const router = useRouter();
-//     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-//     const [currentIndex, setCurrentIndex] = useState(0);
-
-//     const slides = [
-//         {
-//             id: 1,
-//             content: "Inspired by Shree Narendra Modi, Puushkar an ISB Alum became the Founding Member of Citizens for Accountable Governance, the official team of Shree Narendra Modi’s Prime Ministerial campaign",
-//         },
-//         {
-//             id: 2,
-//             content: "Ideated and executed multiple projects like the collection of iron from 6lac villages, Chai pe Charcha, Modi in 3D, NaMo for India, Onground research, and campaign. Ideated the NaMo App with providing consultancy",
-//         },
-//         {
-//             id: 3,
-//             content: "Chief consultant to the CM War Room and ideated and provided blue print for a unique first time ground influencer outreach project, Mukhyamantri Mitra",
-//         },
-//         {
-//             id: 4,
-//             content: "Consulting to various national and international government bodies, political leaders and tech platforms for ground outreach",
-//         },
-//         {
-//             id: 5,
-//             content: "Founded a tech platform for assistive governance and outreach to citizens.Like Gramya, SHAKKTII, Grath. Worked with Chattisgarh, Madhya Padresh The principal coordinator for P20. With the use of AI and Gramya conducted 1000 roundatbles at Gram Panchayat",
-//         },
-//     ];
-
-//     const handleNext = () => {
-//         setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-//     };
-
-//     const handlePrev = () => {
-//         setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
-//     };
-
-//     const goToSlide = (index) => {
-//         setCurrentIndex(index);
-//     };
-
-//     useEffect(() => {
-//         const interval = setInterval(() => {
-//             handleNext();
-//         }, 10000);
-
-//         return () => clearInterval(interval);
-//     }, []);
-//     // Function to handle text-to-speech
-//     const speak = (text) => {
-//         const utterance = new SpeechSynthesisUtterance(text);
-//         utterance.lang = 'en-US'; // Set language to English
-//         window.speechSynthesis.speak(utterance);
-//     };
-
-//     useEffect(() => {
-//         // Speak the instructions when the component is loaded
-//         speak('Hi, I am Shakti, your interview trainer! Here are some essential tips to help you prepare for your upcoming interview.');
-
-//         // No need to return anything here, just ensuring speak is called once 
-//     }, []); // Empty dependency array to run effect only once on mount
-
-//     useEffect(() => {
-//         // Function to check the API response status
-//         const checkApiResponseStatus = () => {
-//             const responseStatus = localStorage.getItem("apiResponseStatus"); // Check if apiResponseStatus exists in localStorage
-
-//             if (responseStatus === "success") {
-//                 setIsButtonEnabled(true); // Enable button if the response was successful
-//             } else {
-//                 setIsButtonEnabled(false); // Disable button if the response was not successful
-//             }
-//         };
-
-//         // Check API status every 1 second
-//         const intervalId = setInterval(checkApiResponseStatus, 1000);
-
-//         // Cleanup interval on component unmount
-//         return () => clearInterval(intervalId);
-//     }, []); // Empty dependency array to run effect only once on mount
-
-//     const handleButtonClick = () => {
-//         // Remove apiResponseStatus from localStorage
-//         localStorage.removeItem("apiResponseStatus");
-
-//         router.push("/questionForm");
-//     };
-
-//     return (
-//         <>
-//             <button onClick={() => router.back()} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
-//                 <img src="/2.svg" className=' top-10 left-10 ' alt="Back" />
-//             </button>
-//             <div className="absolute top-10 right-10">
-//                 <div className="rounded-full flex items-center justify-center">
-//                     <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
-//                 </div>
-//             </div>
-//             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-//                 <div className="relative w-full mt-10 max-w-md p-6  rounded-xl shadow-lg text-white">
-//                     {/* <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4"> */}
-//                     {/* <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4"> */}
-//                     <div class="m-10 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">INSTRUCTIONS FOR THE INTERVIEW</div>
-//                     <div className="bg-white rounded-xl shadow-lg p-6 w-96 relative">
-//                         {/* Header Badge */}
-//                         <div className="absolute -top-5 right-20 flex items-center">
-//                             {/* Circular Icon */}
-//                             <div className="w-12 h-12 z-10 bg-white rounded-full flex items-center justify-center border-4 border-pink-800">
-//                                 <img src="/1.svg" alt="icon" className='h-56 w-56' />
-//                             </div>
-//                             {/* Title Background */}
-//                             <div className="bg-gradient-to-r from-pink-800 to-purple-900 text-white rounded-r-full px-4 py-1 -ml-2">
-//                                 <span className="text-sm font-semibold">Understand the job role</span>
-//                             </div>
-//                         </div>
-
-//                         {/* Card Content */} {slides.map((slide, index) => (
-//                             <div
-//                                 key={slide.id}
-//                                 className={`ab inset-0 transition-opacity duration-700 ease-in-out ${currentIndex === index ? 'opacity-100' : 'opacity-0'}`}
-//                             >
-//                                 <p className="text-gray-700 text-center mt-8 p-0 text-sm">
-//                                     {slide.content}
-//                                 </p>
-//                             </div>
-//                         ))}
-//                     </div>
-
-//                 </div>
-//                 {/* </div> */}
-//             </div>
-
-//             <div className="mt-6 text-center ">
-//                 <button onClick={handleButtonClick} disabled={!isButtonEnabled} className={`${isButtonEnabled ? 'bg-gradient-to-r from-pink-800 to-purple-900' : 'bg-gradient-to-r from-pink-200 to-purple-300 cursor-not-allowed'} px-4 py-2 rounded-md text-white`}>
-//                     I am ready to begin
-//                 </button>
-//             </div>
-
-
-//         </>
-//     );
-// }
-
-// export default Instruction;
-
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 function Instruction() {
     const router = useRouter();
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-    const[collageName,setCollageName]=useState('')
+    const [testPhase, setTestPhase] = useState('speaker'); // 'speaker', 'mic', 'done'
+    const [testMessage, setTestMessage] = useState('Testing speaker...');
+    const [micPermissionGranted, setMicPermissionGranted] = useState(false);
+    const recognitionRef = useRef(null);
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    useEffect(() => {
-        if (!localStorage.getItem("token")) {
-          router.push("/login");
-        } else {
-          const userFromStorage = JSON.parse(localStorage.getItem('user'));
-        //   console.log(userFromStorage);
-          
-          if (userFromStorage) {
-            
-            setCollageName(userFromStorage.collageName || '');  // Initialize email here directly
-          }
-        }
-      }, []);
-
+    const [collageName, setCollageName] = useState('');
     const slides = [
         {
             id: 1,
@@ -432,167 +93,248 @@ function Instruction() {
         return () => clearInterval(interval);
     }, []);
 
-
     // Function to handle text-to-speech
     const speak = (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US'; // Set language to English
+        utterance.lang = 'en-US';
+        utterance.rate = 1.2;
         window.speechSynthesis.speak(utterance);
+        return new Promise(resolve => {
+            utterance.onend = resolve;
+        });
     };
 
+    // Test speaker by reading a sentence
+    const testSpeaker = async () => {
+        setTestMessage('Testing speaker... Please listen carefully');
+        await speak('This is a speaker test. If you can hear this clearly, your speaker is working.');
+        setTestMessage('Speaker test complete. Click next to test microphone.');
+    };
 
- 
-
-
-        useEffect(() => {
-            // Speak the instructions when the component is loaded
-            speak('Hi, I am Shakti, your interview trainer! Here are some essential tips to help you prepare for your upcoming interview.');
-
-            // No need to return anything here, just ensuring speak is called once 
-        }, []); // Empty dependency array to run effect only once on mount
-
-        useEffect(() => {
-
-            // Function to check the API response status
-            const checkApiResponseStatus = () => {
-                const responseStatus = localStorage.getItem("apiResponseStatus"); // Check if apiResponseStatus exists in localStorage
-
-                if (responseStatus === "success") {
-                    setIsButtonEnabled(true); // Enable button if the response was successful
+    // Test microphone by having user read a sentence
+    const testMicrophone = async () => {
+        setTestMessage('Testing microphone... Please repeat after me: "The quick brown fox jumps over the lazy dog."');
+        
+        // Initialize speech recognition
+        recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        
+        // Speak the test sentence
+        await speak('Please repeat after me: The quick brown fox jumps over the lazy dog.');
+        
+        // Start listening for user response
+        recognitionRef.current.start();
+        setTestMessage('Listening... Please say: "The quick brown fox jumps over the lazy dog."');
+        
+        return new Promise(resolve => {
+            recognitionRef.current.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if (transcript.toLowerCase().includes('quick brown fox')) {
+                    setTestMessage('Microphone test successful!');
+                    resolve(true);
                 } else {
-                    setIsButtonEnabled(false); // Disable button if the response was not successful
+                    setTestMessage('Please try again. Say: "The quick brown fox jumps over the lazy dog."');
+                    resolve(false);
                 }
             };
-
-            // Check API status every 1 second
-            const intervalId = setInterval(checkApiResponseStatus, 1000);
-
-            // Cleanup interval on component unmount
-            return () => clearInterval(intervalId);
-        }, []); // Empty dependency array to run effect only once on mount
-
-        const handleButtonClick = async(e) => {
-            // Remove apiResponseStatus from localStorage
-            localStorage.removeItem("apiResponseStatus");
-
-
-            router.push("/questionForm");
-
-            try {
-                // const collageName = "Dynamic Crane Engineers Pvt. Ltd.";  // You can replace this with dynamic data
-        
-                // 1. Attempt to get the existing collage data by collageName using GET method
-                const getRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive?collageName=${collageName}`, {
-                    method: 'GET',  // Use GET method to check if the collage exists
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-        
-                let isActive = 1;  // Default is 1 if collage doesn't exist
-                let collageExists = false;
-        
-                if (getRes.ok) {
-                    const collageData = await getRes.json();
-                    if (collageData?.isActive !== undefined) {
-                        isActive = collageData.isActive + 1;  // collage exists, increment isActive
-                        collageExists = true;
-                    }
-                }
-        
-                // 2. Prepare the data to be saved
-                const data = { collageName, isActive };
-        
-                let finalRes;
-        
-                // 3. Use PUT if the collage already exists, else POST to create
-                if (collageExists) {
-                    // collage exists, update with PUT method
-                    finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-                } else {
-                    // collage doesn't exist, create with POST method
-                    finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-                }
-        
-                if (!finalRes.ok) {
-                    const errorData = await finalRes.json();
-                    throw new Error(errorData?.error || "Failed to save collage data.");
-                }
-        
-                const finalResponse = await finalRes.json();
-                if (finalResponse.success) {
-                    console.log("collage data updated/created successfully");
-                }
-            } catch (error) {
-                console.error("Error:", error.message);
-            }
-
-
-        };
-
-        return (
-            <>
-
-                <button onClick={() => router.back()} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
-                    <img src="/2.svg" className=' top-10 left-10 ' alt="Back" />
-
-                </button>
-                <div className="absolute top-10 right-10">
-                    <div className="rounded-full flex items-center justify-center">
-                        <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
-                    </div>
-                </div>
-                <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-
-                    <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg">
-                        <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">INSTRUCTIONS FOR THE INTERVIEW</div>
-                        <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
-                            {/* Header Badge */}{slides.map((slide, index) => (
-                                <div
-                                    key={slide.id}
-                                    className={`transition-opacity duration-800 ease-in-out ${currentIndex === index ? 'opacity-100' : 'opacity-0 absolute inset-0'}`}
-                                >
-                                    <div className="absolute -top-5  flex  items-center">
-                                        <div className="w-12 h-12 z-10 bg-white rounded-full flex items-center justify-center border-4 border-pink-800">
-                                            <img src={slide.img} alt="icon" className=' rounded-full' />
-                                        </div>
-
-                                        <div className="bg-gradient-to-r from-pink-800 to-purple-900 text-white rounded-r-full px-4 py-1 -ml-2">
-                                            <span className="text-sm font-semibold">{slide.title}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Slider */}
-                                    <div className="relative">
-
-                                        <p className="text-gray-700 text-center mt-8 p-0 text-sm">{slide.content}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-32 text-center ">
-                            <button onClick={handleButtonClick} disabled={!isButtonEnabled} className={`${isButtonEnabled ? 'bg-gradient-to-r from-pink-800 to-purple-900' : 'bg-gradient-to-r from-pink-200 to-purple-300 cursor-not-allowed'} px-4 py-2  rounded-md text-white`}>
-                                I am ready to begin
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </>
-        );
+            
+            recognitionRef.current.onerror = () => {
+                setTestMessage('Microphone access denied. Please enable microphone permissions.');
+                resolve(false);
+            };
+        });
     };
 
-    export default Instruction;
+    // Handle test progression
+    const handleNextTest = async () => {
+        if (testPhase === 'speaker') {
+            await testSpeaker();
+            setTestPhase('mic');
+        } else if (testPhase === 'mic') {
+            const micWorking = await testMicrophone();
+            if (micWorking) {
+                setTestPhase('done');
+                setTestMessage('Device tests complete! You can now begin the interview.');
+                setIsButtonEnabled(true);
+            }
+        }
+    };
+
+    // Run speaker test on component mount
+    useEffect(() => {
+        testSpeaker();
+        
+        // Cleanup speech recognition on unmount
+        return () => {
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!localStorage.getItem("token")) {
+          router.push("/login");
+        } else {
+          const userFromStorage = JSON.parse(localStorage.getItem('user'));
+        //   console.log(userFromStorage);
+          
+          if (userFromStorage) {
+            
+            setCollageName(userFromStorage.collageName || '');  // Initialize email here directly
+          }
+        }
+      }, []);
+
+    // Check API response status periodically
+    useEffect(() => {
+        const checkApiResponseStatus = () => {
+            const responseStatus = localStorage.getItem("apiResponseStatus");
+            if (responseStatus === "success") {
+                setIsButtonEnabled(true);
+            } else {
+                setIsButtonEnabled(false);
+            }
+        };
+
+        const intervalId = setInterval(checkApiResponseStatus, 1000);
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const handleButtonClick = async(e) => {
+        // Remove apiResponseStatus from localStorage
+        localStorage.removeItem("apiResponseStatus");
+
+        router.push("/questionForm");
+
+        try {
+            // const collageName = "Dynamic Crane Engineers Pvt. Ltd.";  // You can replace this with dynamic data
+        
+            // 1. Attempt to get the existing collage data by collageName using GET method
+            const getRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive?collageName=${collageName}`, {
+                method: 'GET',  // Use GET method to check if the collage exists
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        
+            let isActive = 1;  // Default is 1 if collage doesn't exist
+            let collageExists = false;
+        
+            if (getRes.ok) {
+                const collageData = await getRes.json();
+                if (collageData?.isActive !== undefined) {
+                    isActive = collageData.isActive + 1;  // collage exists, increment isActive
+                    collageExists = true;
+                }
+            }
+        
+            // 2. Prepare the data to be saved
+            const data = { collageName, isActive };
+        
+            let finalRes;
+        
+            // 3. Use PUT if the collage already exists, else POST to create
+            if (collageExists) {
+                // collage exists, update with PUT method
+                finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+            } else {
+                // collage doesn't exist, create with POST method
+                finalRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+            }
+        
+            if (!finalRes.ok) {
+                const errorData = await finalRes.json();
+                throw new Error(errorData?.error || "Failed to save collage data.");
+            }
+        
+            const finalResponse = await finalRes.json();
+            if (finalResponse.success) {
+                console.log("collage data updated/created successfully");
+            }
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
+    };
+
+    return (
+        <>
+            <button onClick={() => router.back()} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
+                <img src="/2.svg" className=' top-10 left-10 ' alt="Back" />
+            </button>
+            <div className="absolute top-10 right-10">
+                <div className="rounded-full flex items-center justify-center">
+                    <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
+                </div>
+            </div>
+            <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+                <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg">
+                    <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">DEVICE TEST</div>
+                    <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
+                        {/* Header Badge */}
+                        {slides.map((slide, index) => (
+                            <div
+                                key={slide.id}
+                                className={`transition-opacity duration-800 ease-in-out ${currentIndex === index ? 'opacity-100' : 'opacity-0 absolute inset-0'}`}
+                            >
+                                <div className="absolute -top-5  flex  items-center">
+                                    <div className="w-12 h-12 z-10 bg-white rounded-full flex items-center justify-center border-4 border-pink-800">
+                                        <img src={slide.img} alt="icon" className=' rounded-full' />
+                                    </div>
+
+                                    <div className="bg-gradient-to-r from-pink-800 to-purple-900 text-white rounded-r-full px-4 py-1 -ml-2">
+                                        <span className="text-sm font-semibold">{slide.title}</span>
+                                    </div>
+                                </div>
+
+                                {/* Slider */}
+                                <div className="relative">
+
+                                    <p className="text-gray-700 text-center mt-8 p-0 text-sm">{slide.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-4 text-center">
+                        <p className="mb-4">{testMessage}</p>
+                        {testPhase !== 'done' && (
+                            <button 
+                                onClick={handleNextTest}
+                                className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md text-white"
+                            >
+                                {testPhase === 'speaker' ? 'Next' : 'Test Microphone'}
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mt-32 text-center ">
+                        <button 
+                            onClick={handleButtonClick} 
+                            disabled={!isButtonEnabled} 
+                            className={`${isButtonEnabled ? 'bg-gradient-to-r from-pink-800 to-purple-900' : 'bg-gradient-to-r from-pink-200 to-purple-300 cursor-not-allowed'} px-4 py-2  rounded-md text-white`}
+                        >
+                            I am ready to begin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </>
+    );
+}
+
+export default Instruction;
