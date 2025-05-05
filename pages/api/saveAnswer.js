@@ -145,11 +145,13 @@
 
 // export default handler;
 import JobRole from '../../models/JobRole';
+import connectDb from '@/middleware/dbConnect';
 // import { ObjectId } from 'mongodb'; // Import ObjectId for comparison
 
 // Save answer API
 export async function handler(req, res) {
   if (req.method === 'PUT') {
+    await connectDb()
     const {_id, email, questionId, answer } = req.body;
 
     // Validate request body
