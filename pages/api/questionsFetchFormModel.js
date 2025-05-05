@@ -68,154 +68,154 @@
 
  // Importing the function for fetching questions
 
- export const config = {
-  runtime: "nodejs", // Ensure it's a Node.js function
-  maxDuration: 300,
-};
-
-export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { jobRole, level } = req.body;
-
-    try {
-      // Call the getApiResponse function directly within the handler
-      const fetchedQuestions = await getApiResponse(jobRole, level);
-
-      if (fetchedQuestions) {
-        console.log('Fetched Questions:', fetchedQuestions);  // Log the fetched questions
-        
-        // You can also store the questions or perform further processing if necessary
-        // Example: await saveQuestionsToDatabase(fetchedQuestions);
-
-        return res.status(200).json({
-          message: "Job role submitted. Questions fetched successfully.",
-          questions: fetchedQuestions,
-        });
-      } else {
-        return res.status(500).json({
-          error: "Error: No questions fetched from the API.",
-        });
-      }
-    } catch (error) {
-      console.error('Error during processing:', error);
-      return res.status(500).json({
-        error: "Error during background processing.",
-      });
-    }
-  }
-
-  // If the method is not POST, return a 405 Method Not Allowed response
-  return res.status(405).json({ error: 'Method Not Allowed' });
-}
-
-// The API function to fetch questions
-export const getApiResponse = async (jobRole, level) => {
-  const url = "http://139.59.75.143:11434/api/generate";
-  const headers = {
-    "Content-Type": "application/json",
-  };
-  const payload  = {
-    model: "llama3.1:8b-instruct-q4_K_M",
-    prompt: `Give me 10 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
-
-    stream: false,
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(payload ),
-    });
-
-    if (response.ok) {
-      const responseData = await response.json();
-      return responseData.response; // Return the response from the API
-    } else {
-      console.error("Error fetching response from the API.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error in the fetch operation:", error);
-    return null;
-  }
-};
-
-
-
-// export const config = {
-//   runtime: 'nodejs',
+//  export const config = {
+//   runtime: "nodejs", // Ensure it's a Node.js function
 //   maxDuration: 300,
 // };
 
 // export default async function handler(req, res) {
-//   if (req.method !== 'POST') {
-//     return res.status(405).json({ error: 'Method Not Allowed' });
-//   }
+//   if (req.method === 'POST') {
+//     const { jobRole, level } = req.body;
 
-//   const { jobRole, level } = req.body;
+//     try {
+//       // Call the getApiResponse function directly within the handler
+//       const fetchedQuestions = await getApiResponse(jobRole, level);
 
-//   if (!jobRole || !level) {
-//     return res.status(400).json({ error: 'Job role and level are required.' });
-//   }
+//       if (fetchedQuestions) {
+//         console.log('Fetched Questions:', fetchedQuestions);  // Log the fetched questions
+        
+//         // You can also store the questions or perform further processing if necessary
+//         // Example: await saveQuestionsToDatabase(fetchedQuestions);
 
-//   try {
-//     const questions = await getApiResponse(jobRole, level);
-
-//     if (questions) {
-//       return res.status(200).json({
-//         message: 'Job role submitted. Questions fetched successfully.',
-//         questions,
+//         return res.status(200).json({
+//           message: "Job role submitted. Questions fetched successfully.",
+//           questions: fetchedQuestions,
+//         });
+//       } else {
+//         return res.status(500).json({
+//           error: "Error: No questions fetched from the API.",
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error during processing:', error);
+//       return res.status(500).json({
+//         error: "Error during background processing.",
 //       });
-//     } else {
-//       return res.status(500).json({ error: 'No questions fetched from Claude API.' });
 //     }
-//   } catch (error) {
-//     console.error('Error during processing:', error);
-//     return res.status(500).json({ error: 'Error during background processing.' });
 //   }
+
+//   // If the method is not POST, return a 405 Method Not Allowed response
+//   return res.status(405).json({ error: 'Method Not Allowed' });
 // }
 
-// async function getApiResponse(jobRole, level) {
-//   const url = 'https://api.anthropic.com/v1/messages';
-
+// // The API function to fetch questions
+// export const getApiResponse = async (jobRole, level) => {
+//   const url = "http://139.59.75.143:11434/api/generate";
 //   const headers = {
-//     'Content-Type': 'application/json',
-//     'x-api-key': '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',
-//     'anthropic-version': '2023-06-01',
+//     "Content-Type": "application/json",
 //   };
+//   const payload  = {
+//     model: "llama3.1:8b-instruct-q4_K_M",
+//     prompt: `Give me 10 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
 
-//   const prompt = `Give me 10 interview questions for the ${jobRole} role at ${level} level.`;
-
-//   const payload = {
-//     model: "claude-3-7-sonnet-20250219", // You can change to 'claude-3-sonnet-20240229' for a lighter model
-//     max_tokens: 1000,
-//     temperature: 0.7,
-//     messages: [
-//       {
-//         role: "user",
-//         content: prompt,
-//       },
-//     ],
+//     stream: false,
 //   };
 
 //   try {
 //     const response = await fetch(url, {
-//       method: 'POST',
-//       headers,
+//       method: "POST",
+//       headers: headers,
 //       body: JSON.stringify(payload ),
 //     });
 
-//     const responseData = await response.json();
-
-//     if (response.ok && responseData?.content?.[0]?.text) {
-//       return responseData.content[0].text;
+//     if (response.ok) {
+//       const responseData = await response.json();
+//       return responseData.response; // Return the response from the API
 //     } else {
-//       console.error('Claude API error:', responseData);
+//       console.error("Error fetching response from the API.");
 //       return null;
 //     }
 //   } catch (error) {
-//     console.error('Error calling Claude API:', error);
+//     console.error("Error in the fetch operation:", error);
 //     return null;
 //   }
-// }
+// };
+
+
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const { jobRole, level } = req.body;
+
+  if (!jobRole || !level) {
+    return res.status(400).json({ error: 'Job role and level are required.' });
+  }
+
+  try {
+    const questions = await getApiResponse(jobRole, level);
+
+    if (questions) {
+      return res.status(200).json({
+        message: 'Job role submitted. Questions fetched successfully.',
+        questions,
+      });
+    } else {
+      return res.status(500).json({ error: 'No questions fetched from Claude API.' });
+    }
+  } catch (error) {
+    console.error('Error during processing:', error);
+    return res.status(500).json({ error: 'Error during background processing.' });
+  }
+}
+
+async function getApiResponse(jobRole, level) {
+  const url = 'https://api.anthropic.com/v1/messages';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01',
+  };
+
+  const prompt = `Give me 10 interview questions for the ${jobRole} role at ${level} level.`;
+
+  const payload = {
+    model: "claude-3-7-sonnet-20250219", // You can change to 'claude-3-sonnet-20240229' for a lighter model
+    max_tokens: 1000,
+    temperature: 0.7,
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload ),
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok && responseData?.content?.[0]?.text) {
+      return responseData.content[0].text;
+    } else {
+      console.error('Claude API error:', responseData);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error calling Claude API:', error);
+    return null;
+  }
+}

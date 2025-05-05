@@ -177,95 +177,174 @@
 // };
 
 
-export const config = {
-  runtime: "nodejs", // Ensure it's a Node.js function
-  maxDuration: 300,
-};
+// export const config = {
+//   runtime: "nodejs", // Ensure it's a Node.js function
+//   maxDuration: 300,
+// };
 
-export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { data } = req.body;
+// export default async function handler(req, res) {
+//   if (req.method === 'POST') {
+//     const { data } = req.body;
 
-    try {
-      // Call the getApiResponse function directly within the handler
-      const responseData = await getApiResponseReport(data);
+//     try {
+//       // Call the getApiResponse function directly within the handler
+//       const responseData = await getApiResponseReport(data);
 
-      if (responseData) {
-        console.log('Fetched responseData:', responseData);  
+//       if (responseData) {
+//         console.log('Fetched responseData:', responseData);  
         
-        // Return responseData directly as a JSON response
-        return res.status(200).json(responseData);
-      } else {
-        return res.status(500).json({
-          error: "Error: No questions fetched from the API.",
-        });
-      }
-    } catch (error) {
-      console.error('Error during processing:', error);
-      return res.status(500).json({
-        error: "Error during background processing.",
-      });
-    }
-  }
+//         // Return responseData directly as a JSON response
+//         return res.status(200).json(responseData);
+//       } else {
+//         return res.status(500).json({
+//           error: "Error: No questions fetched from the API.",
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error during processing:', error);
+//       return res.status(500).json({
+//         error: "Error during background processing.",
+//       });
+//     }
+//   }
 
-  // If the method is not POST, return a 405 Method Not Allowed response
-  return res.status(405).json({ error: 'Method Not Allowed' });
-}
+//   // If the method is not POST, return a 405 Method Not Allowed response
+//   return res.status(405).json({ error: 'Method Not Allowed' });
+// }
 
-// The API function to fetch questions
-export const getApiResponseReport = async (reportData) => {
-      const url = "http://139.59.75.143:11434/api/generate";  // Consider passing URL dynamically
-      const headers = {
-        "Content-Type": "application/json"
-      };
+// // The API function to fetch questions
+// export const getApiResponseReport = async (reportData) => {
+//       const url = "http://139.59.75.143:11434/api/generate";  // Consider passing URL dynamically
+//       const headers = {
+//         "Content-Type": "application/json"
+//       };
   
-      // Validate if reportData has questions
-      if (!reportData || !Array.isArray(reportData.questions)) {
-          console.error("Invalid reportData structure or missing questions.");
-          return null;
-      }
+//       // Validate if reportData has questions
+//       if (!reportData || !Array.isArray(reportData.questions)) {
+//           console.error("Invalid reportData structure or missing questions.");
+//           return null;
+//       }
   
-      // Prepare the answers for API evaluation
-      const questionsWithAnswers = reportData.questions.map((question) => {
-        return {
-          questionText: question.questionText || 'No question provided',
-          answer: question.answer || 'No answer provided'
-        };
-      });
+//       // Prepare the answers for API evaluation
+//       const questionsWithAnswers = reportData.questions.map((question) => {
+//         return {
+//           questionText: question.questionText || 'No question provided',
+//           answer: question.answer || 'No answer provided'
+//         };
+//       });
   
-      // Prepare the data object for the API
-      const data = {
-        model: "llama3:latest",
+//       // Prepare the data object for the API
+//       const data = {
+//         model: "llama3:latest",
 
-        // prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube embed links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+//         // prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube embed links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
 
-        prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+//         prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
 
-        stream: false
-      };
+//         stream: false
+//       };
   
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(data),
-        });
+//       try {
+//         const response = await fetch(url, {
+//           method: "POST",
+//           headers: headers,
+//           body: JSON.stringify(data),
+//         });
   
-        if (response.ok) {
-          const responseData = await response.json();
-          if (responseData && responseData.response) {
-            return responseData.response; // Return the report if available
-          } else {
-            console.error("API did not return the expected response format.");
-            return null;
-          }
-        } else {
-          console.error(`Error fetching response from the API: ${response.statusText}`);
-          return null;
-        }
-      } catch (error) {
-        console.error("Error in the fetch operation:", error);
-        return null;
-      }
+//         if (response.ok) {
+//           const responseData = await response.json();
+//           if (responseData && responseData.response) {
+//             return responseData.response; // Return the report if available
+//           } else {
+//             console.error("API did not return the expected response format.");
+//             return null;
+//           }
+//         } else {
+//           console.error(`Error fetching response from the API: ${response.statusText}`);
+//           return null;
+//         }
+//       } catch (error) {
+//         console.error("Error in the fetch operation:", error);
+//         return null;
+//       }
+//   };
+  
+
+
+export const config = {
+    runtime: "nodejs", // Ensure it's a Node.js function
+    maxDuration: 300,
   };
   
+  export default async function handler(req, res) {
+    if (req.method === 'POST') {
+      const { data } = req.body;
+  
+      try {
+        // Call the getApiResponse function directly within the handler
+        const responseData = await getApiResponseReport(data);
+  
+        if (responseData) {
+          console.log('Fetched responseData:', responseData);  
+          
+          // Return responseData directly as a JSON response
+          return res.status(200).json(responseData);
+        } else {
+          return res.status(500).json({
+            error: "Error: No questions fetched from the API.",
+          });
+        }
+      } catch (error) {
+        console.error('Error during processing:', error);
+        return res.status(500).json({
+          error: "Error during background processing.",
+        });
+      }
+    }
+  
+    // If the method is not POST, return a 405 Method Not Allowed response
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+async function getApiResponseReport(data) {
+  const url = 'https://api.anthropic.com/v1/messages';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01',
+  };
+
+  const prompt = `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(data, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`;
+
+  const payload = {
+    model: "claude-3-7-sonnet-20250219", // You can change to 'claude-3-sonnet-20240229' for a lighter model
+    max_tokens: 1000,
+    temperature: 0.7,
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload ),
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok && responseData?.content?.[0]?.text) {
+      return responseData.content[0].text;
+    } else {
+      console.error('Claude API error:', responseData);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error calling Claude API:', error);
+    return null;
+  }
+}
