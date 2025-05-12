@@ -3,46 +3,87 @@ import PsychometricTest from "@/models/PsychometricTest";
 import User from "@/models/User";
 
 // Function to generate psychometric test questions with Claude AI
-async function generateQuestionsWithClaude() {
+async function generateQuestionsWithClaude(profileType = 'employee') {
   try {
     console.log('Generating psychometric test questions with Claude');
     
-    // Create prompt for Claude
-    const prompt = `
-      Generate a comprehensive 10-question psychometric test that evaluates the following competency areas:
-      - Empathy
-      - Assertiveness
-      - Ethical reasoning
-      - Collaboration
-      - Conflict resolution
-      - Leadership potential
+    // Create prompt for Claude based on profile type
+    let prompt;
+    
+    if (profileType === 'student') {
+      prompt = `
+        Generate a comprehensive 10-question psychometric test specifically designed for students that evaluates the following competency areas:
+        - Academic collaboration
+        - Learning environment ethics
+        - Educational leadership
+        - Study group dynamics
+        - Academic conflict resolution
+        - Classroom participation
 
-      Each question should:
-      1. Present a realistic workplace or social scenario
-      2. Offer 4 multiple-choice options representing different approaches
-      3. Have options that reflect varying degrees of effectiveness
-      4. Include subtle differences that reveal personality traits and decision-making style
+        Each question should:
+        1. Present a realistic academic or educational scenario that students commonly face
+        2. Offer 4 multiple-choice options representing different approaches
+        3. Have options that reflect varying degrees of effectiveness
+        4. Include subtle differences that reveal personality traits and decision-making style in educational contexts
 
-      Questions should range from easy to complex difficulty levels.
+        Questions should range from easy to complex difficulty levels and be relevant to educational environments.
 
-      Format your response as a JSON array with this structure:
-      [
-        {
-          "scenario": "Detailed scenario description",
-          "options": [
-            {"text": "Option A description", "value": 3},
-            {"text": "Option B description", "value": 2},
-            {"text": "Option C description", "value": 1},
-            {"text": "Option D description", "value": 0}
-          ],
-          "difficulty": "Easy|Moderate|Complex"
-        },
-        ...more questions
-      ]
+        Format your response as a JSON array with this structure:
+        [
+          {
+            "scenario": "Detailed scenario description in an educational context",
+            "options": [
+              {"text": "Option A description", "value": 3},
+              {"text": "Option B description", "value": 2},
+              {"text": "Option C description", "value": 1},
+              {"text": "Option D description", "value": 0}
+            ],
+            "difficulty": "Easy|Moderate|Complex"
+          },
+          ...more questions
+        ]
 
-      The "value" for each option should represent its effectiveness (3 = most effective, 0 = least effective).
-      Ensure the questions cover all competency areas evenly.
-    `;
+        The "value" for each option should represent its effectiveness (3 = most effective, 0 = least effective).
+        Ensure the questions cover all competency areas evenly and are appropriate for students in high school or college settings.
+      `;
+    } else {
+      // Default to employee/professional profile
+      prompt = `
+        Generate a comprehensive 10-question psychometric test for working professionals that evaluates the following competency areas:
+        - Workplace dynamics
+        - Professional ethics
+        - Management potential
+        - Team collaboration
+        - Workplace conflict resolution
+        - Professional leadership
+
+        Each question should:
+        1. Present a realistic workplace scenario that professionals commonly face
+        2. Offer 4 multiple-choice options representing different approaches
+        3. Have options that reflect varying degrees of effectiveness
+        4. Include subtle differences that reveal personality traits and decision-making style in professional contexts
+
+        Questions should range from easy to complex difficulty levels and be relevant to modern workplace environments.
+
+        Format your response as a JSON array with this structure:
+        [
+          {
+            "scenario": "Detailed scenario description in a workplace context",
+            "options": [
+              {"text": "Option A description", "value": 3},
+              {"text": "Option B description", "value": 2},
+              {"text": "Option C description", "value": 1},
+              {"text": "Option D description", "value": 0}
+            ],
+            "difficulty": "Easy|Moderate|Complex"
+          },
+          ...more questions
+        ]
+
+        The "value" for each option should represent its effectiveness (3 = most effective, 0 = least effective).
+        Ensure the questions cover all competency areas evenly and are appropriate for professional workplace settings.
+      `;
+    }
 
     // Check if API key exists
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -128,49 +169,65 @@ async function generateQuestionsWithClaude() {
 
 // API handler
 async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
   try {
-    // For testing purposes, use a fixed userId or get it from the request body
-    const userId = req.body.userId || "6462a8d8f12c6d92f9f1b9e3"; // Use a default ID for testing
+    const { userId, profileType } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+    
+    // Default to employee if no profileType is provided
+    const testProfileType = profileType || 'employee';
 
     // Skip user verification for testing
     
-    // Check if user already has an incomplete test (optional for testing)
+    // Find existing test for user
     const existingTest = await PsychometricTest.findOne({ 
       userId, 
-      isCompleted: false 
-    });
+      completed: false,
+      profileType: testProfileType
+    }).sort({ startTime: -1 });
 
     if (existingTest) {
       return res.status(200).json({ 
         success: true, 
-        message: 'Existing incomplete test found',
-        test: existingTest 
+        message: 'Existing psychometric test found',
+        test: {
+          _id: existingTest._id,
+          profileType: existingTest.profileType,
+          questions: existingTest.questions,
+          startTime: existingTest.startTime
+        }
       });
     }
 
-    // Generate new questions with Claude
-    const questions = await generateQuestionsWithClaude();
-    console.log(`Successfully generated ${questions.length} psychometric test questions`);
+    // Generate questions with Claude AI based on profile type
+    const questions = await generateQuestionsWithClaude(testProfileType);
 
-    // Create new test in database
+    // Create a new test document
     const newTest = new PsychometricTest({
       userId,
+      profileType: testProfileType,
       questions,
-      dateCreated: new Date(),
-      isCompleted: false
+      startTime: new Date(),
+      completed: false
     });
 
     await newTest.save();
 
-    return res.status(201).json({
-      success: true,
-      message: 'Psychometric test created successfully',
-      test: newTest
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Psychometric test generated successfully',
+      test: {
+        _id: newTest._id,
+        profileType: newTest.profileType,
+        questions: newTest.questions,
+        startTime: newTest.startTime
+      }
     });
   } catch (error) {
     console.error('Error generating psychometric test:', error);

@@ -27,6 +27,9 @@ async function handler(req, res) {
       const testResponse = responses.find(r => r.testId.toString() === test._id.toString());
       return {
         ...test,
+        // Ensure isCompleted is always set based on the completed flag
+        isCompleted: test.completed || test.isCompleted || false,
+        completed: test.completed || test.isCompleted || false, // Ensure both flags are in sync
         response: testResponse || null
       };
     });

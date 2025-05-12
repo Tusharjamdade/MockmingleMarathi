@@ -1,9 +1,47 @@
 import mongoose from "mongoose";
 
+// Define both result schemas to accommodate different profile types
+const StudentResultsSchema = new mongoose.Schema(
+  {
+    academicCollaboration: { type: Number, min: 0, max: 3 },
+    learningEthics: { type: Number, min: 0, max: 3 },
+    educationalLeadership: { type: Number, min: 0, max: 3 },
+    studyGroupDynamics: { type: Number, min: 0, max: 3 },
+    academicConflictResolution: { type: Number, min: 0, max: 3 },
+    classroomParticipation: { type: Number, min: 0, max: 3 },
+    overallScore: { type: Number, min: 0, max: 3 },
+    analysis: { type: String },
+    strengths: [{ type: String }],
+    areasToImprove: [{ type: String }],
+    recommendedLearningStyles: [{ type: String }],
+    academicPathRecommendations: [{ type: String }]
+  },
+  { _id: false }
+);
+
+const EmployeeResultsSchema = new mongoose.Schema(
+  {
+    workplaceDynamics: { type: Number, min: 0, max: 3 },
+    professionalEthics: { type: Number, min: 0, max: 3 },
+    managementPotential: { type: Number, min: 0, max: 3 },
+    teamCollaboration: { type: Number, min: 0, max: 3 },
+    conflictResolution: { type: Number, min: 0, max: 3 },
+    professionalLeadership: { type: Number, min: 0, max: 3 },
+    overallScore: { type: Number, min: 0, max: 3 },
+    analysis: { type: String },
+    strengths: [{ type: String }],
+    areasToImprove: [{ type: String }],
+    careerPathRecommendations: [{ type: String }],
+    roleFitRecommendations: [{ type: String }]
+  },
+  { _id: false }
+);
+
 const PsychometricResponseSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     testId: { type: mongoose.Schema.Types.ObjectId, ref: "PsychometricTest", required: true },
+    profileType: { type: String, enum: ["student", "employee"], default: "employee" },
     responses: [
       {
         questionIndex: { type: Number, required: true },
@@ -11,19 +49,8 @@ const PsychometricResponseSchema = new mongoose.Schema(
         reasoning: { type: String } // Optional reasoning for the choice
       }
     ],
-    results: {
-      empathy: { type: Number, min: 0, max: 3 }, // 0-3 stars
-      assertiveness: { type: Number, min: 0, max: 3 },
-      ethicalReasoning: { type: Number, min: 0, max: 3 },
-      collaboration: { type: Number, min: 0, max: 3 },
-      conflictResolution: { type: Number, min: 0, max: 3 },
-      leadershipPotential: { type: Number, min: 0, max: 3 },
-      overallScore: { type: Number, min: 0, max: 3 },
-      analysis: { type: String },
-      strengths: [{ type: String }],
-      areasToImprove: [{ type: String }],
-      roleFitRecommendations: [{ type: String }]
-    },
+    // Use Mixed type to allow for different result structures based on profile type
+    results: { type: mongoose.Schema.Types.Mixed },
     completedAt: { type: Date, default: Date.now }
   },
   { timestamps: true }

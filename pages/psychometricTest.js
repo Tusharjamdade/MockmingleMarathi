@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function PsychometricTest() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const [test, setTest] = useState(null);
@@ -16,21 +16,19 @@ export default function PsychometricTest() {
   const [reasonings, setReasonings] = useState([]);
   const [results, setResults] = useState(null);
   const [token, setToken] = useState('');
+  const [profileType, setProfileType] = useState(null); // 'student' or 'employee'
+  const [showCardSelection, setShowCardSelection] = useState(true); // Show card selection by default
 
-  useEffect(() => {
-    // For testing purposes, we'll skip authentication
-    // Check if user has an active test without token
-    checkExistingTest();
-  }, []);
-
-  const checkExistingTest = async () => {
+  const generateTest = async (type) => {
     try {
       setLoading(true);
       setGenerating(true);
+      setShowCardSelection(false); // Hide card selection
       
       // For testing, we'll use a fixed userId
       const response = await axios.post('/api/psychometricTests/generatePsychometricTest', {
-        userId: "6462a8d8f12c6d92f9f1b9e3" // Test user ID
+        userId: "6462a8d8f12c6d92f9f1b9e3", // Test user ID
+        profileType: type // Pass the profile type to the API
       });
       
       if (response.data.success) {
@@ -40,14 +38,21 @@ export default function PsychometricTest() {
         setReasonings(new Array(response.data.test.questions.length).fill(''));
       } else {
         toast.error('Failed to load test');
+        setShowCardSelection(true); // Show card selection again on error
       }
     } catch (error) {
-      console.error('Error checking existing test:', error);
+      console.error('Error generating test:', error);
       toast.error('Error loading test: ' + (error.response?.data?.message || error.message));
+      setShowCardSelection(true); // Show card selection again on error
     } finally {
       setLoading(false);
       setGenerating(false);
     }
+  };
+  
+  const handleCardSelection = (type) => {
+    setProfileType(type);
+    generateTest(type);
   };
 
   const handleOptionSelect = (optionIndex) => {
@@ -96,7 +101,8 @@ export default function PsychometricTest() {
       const response = await axios.post('/api/psychometricTests/evaluatePsychometricTest', {
         testId: test._id,
         responses,
-        userId: "6462a8d8f12c6d92f9f1b9e3" // Test user ID
+        userId: "6462a8d8f12c6d92f9f1b9e3", // Test user ID
+        profileType: profileType
       });
       
       if (response.data.success) {
@@ -130,6 +136,126 @@ export default function PsychometricTest() {
     );
   };
 
+  // Card selection screen
+  if (showCardSelection) {
+    return (
+      <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <Head>
+          <title>Psychometric Test | SHAKKTII AI</title>
+        </Head>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Psychometric Assessment</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Select your profile type to generate a personalized psychometric test that evaluates your competencies, decision-making style, and personality traits.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Student Card */}
+            <div 
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl cursor-pointer transform hover:-translate-y-1 transition duration-300"
+              onClick={() => handleCardSelection('student')}
+            >
+              <div className="h-48 bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center p-6">
+                <img 
+                  src="/student.png" 
+                  alt="Student" 
+                  className="h-32 w-32 object-contain"
+                  onError={(e) => {
+                    e.target.src = "/logoo.png";
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Student Profile</h2>
+                <p className="text-gray-600 mb-4">
+                  Designed for students and academic environments. Evaluates academic potential, learning style, teamwork, and leadership qualities in educational contexts.
+                </p>
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Academic collaboration</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Learning environment ethics</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Educational leadership</span>
+                  </li>
+                </ul>
+                <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                  Select Student Profile
+                </button>
+              </div>
+            </div>
+            
+            {/* Employee Card */}
+            <div 
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl cursor-pointer transform hover:-translate-y-1 transition duration-300"
+              onClick={() => handleCardSelection('employee')}
+            >
+              <div className="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center p-6">
+                <img 
+                  src="/employee.png" 
+                  alt="Employee" 
+                  className="h-32 w-32 object-contain"
+                  onError={(e) => {
+                    e.target.src = "/logoo.png";
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Professional Profile</h2>
+                <p className="text-gray-600 mb-4">
+                  Tailored for working professionals. Evaluates workplace competencies, conflict resolution, leadership potential, and professional decision-making.
+                </p>
+                <ul className="space-y-2 mb-6">
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Workplace dynamics</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Professional ethics</span>
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Management potential</span>
+                  </li>
+                </ul>
+                <button className="w-full py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors">
+                  Select Professional Profile
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-12 text-center">
+            <p className="text-gray-500 text-sm">
+              This assessment takes approximately 15-20 minutes to complete. Your responses are confidential and will be used to provide personalized insights into your competencies and potential.
+            </p>
+          </div>
+        </div>
+        <ToastContainer />
+      </div>
+    );
+  }
+  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -164,6 +290,165 @@ export default function PsychometricTest() {
   }
 
   if (results) {
+    const competencyAreas = [];
+    const recommendations = [];
+    
+    // Extract evaluation data from the API response
+    const evaluation = results.evaluation || {};
+    const profileType = results.profileType || 'employee';
+    
+    // Helper function to safely access nested properties
+    const safeGet = (obj, path, defaultValue) => {
+      try {
+        const parts = path.split('.');
+        let current = obj;
+        
+        for (const part of parts) {
+          if (current === undefined || current === null) {
+            return defaultValue;
+          }
+          current = current[part];
+        }
+        
+        return current === undefined || current === null ? defaultValue : current;
+      } catch (e) {
+        return defaultValue;
+      }
+    };
+    
+    if (profileType === 'student') {
+      // Only add items if they exist
+      if (evaluation.academicCollaboration) {
+        competencyAreas.push({
+          name: 'Academic Collaboration',
+          score: safeGet(evaluation, 'academicCollaboration.score', 2),
+          comments: safeGet(evaluation, 'academicCollaboration.comments', 'No comments available')
+        });
+      }
+      
+      if (evaluation.learningEthics) {
+        competencyAreas.push({
+          name: 'Learning Ethics',
+          score: safeGet(evaluation, 'learningEthics.score', 2),
+          comments: safeGet(evaluation, 'learningEthics.comments', 'No comments available')
+        });
+      }
+      
+      if (evaluation.educationalLeadership) {
+        competencyAreas.push({
+          name: 'Educational Leadership',
+          score: safeGet(evaluation, 'educationalLeadership.score', 2),
+          comments: safeGet(evaluation, 'educationalLeadership.comments', 'No comments available')
+        });
+      }
+      
+      if (evaluation.studyGroupDynamics) {
+        competencyAreas.push({
+          name: 'Study Group Dynamics',
+          score: safeGet(evaluation, 'studyGroupDynamics.score', 2),
+          comments: safeGet(evaluation, 'studyGroupDynamics.comments', 'No comments available')
+        });
+      }
+      
+      if (evaluation.academicConflictResolution) {
+        competencyAreas.push({
+          name: 'Academic Conflict Resolution',
+          score: safeGet(evaluation, 'academicConflictResolution.score', 2),
+          comments: safeGet(evaluation, 'academicConflictResolution.comments', 'No comments available')
+        });
+      }
+      
+      if (evaluation.classroomParticipation) {
+        competencyAreas.push({
+          name: 'Classroom Participation',
+          score: safeGet(evaluation, 'classroomParticipation.score', 2),
+          comments: safeGet(evaluation, 'classroomParticipation.comments', 'No comments available')
+        });
+      }
+      
+      recommendations.push(
+        { 
+          title: 'Recommended Learning Styles', 
+          items: safeGet(evaluation, 'recommendedLearningStyles', ['Visual learning', 'Practical application', 'Group study']) 
+        },
+        { 
+          title: 'Academic Path Recommendations', 
+          items: safeGet(evaluation, 'academicPathRecommendations', ['Consider peer tutoring', 'Join study groups', 'Seek hands-on learning opportunities']) 
+        }
+      );
+    } else {
+      // Employee profile - use the original competencies
+      // Empathy
+      competencyAreas.push({
+        name: 'Empathy',
+        score: safeGet(evaluation, 'empathy.score', 2),
+        comments: safeGet(evaluation, 'empathy.comments', 'No comments available')
+      });
+      
+      // Assertiveness
+      competencyAreas.push({
+        name: 'Assertiveness',
+        score: safeGet(evaluation, 'assertiveness.score', 2),
+        comments: safeGet(evaluation, 'assertiveness.comments', 'No comments available')
+      });
+      
+      // Ethical Reasoning
+      competencyAreas.push({
+        name: 'Ethical Reasoning',
+        score: safeGet(evaluation, 'ethicalReasoning.score', 2),
+        comments: safeGet(evaluation, 'ethicalReasoning.comments', 'No comments available')
+      });
+      
+      // Collaboration
+      competencyAreas.push({
+        name: 'Collaboration',
+        score: safeGet(evaluation, 'collaboration.score', 2),
+        comments: safeGet(evaluation, 'collaboration.comments', 'No comments available')
+      });
+      
+      // Conflict Resolution
+      competencyAreas.push({
+        name: 'Conflict Resolution',
+        score: safeGet(evaluation, 'conflictResolution.score', 2),
+        comments: safeGet(evaluation, 'conflictResolution.comments', 'No comments available')
+      });
+      
+      // Leadership Potential
+      competencyAreas.push({
+        name: 'Leadership Potential',
+        score: safeGet(evaluation, 'leadershipPotential.score', 2),
+        comments: safeGet(evaluation, 'leadershipPotential.comments', 'No comments available')
+      });
+      
+      recommendations.push(
+        { 
+          title: 'Career Path Recommendations', 
+          items: safeGet(evaluation, 'careerPathRecommendations', ['Project management', 'Team leadership', 'Specialized technical role']) 
+        },
+        { 
+          title: 'Role Fit Recommendations', 
+          items: safeGet(evaluation, 'roleFitRecommendations', ['Team lead', 'Project coordinator', 'Technical specialist']) 
+        }
+      );
+    }
+    
+    // If no competency areas were added (due to missing data), add default ones
+    if (competencyAreas.length === 0) {
+      if (profileType === 'student') {
+        competencyAreas.push(
+          { name: 'Academic Collaboration', score: 2, comments: 'Default assessment' },
+          { name: 'Learning Ethics', score: 2, comments: 'Default assessment' },
+          { name: 'Educational Leadership', score: 2, comments: 'Default assessment' }
+        );
+      } else {
+        competencyAreas.push(
+          { name: 'Workplace Dynamics', score: 2, comments: 'Default assessment' },
+          { name: 'Professional Ethics', score: 2, comments: 'Default assessment' },
+          { name: 'Management Potential', score: 2, comments: 'Default assessment' }
+        );
+      }
+    }
+
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
         <Head>
@@ -178,115 +463,79 @@ export default function PsychometricTest() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-4">Competency Ratings</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Empathy</h3>
-                    {renderStarRating(results.empathy.score)}
+                {competencyAreas.map((area, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium">{area.name}</h3>
+                      {renderStarRating(area.score)}
+                    </div>
+                    <p className="text-sm text-gray-600">{area.comments}</p>
                   </div>
-                  <p className="text-sm text-gray-600">{results.empathy.comments}</p>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Assertiveness</h3>
-                    {renderStarRating(results.assertiveness.score)}
-                  </div>
-                  <p className="text-sm text-gray-600">{results.assertiveness.comments}</p>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Ethical Reasoning</h3>
-                    {renderStarRating(results.ethicalReasoning.score)}
-                  </div>
-                  <p className="text-sm text-gray-600">{results.ethicalReasoning.comments}</p>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Collaboration</h3>
-                    {renderStarRating(results.collaboration.score)}
-                  </div>
-                  <p className="text-sm text-gray-600">{results.collaboration.comments}</p>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Conflict Resolution</h3>
-                    {renderStarRating(results.conflictResolution.score)}
-                  </div>
-                  <p className="text-sm text-gray-600">{results.conflictResolution.comments}</p>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium">Leadership Potential</h3>
-                    {renderStarRating(results.leadershipPotential.score)}
-                  </div>
-                  <p className="text-sm text-gray-600">{results.leadershipPotential.comments}</p>
-                </div>
+                ))}
               </div>
             </div>
+            
+
             
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Overall Assessment</h2>
-                <div className="flex items-center">
-                  <span className="mr-2 font-medium">Rating:</span>
-                  {renderStarRating(results.overallScore)}
+              <h2 className="text-xl font-semibold mb-4">Overall Assessment</h2>
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium text-lg">Overall Score</h3>
+                  <div className="flex">
+                    {renderStarRating(safeGet(evaluation, 'overallScore', 2))}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 whitespace-pre-line">{results.analysis}</p>
+                <div className="prose max-w-none">
+                  <p className="text-gray-700">{safeGet(evaluation, 'analysis', 'This is an automatically generated analysis based on your responses to the psychometric test questions.')}</p>
+                </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div>
-                <h2 className="text-xl font-semibold mb-4">Key Strengths</h2>
-                <ul className="bg-gray-50 p-4 rounded-lg">
-                  {results.strengths.map((strength, index) => (
-                    <li key={index} className="mb-2 flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>{strength}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h2 className="text-xl font-semibold mb-4">Strengths</h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <ul className="space-y-2">
+                    {safeGet(evaluation, 'strengths', ['Communication skills', 'Problem-solving ability', 'Adaptability']).map((strength, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               
               <div>
-                <h2 className="text-xl font-semibold mb-4">Areas for Improvement</h2>
-                <ul className="bg-gray-50 p-4 rounded-lg">
-                  {results.areasToImprove.map((area, index) => (
-                    <li key={index} className="mb-2 flex items-start">
-                      <svg className="w-5 h-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      <span>{area}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h2 className="text-xl font-semibold mb-4">Areas to Improve</h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <ul className="space-y-2">
+                    {safeGet(evaluation, 'areasToImprove', ['Time management', 'Group collaboration', 'Self-assessment']).map((area, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-amber-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span>{area}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
             
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Role Fit Recommendations</h2>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {results.roleFitRecommendations.map((role, index) => (
-                    <li key={index} className="flex items-center">
-                      <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                        <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-                      </svg>
-                      <span>{role}</span>
-                    </li>
+            {recommendations.map((rec, i) => (
+              <div key={i} className="mt-8">
+                <h3 className="text-xl font-semibold text-gray-800 mb-3">{rec.title}</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  {rec.items.map((item, index) => (
+                    <li key={index} className="ml-4">{item}</li>
                   ))}
                 </ul>
               </div>
-            </div>
+            ))}
             
             <div className="mt-8 flex justify-center">
               <button
@@ -300,7 +549,7 @@ export default function PsychometricTest() {
                   setResults(null);
                   setTest(null);
                   setCurrentQuestionIndex(0);
-                  checkExistingTest();
+                  setShowCardSelection(true); // Show card selection again
                 }}
                 className="ml-4 px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
               >

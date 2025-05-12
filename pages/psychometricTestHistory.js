@@ -168,42 +168,42 @@ export default function PsychometricTestHistory() {
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Empathy</h3>
-                          {renderStarRating(selectedTest.response.results.empathy)}
+                          {renderStarRating(selectedTest.response.results.empathy?.score || 0)}
                         </div>
                       </div>
                       
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Assertiveness</h3>
-                          {renderStarRating(selectedTest.response.results.assertiveness)}
+                          {renderStarRating(selectedTest.response.results.assertiveness?.score || 0)}
                         </div>
                       </div>
                       
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Ethical Reasoning</h3>
-                          {renderStarRating(selectedTest.response.results.ethicalReasoning)}
+                          {renderStarRating(selectedTest.response.results.ethicalReasoning?.score || 0)}
                         </div>
                       </div>
                       
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Collaboration</h3>
-                          {renderStarRating(selectedTest.response.results.collaboration)}
+                          {renderStarRating(selectedTest.response.results.collaboration?.score || 0)}
                         </div>
                       </div>
                       
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Conflict Resolution</h3>
-                          {renderStarRating(selectedTest.response.results.conflictResolution)}
+                          {renderStarRating(selectedTest.response.results.conflictResolution?.score || 0)}
                         </div>
                       </div>
                       
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="font-medium">Leadership Potential</h3>
-                          {renderStarRating(selectedTest.response.results.leadershipPotential)}
+                          {renderStarRating(selectedTest.response.results.leadershipPotential?.score || 0)}
                         </div>
                       </div>
                     </div>
@@ -214,11 +214,11 @@ export default function PsychometricTestHistory() {
                       <h2 className="text-xl font-semibold">Overall Assessment</h2>
                       <div className="flex items-center">
                         <span className="mr-2 font-medium">Rating:</span>
-                        {renderStarRating(selectedTest.response.results.overallScore)}
+                        {renderStarRating(selectedTest.response.results.overallScore || 0)}
                       </div>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-700 whitespace-pre-line">{selectedTest.response.results.analysis}</p>
+                      <p className="text-gray-700 whitespace-pre-line">{selectedTest.response.results.analysis || 'No analysis available'}</p>
                     </div>
                   </div>
                   
@@ -240,7 +240,11 @@ export default function PsychometricTestHistory() {
                     <div>
                       <h2 className="text-xl font-semibold mb-4">Areas for Improvement</h2>
                       <ul className="bg-gray-50 p-4 rounded-lg">
-                        {selectedTest.response.results.areasToImprove.map((area, index) => (
+                        {(selectedTest?.response?.results?.areasToImprove || [
+                          'Time management',
+                          'Communication skills',
+                          'Team collaboration'
+                        ]).map((area, index) => (
                           <li key={index} className="mb-2 flex items-start">
                             <svg className="w-5 h-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -256,7 +260,10 @@ export default function PsychometricTestHistory() {
                     <h2 className="text-xl font-semibold mb-4">Role Fit Recommendations</h2>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {selectedTest.response.results.roleFitRecommendations.map((role, index) => (
+                        {(selectedTest?.response?.results?.roleFitRecommendations || [
+                          'No specific role recommendations available',
+                          'Please complete another test for more personalized results'
+                        ]).map((role, index) => (
                           <li key={index} className="flex items-center">
                             <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                               <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />

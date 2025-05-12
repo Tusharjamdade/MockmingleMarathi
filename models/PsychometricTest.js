@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const PsychometricTestSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    profileType: { type: String, enum: ["student", "employee"], default: "employee" },
     questions: [
       {
         scenario: { type: String, required: true },
@@ -15,9 +16,13 @@ const PsychometricTestSchema = new mongoose.Schema(
         difficulty: { type: String, enum: ["Easy", "Moderate", "Complex"], required: true }
       }
     ],
-    dateCreated: { type: Date, default: Date.now },
-    isCompleted: { type: Boolean, default: false },
-    completedAt: { type: Date }
+    startTime: { type: Date, default: Date.now },
+    completed: { type: Boolean, default: false },
+    isCompleted: { type: Boolean, default: false }, // For frontend compatibility
+    completedAt: { type: Date },
+    responses: [{ type: Number }], // Array of selected option indices
+    reasonings: [{ type: String }], // Array of reasoning for each response
+    results: { type: Object } // Results object with scores and analysis
   },
   { timestamps: true }
 );
