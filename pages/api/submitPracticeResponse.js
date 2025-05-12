@@ -78,25 +78,20 @@ async function handler(req, res) {
 
     await practiceResponse.save();
 
-    // Calculate a score between 1-3 based on response length and complexity
-    // This is a simple scoring mechanism that you can improve later with more sophisticated criteria
-    let calculatedScore = 1; // Default minimum score
+    // Get the card details to provide context for Claude evaluation
+    const cardDetails = {
+      cardId,
+      skillArea: skillArea || getSkillAreaFromCardId(cardId) || 'Listening',
+      difficulty: difficulty || getDifficultyFromCardId(cardId) || 'Beginner',
+      level: level || getLevelFromCardId(cardId) || 1
+    };
     
-    // Basic scoring criteria based on response length
-    if (userResponse && userResponse.trim()) {
-      const wordCount = userResponse.trim().split(/\s+/).length;
-      
-      if (wordCount >= 15) {
-        calculatedScore = 3; // Excellent - longer, more detailed response
-      } else if (wordCount >= 8) {
-        calculatedScore = 2; // Good - moderate length response
-      } else {
-        calculatedScore = 1; // Needs improvement - very short response
-      }
-    }
+    // Use Claude AI to evaluate the response and generate feedback
+    const evaluation = await evaluateWithClaude(userResponse, cardDetails);
     
-    // Generate AI feedback for the response using our calculated score
-    const feedback = await generateFeedback(userResponse, calculatedScore);
+    // Extract score and feedback from the evaluation
+    const calculatedScore = evaluation.score || 1; // Default to 1 if evaluation fails
+    const feedback = evaluation.feedback || "Thank you for your response. Keep practicing to improve your skills.";
 
     // Update the response with feedback and the calculated score
     practiceResponse.feedbackResponse = feedback;
@@ -138,53 +133,123 @@ async function handler(req, res) {
   }
 }
 
-// Function to generate feedback using Claude API
-async function generateFeedback(userResponse, score) {
-  const url = 'https://api.anthropic.com/v1/messages';
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'x-api-key': process.env.ANTHROPIC_API_KEY,
-    'anthropic-version': '2023-06-01',
-  };
-
-  const prompt = `As a language assessment AI, provide constructive and encouraging feedback for this student response:
-  
-  Student response: "${userResponse}"
-  Current assessment: ${score} out of 3 stars
-  
-  Give specific, actionable feedback in 2-3 sentences that would help the student improve.`;
-
-  const payload = {
-    model: "claude-3-haiku-20240307",
-    max_tokens: 150,
-    temperature: 0.7,
-    messages: [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  };
-
+// Function to evaluate response and generate feedback using Claude API
+async function evaluateWithClaude(userResponse, cardDetails) {
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
+    console.log('Evaluating practice response with Claude:', { cardId: cardDetails.cardId });
+    
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('Claude API key is missing');
+      return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+    }
+    
+    const url = 'https://api.anthropic.com/v1/messages';
 
-    const responseData = await response.json();
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    };
 
-    if (response.ok && responseData?.content?.[0]?.text) {
-      return responseData.content[0].text.trim();
-    } else {
-      console.error('Claude API error for feedback:', responseData);
-      return "Thank you for your response. Keep practicing to improve your skills.";
+    // Create a prompt for Claude to evaluate the response
+    const prompt = `
+      You are evaluating a student's response for a language learning exercise.
+      
+      Skill Area: ${cardDetails.skillArea}
+      Difficulty Level: ${cardDetails.difficulty}
+      Level Number: ${cardDetails.level}
+      
+      Student's response: "${userResponse}"
+      
+      Please evaluate the response based on:
+      - Accuracy of content
+      - Language usage and grammar
+      - Completeness of response
+      - Relevance to the topic
+      
+      Assign a star rating from 1-3 stars, where:
+      - 1 star: Needs improvement, basic response with errors or incomplete
+      - 2 stars: Good response with minor errors or areas for improvement
+      - 3 stars: Excellent response, comprehensive and well-articulated
+      
+      Then provide specific, constructive feedback in 2-3 sentences that would help the student improve.
+      
+      Return your evaluation as a JSON object with this structure:
+      {
+        "score": (number from 1-3),
+        "feedback": "(your specific feedback for the student)"
+      }
+    `;
+
+    // Call Claude API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 300,
+          temperature: 0.7,
+          messages: [{
+            role: "user",
+            content: prompt
+          }]
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Claude API error response:', errorText);
+        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      }
+
+      const result = await response.json();
+      
+      if (!result.content || !result.content[0] || !result.content[0].text) {
+        console.error('Unexpected Claude API response structure:', JSON.stringify(result));
+        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      }
+
+      const textResponse = result.content[0].text;
+      
+      // Extract JSON object from the response
+      const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('Could not find valid JSON object in Claude response');
+        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      }
+
+      try {
+        const evaluation = JSON.parse(jsonMatch[0]);
+        
+        // Validate the evaluation format
+        if (evaluation.score === undefined || !evaluation.feedback) {
+          console.error('Invalid evaluation format from Claude');
+          return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+        }
+        
+        return evaluation;
+      } catch (parseError) {
+        console.error('Error parsing Claude response as JSON:', parseError);
+        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('Claude API request timed out');
+      } else {
+        console.error('Error calling Claude API:', error);
+      }
+      return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
     }
   } catch (error) {
-    console.error('Error calling Claude API for feedback:', error);
-    return "Thank you for your response. Keep practicing to improve your skills.";
+    console.error('Error in evaluateWithClaude:', error);
+    return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
   }
 }
 

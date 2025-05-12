@@ -42,12 +42,89 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
       }
     `;
 
-    // Use Claude API to evaluate the responses
+    // Check if API key exists
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('Claude API key is missing');
+      throw new Error('API key is missing');
+    }
+
+    // Call Claude API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+    try {
+      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 1000,
+          temperature: 0.7,
+          messages: [{
+            role: "user",
+            content: prompt
+          }]
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        console.error('Claude API error response:', errorText);
+        throw new Error(`API error: ${claudeResponse.status}`);
+      }
+
+      const result = await claudeResponse.json();
+      console.log('Claude API response received');
+      
+      if (!result.content || !result.content[0] || !result.content[0].text) {
+        console.error('Unexpected Claude API response structure:', JSON.stringify(result));
+        throw new Error('Invalid API response format');
+      }
+
+      const textResponse = result.content[0].text;
+      console.log('Claude response received, length:', textResponse.length);
+
+      // Extract JSON object from the response
+      const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('Could not find valid JSON object in Claude response');
+        throw new Error('Invalid response format');
+      }
+
+      try {
+        const evaluation = JSON.parse(jsonMatch[0]);
+        
+        // Validate the evaluation format
+        if (evaluation.overallRating === undefined || !evaluation.feedback || evaluation.completed === undefined) {
+          throw new Error('Invalid evaluation format');
+        }
+        
+        return evaluation;
+      } catch (parseError) {
+        console.error('Error parsing Claude response as JSON:', parseError);
+        console.log('Raw Claude response text:', textResponse);
+        throw new Error('Failed to parse response');
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out');
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error evaluating with Claude:", error);
     
-    // Log the responses for debugging
-    console.log('Evaluating the following responses:', JSON.stringify(responses, null, 2));
+    // Fall back to a basic evaluation if Claude API fails
+    console.log('Falling back to basic evaluation');
     
-    // Calculate an average score based on response match percentages
+    // Calculate a basic score based on response match percentages
     let totalScore = 0;
     let perfectResponses = 0;
     
@@ -55,25 +132,20 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
       const userText = response.userResponse?.toLowerCase() || '';
       const expectedText = response.expectedResponse?.toLowerCase() || '';
       
-      console.log(`Comparing answer: User="${userText}" vs Expected="${expectedText}"`);
-      
       // For listening practice, be more lenient with matches
       if (skillArea === 'Listening') {
         // Exact match
         if (userText === expectedText) {
           totalScore += 3;
           perfectResponses++;
-          console.log('Exact match: +3 points');
         } 
         // User response contains the expected response completely
         else if (expectedText && userText.includes(expectedText)) {
           totalScore += 2.5;
-          console.log('Contains expected response: +2.5 points');
         }
         // Expected response contains the user response completely
         else if (expectedText && expectedText.includes(userText) && userText.length > 2) {
           totalScore += 2;
-          console.log('Expected response contains user response: +2 points');
         } 
         // Significant word overlap (more than 50% of the expected words)
         else if (expectedText) {
@@ -89,16 +161,11 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
             });
             
             const matchPercentage = matchedWords / expectedWords.length;
-            console.log(`Word match percentage: ${matchPercentage * 100}%`);
             
             if (matchPercentage >= 0.5) {
               totalScore += 1 + matchPercentage;
-              console.log(`Good word overlap: +${1 + matchPercentage} points`);
             } else if (matchPercentage > 0) {
               totalScore += matchPercentage;
-              console.log(`Some word overlap: +${matchPercentage} points`);
-            } else {
-              console.log('No significant word overlap');
             }
           }
         }
@@ -147,56 +214,6 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
       overallRating: stars,
       feedback,
       completed
-    };
-    
-    // Now we're calling the actual Claude API for a detailed evaluation
-    try {
-      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 1000,
-          temperature: 0.7,
-          messages: [{
-            role: "user",
-            content: prompt
-          }]
-        })
-      });
-      
-      if (claudeResponse.ok) {
-        const result = await claudeResponse.json();
-        console.log('Claude API response:', result);
-        
-        if (result.content && result.content[0] && result.content[0].text) {
-          try {
-            return JSON.parse(result.content[0].text);
-          } catch (parseError) {
-            console.error('Error parsing Claude response as JSON:', parseError);
-            console.log('Raw Claude response text:', result.content[0].text);
-            // Fall back to our calculated evaluation
-          }
-        }
-      } else {
-        console.error('Claude API error:', await claudeResponse.text());
-      }
-    } catch (apiError) {
-      console.error('Error calling Claude API:', apiError);
-    }
-    
-    // If Claude API fails or returns invalid response, fall back to our calculated evaluation
-    
-  } catch (error) {
-    console.error("Error evaluating with Claude:", error);
-    return {
-      overallRating: 1, // Default to 1 star if evaluation fails
-      feedback: "We couldn't fully evaluate your responses, but you've completed the level.",
-      completed: true
     };
   }
 };

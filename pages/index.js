@@ -1972,6 +1972,18 @@ export default function Home({ Logout, user }) {
                       </svg>
                     </button>
                   </Link>
+                  
+                  <Link href={'/psychometricTest'}>
+                    <button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
+                      PSYCHOMETRIC TEST
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </button>
+                  </Link>
+                 
+
+
                 </div>
               </div>
             </div>
