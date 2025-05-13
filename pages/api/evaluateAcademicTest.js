@@ -104,31 +104,43 @@ function generateBasicEvaluation(testData, userAnswers) {
   const answers = testData.questions.map((q, index) => {
     const userAnswer = userAnswers[index] || '';
     
-    // Simple string matching for MCQ or exact answers
+    // Evaluation variables
     let isCorrect = false;
     let isPartial = false;
     let score = 0;
     let feedback = '';
     
     if (testData.testFormat === 'MCQ') {
-      // For MCQ, check exact match first
-      if (userAnswer.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
+      // For MCQ, we need to compare the selected option with the correct answer
+      // Normalize both for comparison (trim whitespace, make lowercase)
+      const normalizedUserAnswer = userAnswer.trim().toLowerCase();
+      const normalizedCorrectAnswer = q.correctAnswer.trim().toLowerCase();
+      
+      // Get all available options normalized for comparison
+      const normalizedOptions = q.options.map(opt => opt.trim().toLowerCase());
+      
+      // First check if user selected the exact correct answer
+      if (normalizedUserAnswer === normalizedCorrectAnswer) {
         isCorrect = true;
         score = 100;
         feedback = "Correct answer! Well done.";
-      } else {
-        // Check if it's partially correct (contains part of the answer)
-        const correctLower = q.correctAnswer.trim().toLowerCase();
-        const userLower = userAnswer.trim().toLowerCase();
-        
-        if (correctLower.includes(userLower) || userLower.includes(correctLower)) {
-          isPartial = true;
-          score = 50;
-          feedback = "Partially correct. Your answer contains some correct elements.";
-        } else {
-          score = 0;
-          feedback = `Incorrect. The correct answer is: ${q.correctAnswer}`;
-        }
+      } 
+      // Check if the user selected a valid option (but not the correct one)
+      else if (normalizedOptions.includes(normalizedUserAnswer)) {
+        // User selected a wrong option
+        score = 0;
+        feedback = `Incorrect. The correct answer is: ${q.correctAnswer}`;
+      }
+      // Check if user answer matches part of correct answer (fuzzy match)
+      else if (normalizedCorrectAnswer.includes(normalizedUserAnswer) && normalizedUserAnswer.length > 3) {
+        isPartial = true;
+        score = 30; // Reduced partial score for fuzzy matches
+        feedback = "Partially correct. Your answer contains some elements of the correct answer.";
+      } 
+      // Completely wrong or invalid answer
+      else {
+        score = 0;
+        feedback = `Incorrect. The correct answer is: ${q.correctAnswer}`;
       }
     } else if (testData.testFormat === 'Written') {
       // For written answers, use more sophisticated matching

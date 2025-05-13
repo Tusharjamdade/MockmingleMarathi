@@ -12,6 +12,9 @@ export const config = {
 const { getCachedQuestions, cacheQuestions } = require("@/utils/academicTestCache");
 
 async function generateQuestionsWithClaude(stream, department, subject, confidenceLevel, testFormat) {
+  // Variable to track if we need to regenerate questions due to issues
+  let needsRegeneration = false;
+  
   try {
     console.log(`Generating questions for ${subject} (${stream}, ${department}) at confidence level ${confidenceLevel} in ${testFormat} format`);
     
@@ -26,6 +29,16 @@ async function generateQuestionsWithClaude(stream, department, subject, confiden
       - 3 Easy questions
       - 4 Moderate questions 
       - 3 Hard questions
+      
+      ${testFormat === 'MCQ' ? `For MCQ questions, please follow these guidelines:
+      1. Generate 4 options for each question
+      2. One option MUST be correct, the other 3 MUST be wrong
+      3. All options MUST be relevant to the subject (${subject}) and specific topic of the question
+      4. NEVER use generic options like "All of the above" or "None of the above"
+      5. Make wrong options plausible but clearly incorrect
+      6. The correct answer should be randomly positioned (not always the first option)
+      7. Use terminology appropriate for ${stream} level students in ${department}
+      ` : ''}
       
       Return the questions as a JSON array with this structure:
       [
@@ -118,15 +131,75 @@ async function generateQuestionsWithClaude(stream, department, subject, confiden
           throw new Error('Response is not a valid array of questions');
         }
         
-        // Ensure questions have the required fields
-        const validatedQuestions = parsedQuestions.map((q, index) => ({
-          questionText: q.questionText || `Question ${index + 1}`,
-          difficulty: q.difficulty || 'Moderate',
-          options: Array.isArray(q.options) ? q.options : (testFormat === 'MCQ' ? ['Option A', 'Option B', 'Option C', 'Option D'] : []),
-          correctAnswer: q.correctAnswer || 'Answer not provided',
-          explanation: q.explanation || 'No explanation available'
-        }));
+        // Initialize flag for potential regeneration
+        let needsRegeneration = false;
         
+        // Ensure questions have the required fields
+        const validatedQuestions = parsedQuestions.map((q, index) => {
+          // Process the question data
+          let options = q.options;
+          let correctAnswer = q.correctAnswer;
+          
+          if (testFormat === 'MCQ') {
+            // If Claude didn't generate options correctly, log the issue
+            if (!Array.isArray(options) || options.length < 4) {
+              console.log(`Question ${index + 1} has invalid options, attempting to fix`);
+              // Try to correct the issue by ensuring we have at least 4 options
+              if (!Array.isArray(options)) {
+                options = [
+                  `${subject} concept 1`, 
+                  `${subject} concept 2`, 
+                  `${subject} concept 3`, 
+                  `${subject} concept 4`
+                ];
+              } else if (options.length < 4) {
+                // Add subject-relevant placeholder options to fill up to 4
+                while (options.length < 4) {
+                  options.push(`Additional ${subject} option ${options.length + 1}`);
+                }
+              }
+              
+              // Flag this test for re-generation with retryWithSimplifiedPrompt
+              needsRegeneration = true;
+            }
+            
+            // Ensure the correct answer is actually one of the options
+            if (!correctAnswer || !options.includes(correctAnswer)) {
+              console.log(`Question ${index + 1} has invalid correctAnswer, fixing`);
+              // Use first option as default correct answer
+              correctAnswer = options[0];
+              // Flag this test for re-generation
+              needsRegeneration = true;
+            }
+          } else {
+            // For non-MCQ questions, use Claude's provided answer or a placeholder
+            correctAnswer = correctAnswer || 'Answer not provided';
+          }
+          
+          return {
+            questionText: q.questionText || `Question ${index + 1}`,
+            difficulty: q.difficulty || 'Moderate',
+            options: options || [],
+            correctAnswer: correctAnswer,
+            explanation: q.explanation || 'No explanation available'
+          };
+        });
+        
+        // If any questions had issues that required fixes, try regenerating with simplified prompt
+        if (needsRegeneration) {
+          console.log('Some questions had issues, attempting to regenerate with simplified prompt...');
+          try {
+            // Try the simplified prompt approach
+            const regeneratedQuestions = await retryWithSimplifiedPrompt(stream, department, subject, confidenceLevel, testFormat);
+            return regeneratedQuestions;
+          } catch (retryError) {
+            console.log('Regeneration failed, returning best-effort fixed questions');
+            // Fall back to our fixed questions if regeneration fails
+            return validatedQuestions;
+          }
+        }
+        
+        // Return the validated questions if no regeneration was needed
         return validatedQuestions;
       } catch (parseError) {
         console.error('Error parsing Claude response as JSON:', parseError);
@@ -153,7 +226,9 @@ function generateFallbackQuestions(stream, department, subject, testFormat) {
   
   // Create subject-specific fallback questions based on common topics
   const subjectTopics = getSubjectTopics(subject, department);
-  const mcqOptions = testFormat === "MCQ" ? generateMcqOptions(subject, 4) : [];
+  // We no longer use hardcoded fallback options
+  // If we get this far, we couldn't generate questions with Claude at all
+  throw new Error(`Failed to generate ${subject} questions with Claude AI. Please try again later.`);
   
   return Array.from({ length: 10 }, (_, i) => {
     const difficulty = i < 3 ? "Easy" : i < 7 ? "Moderate" : "Hard";
@@ -197,27 +272,99 @@ function getSubjectTopics(subject, department) {
   return topicMap[subject] || defaultTopics;
 }
 
-// Generate MCQ options based on the subject
-function generateMcqOptions(subject, count) {
-  const optionSets = [
-    // Programming
-    ['Object-oriented programming', 'Functional programming', 'Procedural programming', 'Event-driven programming'],
-    ['Variables', 'Constants', 'Functions', 'Classes'],
-    ['JavaScript', 'Python', 'Java', 'C++'],
-    ['HTML', 'CSS', 'JSON', 'XML'],
-    ['Git', 'SVN', 'Mercurial', 'Perforce'],
+// Handle API failure by attempting a new API call with a simplified prompt
+async function retryWithSimplifiedPrompt(stream, department, subject, confidenceLevel, testFormat) {
+  try {
+    console.log('Retrying question generation with simplified prompt...');
     
-    // Mathematics
-    ['Integration', 'Differentiation', 'Limits', 'Series'],
-    ['Mean', 'Median', 'Mode', 'Standard Deviation'],
-    ['Linear', 'Quadratic', 'Exponential', 'Logarithmic'],
+    // Create a simpler prompt focusing just on generating valid MCQ options
+    const simplifiedPrompt = `
+      Generate 10 ${subject} questions for a ${stream} student in ${department}.
+      
+      Each question must include:
+      1. Clear question text
+      2. Four distinct answer options relevant to ${subject}
+      3. One clearly marked correct answer
+      4. Difficulty level (Easy, Moderate, or Hard)
+      
+      Format as JSON array:
+      [
+        {
+          "questionText": "Question here?",
+          "difficulty": "Moderate",
+          "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+          "correctAnswer": "Option 2",
+          "explanation": "Brief explanation"
+        },
+        ...
+      ]
+      
+      IMPORTANT: Return ONLY valid JSON. No other text.
+    `;
     
-    // Generic
-    ['True', 'False', 'Partially true', 'Cannot be determined'],
-    ['Always', 'Sometimes', 'Rarely', 'Never']
-  ];
-  
-  return optionSets;
+    // Call Claude with simplified prompt
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 4000,
+          temperature: 0.7,
+          messages: [{
+            role: "user",
+            content: simplifiedPrompt
+          }]
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.content || !result.content[0] || !result.content[0].text) {
+        throw new Error('Invalid API response format');
+      }
+      
+      // Extract and parse JSON
+      const textResponse = result.content[0].text;
+      const jsonStart = textResponse.indexOf('[');
+      const jsonEnd = textResponse.lastIndexOf(']') + 1;
+      
+      if (jsonStart === -1 || jsonEnd <= jsonStart) {
+        throw new Error('No valid JSON found in response');
+      }
+      
+      const jsonString = textResponse.substring(jsonStart, jsonEnd);
+      const parsedQuestions = JSON.parse(jsonString);
+      
+      if (!Array.isArray(parsedQuestions) || parsedQuestions.length === 0) {
+        throw new Error('Response is not a valid array of questions');
+      }
+      
+      return parsedQuestions;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      console.error('Retry with simplified prompt failed:', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Complete API failure, unable to generate questions:', error);
+    throw new Error('Unable to generate questions after multiple attempts');
+  }
 }
 
 // Create a realistic question text
