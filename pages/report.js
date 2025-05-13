@@ -484,9 +484,10 @@ console.log("match Score",scoreMatch);
   return (
     <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: "url('/BG.jpg')" }}>
       {/* Back Button */}
-      <div className="absolute top-5 left-3 text-4xl text-white cursor-pointer" onClick={goBack}>
-        <IoIosArrowBack />
-      </div>
+      <div className="absolute top-5 left-3 text-5xl text-white cursor-pointer flex items-center" onClick={goBack}>
+  <IoIosArrowBack /> <span className="ml-2 text-base">Go Back</span>
+</div>
+
 
       {/* Main Content */}
       <div className="text-white p-6 md:p-12">
