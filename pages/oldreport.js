@@ -163,7 +163,216 @@ function Oldreport() {
     });
   };
 
-  // Generate PDF Report
+  // Generate PDF for detailed report analysis
+  const downloadDetailedReport = () => {
+    if (!fullReportData) return;
+    
+    // Create new PDF document with higher quality settings
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
+    
+    const reportDate = fullReportData.createdAt ? new Date(fullReportData.createdAt).toLocaleString() : "Unknown Date";
+    let marginX = 15;
+    let marginY = 20;
+    let pageHeight = doc.internal.pageSize.height;
+    let pageWidth = doc.internal.pageSize.width;
+    let contentWidth = pageWidth - (marginX * 2);
+
+    // Title
+    doc.setFontSize(20);
+    doc.text("Detailed Interview Analysis", doc.internal.pageSize.width / 2, marginY, { align: "center" });
+
+    // Report Role and Date
+    marginY += 15;
+    doc.setFontSize(14);
+    doc.text(`Role: ${fullReportData.role || 'N/A'}`, marginX, marginY);
+    marginY += 10;
+    doc.text(`Date: ${reportDate}`, marginX, marginY);
+    marginY += 15;
+
+    // Extract and format the full report content
+    const formatReportContentForPDF = (rawContent) => {
+      if (!rawContent) return '';
+      
+      // First extract the complete text content
+      let cleanReport = rawContent
+        // Remove markdown formatting
+        .replace(/\*\*/g, '')
+        .replace(/##/g, '')
+        .replace(/###/g, '')
+        // Convert markdown links to readable text
+        .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)')
+        // Fix spacing issues
+        .replace(/\n\s*\n/g, '\n')
+        // Ensure bullet points are properly formatted
+        .replace(/^\s*-\s*/gm, '- ')
+        // Fix numbered list formatting
+        .replace(/^(\d+)\.(?!\d)/gm, '$1. ');
+      
+      return cleanReport;
+    };
+    
+    // Process the full report content
+    const cleanReport = formatReportContentForPDF(fullReportData.reportAnalysis);
+
+    // Split the detailed analysis by sections for better formatting
+    const sections = cleanReport.split('\n').filter(line => line.trim() !== '');
+
+    doc.setFontSize(12);
+    
+    // Keep track of list numbering
+    let inList = false;
+    let listNumber = 0;
+    
+    sections.forEach(section => {
+      // Handle section headers (lines that end with a colon)
+      const isHeader = section.match(/^[A-Za-z][^:]+:$/) || 
+                      section.match(/Assessment and Recommendations$/) ||
+                      section.match(/Key Recommendations:$/);
+      
+      // Handle numbered lists
+      const isNumberedItem = section.match(/^\d+\.\s/);
+      
+      // Handle bullet points
+      const isBulletPoint = section.trim().startsWith('-');
+      
+      // Format headers differently
+      if (isHeader) {
+        // Add a page break if we're close to the bottom
+        if (marginY + 20 > pageHeight - 20) {
+          doc.addPage();
+          marginY = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        
+        doc.text(section.trim(), marginX, marginY);
+        marginY += 10;
+        
+        // Draw a line under headers
+        doc.setDrawColor(100, 100, 200);
+        doc.line(marginX, marginY - 5, marginX + 150, marginY - 5);
+        
+        // Reset font
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        
+        // Reset list counter when encountering a new section
+        inList = false;
+        listNumber = 0;
+      } 
+      // Handle numbered list items
+      else if (isNumberedItem) {
+        // Set list to active
+        inList = true;
+        
+        // Add a page break if we're close to the bottom
+        if (marginY + 15 > pageHeight - 20) {
+          doc.addPage();
+          marginY = 20;
+        }
+        
+        doc.setFont(undefined, 'bold');
+        doc.text(section.trim(), marginX, marginY);
+        doc.setFont(undefined, 'normal');
+        marginY += 8;
+        
+        // Get the number from this item
+        const numMatch = section.match(/^(\d+)\./); 
+        if (numMatch) {
+          listNumber = parseInt(numMatch[1], 10);
+        }
+      }
+      // Handle bullet points
+      else if (isBulletPoint) {
+        // Add a page break if we're close to the bottom
+        if (marginY + 15 > pageHeight - 20) {
+          doc.addPage();
+          marginY = 20;
+        }
+        
+        // Format the bullet point text (remove the leading dash)
+        const bulletText = section.trim().substring(1).trim();
+        
+        // Indent bullet points
+        doc.text(`•  ${bulletText}`, marginX + 5, marginY);
+        marginY += 8;
+      }
+      else {
+        // Check if this contains a score
+        const scoreMatch = section.match(/(\d+)\/(10|50)/);
+        if (scoreMatch) {
+          // Add a page break if we're close to the bottom
+          if (marginY + 15 > pageHeight - 20) {
+            doc.addPage();
+            marginY = 20;
+          }
+          
+          doc.text(section, marginX, marginY);
+          marginY += 8;
+          
+          // Draw a score bar
+          const scoreValue = parseInt(scoreMatch[1], 10);
+          const maxValue = parseInt(scoreMatch[2], 10);
+          const percentage = (scoreValue / maxValue);
+          
+          if (Number.isFinite(percentage) && percentage > 0) {
+            const barWidth = 100 * percentage;
+            doc.setFillColor(50, 100, 250);
+            doc.rect(marginX, marginY - 5, barWidth, 3, "F");
+            marginY += 10;
+          }
+        } 
+        // Handle regular paragraphs
+        else {
+          // If in a list, add indentation to paragraphs
+          const textIndent = inList ? 10 : 0;
+          
+          // Regular text - wrap long content
+          const wrappedText = doc.splitTextToSize(section, 170 - textIndent);
+          
+          // Check if we need a page break
+          if (marginY + (wrappedText.length * 7) > pageHeight - 20) {
+            doc.addPage();
+            marginY = 20;
+          }
+          
+          wrappedText.forEach(line => {
+            doc.text(line, marginX + textIndent, marginY);
+            marginY += 7;
+          });
+          
+          marginY += 3; // Extra space between paragraphs
+        }
+      }
+    });
+
+    // Add company logo or branding at the bottom
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Generated by SHAKKTII AI © ' + new Date().getFullYear(), doc.internal.pageSize.width/2, doc.internal.pageSize.height - 10, {
+      align: 'center'
+    });
+    
+    // Ensure all content is rendered properly before saving
+    try {
+      // Save with a meaningful filename based on role and date
+      const fileName = `${fullReportData.role || 'interview'}_report_${new Date().toISOString().split('T')[0]}`;
+      doc.save(`${fileName}.pdf`);
+      
+      console.log('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF report. Please try again.');
+    }
+  };
+  
+  // Generate PDF Report for summary
   const downloadReport = (reportContent, report) => {
     const doc = new jsPDF();
     const reportDate = report.createdAt ? new Date(report.createdAt).toLocaleString() : "Unknown Date";
@@ -203,27 +412,39 @@ function Oldreport() {
     // Scores Section
     marginY += 10;
     const scores = [
-      { label: 'Technical Proficiency', score: extractScore(report, 'Technical Proficiency') },
-      { label: 'Communication', score: extractScore(report, 'Communication') },
-      { label: 'Decision-Making', score: extractScore(report, 'Decision-Making') },
-      { label: 'Confidence', score: extractScore(report, 'Confidence') },
-      { label: 'Language Fluency', score: extractScore(report, 'Language Fluency') },
-      { label: 'Overall Score', score: extractScore(report, 'Overall Score') },
+      { label: 'Technical Proficiency', scoreData: extractScore(report, 'Technical Proficiency') },
+      { label: 'Communication', scoreData: extractScore(report, 'Communication') },
+      { label: 'Decision-Making', scoreData: extractScore(report, 'Decision-Making') },
+      { label: 'Confidence', scoreData: extractScore(report, 'Confidence') },
+      { label: 'Language Fluency', scoreData: extractScore(report, 'Language Fluency') },
+      { label: 'Overall Score', scoreData: extractScore(report, 'Overall Score') },
     ];
 
-    scores.forEach((score) => {
+    scores.forEach((scoreItem) => {
       if (marginY + 15 > pageHeight - 20) {
         doc.addPage();
         marginY = 20;
       }
       doc.setFontSize(12);
-      doc.text(`${score.label}:`, marginX, marginY);
+      doc.text(`${scoreItem.label}:`, marginX, marginY);
 
+      // Get the numeric score value (defaulting to 0 if undefined)
+      const scoreValue = scoreItem.scoreData && typeof scoreItem.scoreData.score === 'number' ? 
+        scoreItem.scoreData.score : 0;
+        
       // Progress Bar (Replaces Circle)
-      let progressWidth = (score.score / 10) * 50;
-      doc.setFillColor(50, 150, 250); // Blue color
-      doc.rect(marginX + 80, marginY - 5, progressWidth, 5, "F"); // Progress bar
-      doc.text(`${score.score}/10`, marginX + 140, marginY);
+      let progressWidth = (scoreValue / 10) * 50;
+      
+      // Ensure progressWidth is a valid number
+      progressWidth = Number.isFinite(progressWidth) ? progressWidth : 0;
+      
+      // Only draw the rectangle if we have valid dimensions
+      if (progressWidth > 0) {
+        doc.setFillColor(50, 150, 250); // Blue color
+        doc.rect(marginX + 80, marginY - 5, progressWidth, 5, "F"); // Progress bar
+      }
+      
+      doc.text(`${scoreValue}/10`, marginX + 140, marginY);
 
       marginY += 15;
     });
@@ -347,7 +568,17 @@ function Oldreport() {
                 })}
               </div>
               
-              <div className="flex justify-end mt-8">
+              <div className="flex justify-between mt-8">
+                <button
+                  onClick={downloadDetailedReport}
+                  className="bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Download Detailed Report</span>
+                </button>
+                
                 <button
                   onClick={() => setShowFullReport(false)}
                   className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
