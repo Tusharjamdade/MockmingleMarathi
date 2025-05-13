@@ -26,6 +26,14 @@ const nextConfig = {
       },
     ];
   },
+  api: {
+    // Increase body size limit for API routes (default is 1mb)
+    bodyParser: {
+      sizeLimit: '8mb',
+    },
+    // Increase response size limit
+    responseLimit: '8mb',
+  },
   experimental: {
     // Enable larger response size limits
     largePageDataBytes: 128 * 1000, // 128KB (default is 128KB)

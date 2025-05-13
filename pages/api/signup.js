@@ -4,8 +4,17 @@ import connectDb from "@/middleware/dbConnect"
 import mongoose from "mongoose" // Added for direct connection check
 var CryptoJS = require("crypto-js");
 
+// Configure API route to accept larger payloads (for images)
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '8mb',
+        },
+    },
+};
+
 const handler = async (req, res) => {
-    try { vvsdftijsgggggvsuguyejjsjsgs
+    try {
         // Ensure database connection
         if (!mongoose.connections[0].readyState) {
             console.log('Connecting to MongoDB...');
@@ -13,7 +22,56 @@ const handler = async (req, res) => {
         }
         
         if (req.method == 'POST') {
-            const {profileImg,fullName,email,mobileNo,address,DOB,education,collageName} = req.body
+            // Extract all fields from request body
+            const {profileImg, fullName, email, password, mobileNo, address, DOB, education, collageName} = req.body
+            
+            // Validate required fields
+            const requiredFields = {
+                fullName: 'Full Name',
+                email: 'Email Address',
+                password: 'Password',
+                mobileNo: 'Mobile Number',
+                education: 'Education',
+                collageName: 'College Name'
+            };
+            
+            const missingFields = [];
+            for (const [field, label] of Object.entries(requiredFields)) {
+                if (!req.body[field]) {
+                    missingFields.push(label);
+                }
+            }
+            
+            if (missingFields.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Required fields missing", 
+                    missingFields: missingFields,
+                    message: `Please provide: ${missingFields.join(', ')}`
+                });
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Invalid email format",
+                    field: "email",
+                    message: "Please provide a valid email address"
+                });
+            }
+            
+            // Check if email already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({
+                    success: false,
+                    error: "Email already registered",
+                    field: "email",
+                    message: "This email is already registered, please use a different email or login"
+                });
+            }
             
             // Create new user with interview tracking fields explicitly defined
             const userData = {
@@ -25,7 +83,7 @@ const handler = async (req, res) => {
                 DOB,
                 education,
                 collageName, 
-                password: CryptoJS.AES.encrypt(req.body.password,'secret123').toString()
+                password: CryptoJS.AES.encrypt(password, 'secret123').toString()
             };
             
             // Explicitly add the interview tracking fields
@@ -41,246 +99,50 @@ const handler = async (req, res) => {
             const savedUser = await User.findOne({ email }).select('-password');
             console.log('Saved user with fields:', Object.keys(savedUser._doc));
             
-            res.status(200).json({ success: "success" });
+            res.status(200).json({ success: true, message: "Signup successful" });
         } else {
-            res.status(400).json({ error: "This method is not allowed" });
+            res.status(405).json({ success: false, error: "Method not allowed", message: "This endpoint only supports POST requests" });
         }
     } catch (error) {
         console.error('Error in signup handler:', error);
-        res.status(500).json({ error: error.message });
+        
+        // Handle mongoose validation errors
+        if (error.name === 'ValidationError') {
+            const validationErrors = {};
+            
+            for (const field in error.errors) {
+                validationErrors[field] = error.errors[field].message;
+            }
+            
+            return res.status(400).json({
+                success: false,
+                error: "Validation failed",
+                validationErrors,
+                message: "Please fix the validation errors"
+            });
+        }
+        
+        // Handle duplicate key error (typically for unique fields like email)
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            const fieldName = field === 'email' ? 'Email Address' : 
+                             field === 'mobileNo' ? 'Mobile Number' : field;
+            
+            return res.status(409).json({
+                success: false,
+                error: "Duplicate value",
+                field,
+                message: `This ${fieldName} is already registered in our system`
+            });
+        }
+        
+        // Handle other errors
+        res.status(500).json({
+            success: false,
+            error: "Server error", 
+            message: "An unexpected error occurred during signup"
+        });
     }
 }
 
 export default connectDb(handler)
-
-// import User from "@/models/User"
-// import connectDb from "@/middleware/dbConnect"
-// var CryptoJS = require("crypto-js");
-
-// const handler = async (req, res) => {
-//     if (req.method === 'POST') {
-//         try {
-//             const { profileImg, fullName, email, mobileNo, address, DOB, education, password } = req.body;
-
-//             // Validate required fields
-//             if (!email || !password || !fullName) {
-//                 return res.status(400).json({ error: "Please provide all required fields." });
-//             }
-
-//             // Check if email already exists
-//             const existingUser = await User.findOne({ email });
-//             if (existingUser) {
-//                 return res.status(400).json({ error: "This email is already in use. Please choose a different one." });
-//             }
-
-//             // Encrypt the password before saving
-//             const encryptedPassword = CryptoJS.AES.encrypt(password, 'secret123').toString();
-
-//             // Create new user
-//             let newUser = new User({ profileImg, fullName, email, mobileNo, address, DOB, education, password: encryptedPassword });
-//             await newUser.save();
-
-//             // Respond with success
-//             return res.status(200).json({ success: "User created successfully." });
-
-//         } catch (error) {
-//             // Catch duplicate key error (email already exists)
-//             if (error.code === 11000) {
-//                 return res.status(400).json({ error: "This email is already in use. Please choose a different one." });
-//             }
-
-//             // Log the error for debugging
-//             console.error(error);
-
-//             // Handle general server error
-//             return res.status(500).json({ error: "An error occurred while creating the user. Please try again later." });
-//         }
-//     } else {
-//         res.status(400).json({ error: "This method is not allowed." });
-//     }
-// };
-
-// export default connectDb(handler);
-
-
-
-
-
-
-
-
-
-
-// import User from "@/models/User";
-// import connectDb from "@/middleware/dbConnect";
-// import mongoose from "mongoose";
-// var CryptoJS = require("crypto-js");
-
-// const handler = async (req, res) => {
-//     if (mongoose.connections[0].readyState) return;
-//           await mongoose.connect(process.env.MONGODB_URI);
-//     if (req.method === 'POST') {
-        
-        
-        
-//         try {
-//             const { profileImg, fullName, email, mobileNo, address, DOB, education, password } = req.body;
-
-//             // Validate required fields
-//             if (!email || !password || !fullName) {
-//                 return res.status(400).json({ error: "Please provide all required fields." });
-//             }
-
-//             // Check if email already exists
-//             const existingUser = await User.findOne({ email });
-//             if (existingUser) {
-//                 return res.status(400).json({ error: "This email is already in use. Please choose a different one." });
-//             }
-
-//             // Encrypt the password before saving
-//             const encryptedPassword = CryptoJS.AES.encrypt(password, 'secret123').toString();
-
-//             // Create new user
-//             let newUser = new User({ profileImg, fullName, email, mobileNo, address, DOB, education, password: encryptedPassword });
-//             await newUser.save();
-
-//             // Respond with success
-//             return res.status(200).json({ success: "User created successfully." });
-
-//         } catch (error) {
-//             // Catch duplicate key error (email already exists)
-//             if (error.code === 11000) {
-//                 return res.status(400).json({ error: "This email is already in use. Please choose a different one." });
-//             }
-
-//             // Log the error for debugging
-//             console.error(error);
-
-//             // Handle general server error
-//             return res.status(500).json({ error: "An error occurred while creating the user. Please try again later." });
-//         }
-//     } else if (req.method === 'PUT') {
-//         if (mongoose.connections[0].readyState) return;
-//           await mongoose.connect(process.env.MONGODB_URI);
-//         try {
-//             const { email, profileImg, fullName, mobileNo, address, DOB, education, password } = req.body;
-
-//             // Validate email
-//             if (!email) {
-//                 return res.status(400).json({ error: "Please provide the email of the user to update." });
-//             }
-
-//             // Find the user by email
-//             const user = await User.findOne({ email });
-//             if (!user) {
-//                 return res.status(404).json({ error: "User not found." });
-//             }
-
-//             // Update the user fields if provided
-//             if (profileImg) user.profileImg = profileImg;
-//             if (fullName) user.fullName = fullName;
-//             if (mobileNo) user.mobileNo = mobileNo;
-//             if (address) user.address = address;
-//             if (DOB) user.DOB = DOB;
-//             if (education) user.education = education;
-
-//             // Encrypt the password if it's provided
-//             if (password) {
-//                 const encryptedPassword = CryptoJS.AES.encrypt(password, 'secret123').toString();
-//                 user.password = encryptedPassword;
-//             }
-
-//             // Save the updated user
-//             await user.save();
-
-//             // Respond with success
-//             return res.status(200).json({ success: "User updated successfully." });
-
-//         } catch (error) {
-//             // Log the error for debugging
-//             console.error(error);
-
-//             // Handle general server error
-//             return res.status(500).json({ error: "An error occurred while updating the user. Please try again later." });
-//         }
-//     } else if (req.method === 'GET') {
-//         try {
-//             const { email } = req.query;  // Getting email from query params
-
-//             // Validate that email is provided
-//             if (!email) {
-//                 return res.status(400).json({ error: "Please provide the email of the user." });
-//             }
-
-//             // Find the user by email
-//             const user = await User.findOne({ email });
-//             if (!user) {
-//                 return res.status(404).json({ error: "User not found." });
-//             }
-
-//             // Exclude sensitive fields (password)
-//             const { password, ...userData } = user.toObject();
-
-//             // Return the user's data (excluding password)
-//             return res.status(200).json(userData);
-
-//         } catch (error) {
-//             // Log the error for debugging
-//             console.error(error);
-
-//             // Handle general server error
-//             return res.status(500).json({ error: "An error occurred while fetching the user. Please try again later." });
-//         }
-//     } else {
-//         res.status(400).json({ error: "This method is not allowed." });
-//     }
-// };
-
-// export default connectDb(handler);
-
-
-// // import bcrypt from 'bcryptjs';
-
-// // // Encrypt the password using bcrypt
-// // const salt = await bcrypt.genSalt(10);
-// // const hashedPassword = await bcrypt.hash(password, salt);
-
-// // // Create new user
-// // let newUser = new User({
-// //   profileImg,
-// //   fullName,
-// //   email,
-// //   mobileNo,
-// //   address,
-// //   DOB,
-// //   education,
-// //   password: hashedPassword,
-// // });
-// // await newUser.save();
-
-// // // Check if email already exists before proceeding with PUT method
-// // if (req.method === 'PUT') {
-// //   const { email, profileImg, fullName, mobileNo, address, DOB, education, password } = req.body;
-// //   const user = await User.findOne({ email });
-
-// //   if (!user) {
-// //     return res.status(404).json({ error: "User not found." });
-// //   }
-
-// //   // Handle password encryption conditionally
-// //   if (password) {
-// //     const salt = await bcrypt.genSalt(10);
-// //     user.password = await bcrypt.hash(password, salt);
-// //   }
-
-// //   // Update fields
-// //   user.profileImg = profileImg || user.profileImg;
-// //   user.fullName = fullName || user.fullName;
-// //   user.mobileNo = mobileNo || user.mobileNo;
-// //   user.address = address || user.address;
-// //   user.DOB = DOB || user.DOB;
-// //   user.education = education || user.education;
-
-// //   await user.save();
-// //   return res.status(200).json({ success: "User updated successfully." });
-// // }
