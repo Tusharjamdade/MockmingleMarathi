@@ -30,14 +30,16 @@ async function generateQuestionsWithClaude(stream, department, subject, confiden
       - 4 Moderate questions 
       - 3 Hard questions
       
-      ${testFormat === 'MCQ' ? `For MCQ questions, please follow these guidelines:
-      1. Generate 4 options for each question
-      2. One option MUST be correct, the other 3 MUST be wrong
-      3. All options MUST be relevant to the subject (${subject}) and specific topic of the question
-      4. NEVER use generic options like "All of the above" or "None of the above"
-      5. Make wrong options plausible but clearly incorrect
-      6. The correct answer should be randomly positioned (not always the first option)
-      7. Use terminology appropriate for ${stream} level students in ${department}
+      ${testFormat === 'MCQ' ? `For MCQ questions, you MUST follow these guidelines EXACTLY:
+      1. ALL questions MUST have EXACTLY 4 options (no more, no less)
+      2. EXACTLY ONE option must be correct, the other 3 MUST be wrong
+      3. The correct answer MUST be crystal clear and unambiguous
+      4. All options MUST be relevant to the subject (${subject}) and specific topic of the question
+      5. NEVER use generic options like "All of the above" or "None of the above"
+      6. Make wrong options plausible but clearly incorrect
+      7. The correct answer should be randomly positioned (not always the first option)
+      8. Use terminology appropriate for ${stream} level students in ${department}
+      9. Ensure the correct answer is academically accurate and precisely matches the question
       ` : ''}
       
       Return the questions as a JSON array with this structure:
@@ -45,18 +47,22 @@ async function generateQuestionsWithClaude(stream, department, subject, confiden
         {
           "questionText": "The full question text",
           "difficulty": "Easy/Moderate/Hard",
-          "options": ["Option A", "Option B", "Option C", "Option D"], // Only for MCQ format
-          "correctAnswer": "The correct answer", 
-          "explanation": "Brief explanation of the answer"
+          "options": ["Option A", "Option B", "Option C", "Option D"], // Exactly 4 options for MCQ format
+          "correctAnswer": "The exact text of the correct option (for MCQ) or the expected answer (for other formats)", 
+          "explanation": "Brief explanation of why this answer is correct"
         },
         ...
       ]
       
       Make sure the questions are appropriate for the academic stream, department, and subject.
-      For the MCQ format, provide 4 options per question.
-      For Written and Speaking formats, provide the expected key points in the correctAnswer field.
+      For the MCQ format, provide EXACTLY 4 options per question, with EXACTLY 1 correct answer.
+      For Written and Speaking formats, provide precise expected key points in the correctAnswer field.
       
-      IMPORTANT: Format your response as valid JSON only. Do not include any other text.
+      IMPORTANT: 
+      1. Format your response as valid JSON only. Do not include any other text.
+      2. Double-check that each question has EXACTLY 4 options for MCQ format.
+      3. Verify that the correctAnswer field EXACTLY matches the text of one of the options for MCQ format.
+      4. Ensure all questions have clear, unambiguous correct answers for accurate evaluation.
     `;
 
     // Check for API key

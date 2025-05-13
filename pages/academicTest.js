@@ -421,13 +421,31 @@ function AcademicTest() {
     }
   };
   
+  // Handle MCQ selection
+  const handleMCQSelect = (index) => {
+    setMcqSelection(index);
+  };
+  
   // Save answer for current question
   const saveAnswer = () => {
     const newAnswers = [...userAnswers];
+    const currentQuestionObj = test.questions[currentQuestion];
     
     if (testFormat === 'MCQ') {
-      if (mcqSelection >= 0 && test.questions[currentQuestion].options[mcqSelection]) {
-        newAnswers[currentQuestion] = test.questions[currentQuestion].options[mcqSelection];
+      // Validate that we have exactly 4 options for MCQ questions
+      if (!currentQuestionObj.options || currentQuestionObj.options.length !== 4) {
+        console.error('Invalid MCQ question: does not have exactly 4 options', currentQuestionObj.options);
+        alert('This question has an invalid format (must have exactly 4 options). Please contact support.');
+        return false;
+      }
+      
+      // Validate that the user has selected an option
+      if (mcqSelection >= 0 && mcqSelection < 4 && currentQuestionObj.options[mcqSelection]) {
+        newAnswers[currentQuestion] = currentQuestionObj.options[mcqSelection];
+        
+        // For debugging/validation
+        console.log('Selected answer:', newAnswers[currentQuestion]);
+        console.log('Correct answer:', currentQuestionObj.correctAnswer);
       } else {
         alert("Please select an option before proceeding.");
         return false;
@@ -484,6 +502,26 @@ function AcademicTest() {
   const submitTest = async () => {
     // Make sure current answer is saved
     if (!saveAnswer()) return;
+    
+    // Additional validation for MCQ format - ensure all questions have exactly 4 options
+    if (testFormat === 'MCQ') {
+      const invalidQuestions = test.questions.filter(q => !q.options || q.options.length !== 4);
+      if (invalidQuestions.length > 0) {
+        setLoading(false);
+        alert(`Error: ${invalidQuestions.length} question(s) do not have exactly 4 options. Please contact support.`);
+        return;
+      }
+      
+      // Ensure all answers are recorded
+      const unansweredQuestions = userAnswers.findIndex(a => !a);
+      if (unansweredQuestions >= 0) {
+        setLoading(false);
+        if (confirm(`You haven't answered question ${unansweredQuestions + 1}. Go to that question?`)) {
+          setCurrentQuestion(unansweredQuestions);
+          return;
+        }
+      }
+    }
     
     setLoading(true);
     setTestCompleted(true);
@@ -885,27 +923,35 @@ function AcademicTest() {
           
           {testFormat === 'MCQ' && question.options && (
             <div className="space-y-3">
-              {question.options.map((option, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => setMcqSelection(idx)}
-                  className={`p-3 rounded-lg border cursor-pointer transition duration-300 
-                    ${mcqSelection === idx ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}`}
-                >
-                  <div className="flex items-center">
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 
-                      ${mcqSelection === idx ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300'}`}
-                    >
-                      {mcqSelection === idx && (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
+              {/* Validate that we have exactly 4 options */}
+              {question.options.length === 4 ? (
+                question.options.map((option, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => setMcqSelection(idx)}
+                    className={`p-3 rounded-lg border cursor-pointer transition duration-300 
+                      ${mcqSelection === idx ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}`}
+                  >
+                    <div className="flex items-center">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 
+                        ${mcqSelection === idx ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300'}`}
+                      >
+                        {mcqSelection === idx && (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <span>{option}</span>
                     </div>
-                    <span>{option}</span>
                   </div>
+                ))
+              ) : (
+                <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                  <p className="text-yellow-700 font-medium">This question doesn't have the required 4 options. Please contact support.</p>
+                  <p className="text-sm text-yellow-600 mt-2">Found {question.options.length} options instead of 4.</p>
                 </div>
-              ))}
+              )}
             </div>
           )}
           

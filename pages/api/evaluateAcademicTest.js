@@ -20,36 +20,52 @@ async function evaluateWithClaude(testData, userAnswers) {
       Department: ${testData.department}
       Test Format: ${testData.testFormat}
       
+      IMPORTANT EVALUATION INSTRUCTIONS:
+      - For MCQ questions, the student's answer must EXACTLY match the correct answer text to be considered correct
+      - Each MCQ question has exactly 4 options with exactly 1 correct answer
+      - Score questions as either correct (100%) or incorrect (0%) - no partial credit for MCQs
+      - For non-MCQ questions, you may give partial credit based on how well the answer matches key points
+      
       Below are the test questions and the student's answers.
-      Please evaluate each answer and provide feedback.
+      Please evaluate each answer according to the instructions above.
       
       ${testData.questions.map((q, index) => `
         Question ${index + 1} (${q.difficulty}): ${q.questionText}
-        ${testData.testFormat === 'MCQ' ? `Options: ${q.options.join(', ')}` : ''}
+        ${testData.testFormat === 'MCQ' ? `Options: ${q.options.join(' | ')}` : ''}
         Correct answer: ${q.correctAnswer}
         Student's answer: ${userAnswers[index] || 'No answer provided'}
       `).join('\n\n')}
       
-      For each question, determine if the answer is correct, partially correct, or incorrect.
-      Assign a score from 0-100 for each answer based on accuracy and completeness.
-      Provide brief feedback for each answer.
+      For each question, determine if the answer is correct or incorrect as follows:
+      - For MCQ: The answer is correct ONLY if it EXACTLY matches the correct answer text
+      - For other formats: Evaluate if the answer contains the key points from the correct answer
       
-      Then, calculate an overall score (0-100) and assign a star rating (0-3 stars).
+      Score rules:
+      - MCQ: 100 points for correct, 0 points for incorrect
+      - Other formats: 0-100 based on accuracy and completeness
+      
+      Provide brief, encouraging feedback for each answer.
+      
+      Then, calculate an overall score (0-100) and assign a star rating using these rules:
+      - 3 stars: 85-100 points
+      - 2 stars: 70-84 points
+      - 1 star: 50-69 points
+      - 0 stars: Below 50 points
       
       Return your evaluation as a JSON object with this structure:
       {
         "answers": [
           {
             "questionIndex": 0,
-            "isCorrect": true/false/partial,
-            "score": 85,
-            "feedback": "Feedback on this answer"
+            "isCorrect": true/false,
+            "score": 100,
+            "feedback": "Excellent! Your answer is correct."
           },
           ...
         ],
-        "overallScore": 78,
-        "stars": 2,
-        "feedback": "Overall feedback on the test performance"
+        "overallScore": 90,
+        "stars": 3,
+        "feedback": "Detailed and encouraging overall feedback on test performance"
       }
     `;
 
