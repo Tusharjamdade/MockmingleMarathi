@@ -2,7 +2,7 @@ import PracticeProgress from "@/models/PracticeProgress";
 import PracticeResponse from "@/models/PracticeResponse";
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import connectDb from '@/middleware/dbConnect';
+import connectDb from '@/utils/db';
 
 export const config = {
   runtime: 'nodejs',
@@ -278,10 +278,9 @@ async function handler(req, res) {
         if (levelNum < 30) {
           const nextLevelIndex = progressRecord.levelProgress.findIndex(p => p.level === levelNum + 1);
           if (nextLevelIndex > -1) {
-            // Unlock only the next level - ensure level field is always included (required by schema)
+            // Unlock only the next level
             progressRecord.levelProgress[nextLevelIndex] = {
               ...progressRecord.levelProgress[nextLevelIndex],
-              level: levelNum + 1, // Explicitly set the level field to avoid validation errors
               completed: true,  // Mark as available
               locked: false     // Ensure it's not locked
             };

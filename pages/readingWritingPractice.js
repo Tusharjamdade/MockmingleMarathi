@@ -60,7 +60,7 @@ function ReadingWritingPractice() {
       const defaultProgress = Array.from({ length: 30 }, (_, i) => ({
         level: i + 1,
         stars: 0,
-        completed: i === 0, // Only first level is unlocked by default
+        completed: i === 0, // Only level 1 is unlocked by default
         questionsCompleted: 0
       }));
       
@@ -98,45 +98,169 @@ function ReadingWritingPractice() {
       const emptyProgress = Array.from({ length: 30 }, (_, i) => ({
         level: i + 1,
         stars: 0,
-        completed: i < 2 // Make first 2 levels completed by default for demo
+        completed: i === 0, // Only level 1 is unlocked by default
+        questionsCompleted: 0 // No initial progress shown
       }));
       setLevelProgress(emptyProgress);
     } finally {
       setLoading(false);
-      setShowLevelSelection(true);
     }
   };
   
   // Handle difficulty selection
-  const handleDifficultySelect = (selectedDifficulty) => {
-    setDifficulty(selectedDifficulty);
-    fetchLevelProgress(selectedDifficulty);
+  const handleDifficultySelect = async (level) => {
+    setDifficulty(level);
+    // Fetch level progress and immediately show level selection
+    await fetchLevelProgress(level);
+    setShowLevelSelection(true);
+    // Skip the second difficulty screen
+    setSelectedLevel(1); // Default to level 1
   };
   
   // Handle level selection
   const handleLevelSelect = (level) => {
-    setSelectedLevel(level);
-    // If it's a double-click or if it's a single click on a level that was already selected, start the practice
-    if (selectedLevel === level) {
-      fetchQuestions();
+    // Get the level object
+    const levelObj = levelProgress.find(p => p.level === level);
+    
+    // Determine if the level is locked using the same logic as the UI
+    // A level is locked if it's not level 1, it's not completed, and it's not exactly the next level after the highest completed level
+    const highestCompletedLevel = Math.max(...levelProgress.filter(l => l.completed).map(l => l.level), 0);
+    const isLocked = level !== 1 && 
+                    !levelObj?.completed && 
+                    level !== highestCompletedLevel + 1;
+    
+    // Only allow selecting levels that are not locked
+    if (!isLocked && levelObj) {
+      setSelectedLevel(level);
+      
+      // Reset all user interaction states to prevent old feedback from showing
+      setUserResponse('');
+      setSelectedOptions([]);
+      setFeedback('');
+      setScore(0);
+      setResponses([]);
+      
+      // Keep current test state paused until user clicks Start Practice
+      setTestStarted(false);
+
+      // If it's a double-click or if it's a single click on a level that was already selected, start the practice
+      if (selectedLevel === level) {
+        fetchQuestions();
+      }
+    } else {
+      alert('This level is locked. Complete previous levels to unlock.');
     }
   };
   
   // Handle level double click to immediately start practice
   const handleLevelDoubleClick = (level) => {
-    setSelectedLevel(level);
-    fetchQuestions();
+    // Get the level object
+    const levelObj = levelProgress.find(p => p.level === level);
+    
+    // Determine if the level is locked using the same logic as the UI
+    // A level is locked if it's not level 1, it's not completed, and it's not exactly the next level after the highest completed level
+    const highestCompletedLevel = Math.max(...levelProgress.filter(l => l.completed).map(l => l.level), 0);
+    const isLocked = level !== 1 && 
+                    !levelObj?.completed && 
+                    level !== highestCompletedLevel + 1;
+    
+    // Only proceed if the level is not locked
+    if (!isLocked && levelObj) {
+      setSelectedLevel(level);
+      // Reset states
+      setUserResponse('');
+      setSelectedOptions([]);
+      setFeedback('');
+      setScore(0);
+      setResponses([]);
+      // Start practice
+      fetchQuestions();
+    } else {
+      alert('This level is locked. Complete previous levels to unlock.');
+    }
   };
   
   // Back to level selection
-  const backToLevelSelection = () => {
+  const backToLevelSelection = async () => {
+    // Reset all test-related states
     setTestStarted(false);
     setTestCompleted(false);
     setQuestions([]);
     setCurrentIndex(0);
     setShowEvaluation(false);
     setResponses([]);
-    setShowLevelSelection(true);
+    
+    // Set a loading state while we refresh the level data
+    setLoading(true);
+    
+    try {
+      // Get user ID for API request
+      const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+      const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001';
+      
+      // Fetch the latest level progress from the API
+      const response = await fetch('/api/getUserProgress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          skillArea: mode === 'reading' ? 'Reading' : 'Writing',
+          difficulty
+        })
+      });
+      
+      if (response.ok) {
+        const skillProgress = await response.json();
+        
+        // Initialize default progress for all 30 levels
+        const defaultProgress = Array.from({ length: 30 }, (_, i) => ({
+          level: i + 1,
+          stars: 0,
+          completed: i === 0, // Only level 1 is unlocked by default
+          questionsCompleted: 0
+        }));
+        
+        // Merge API data with default data
+        if (skillProgress && skillProgress.levelProgress && skillProgress.levelProgress.length > 0) {
+          // First, create a merged progress array
+          const mergedProgress = defaultProgress.map(defaultLevel => {
+            const apiLevel = skillProgress.levelProgress.find(l => l.level === defaultLevel.level);
+            return apiLevel || defaultLevel;
+          });
+          
+          // Then, ensure only one level after the highest completed level is unlocked
+          const completedLevels = mergedProgress.filter(level => level.completed);
+          const highestCompletedLevel = completedLevels.length > 0 ? 
+            Math.max(...completedLevels.map(l => l.level)) : 0;
+          
+          // Update the merged progress to ensure only the next level is unlocked
+          const fixedProgress = mergedProgress.map(level => {
+            // If it's level 1, it's always unlocked
+            if (level.level === 1) return level;
+            
+            // If it's already completed, keep it that way
+            if (level.completed) return level;
+            
+            // If it's exactly the next level after highest completed, unlock it
+            if (level.level === highestCompletedLevel + 1) {
+              return { ...level, completed: true };
+            }
+            
+            // Otherwise, it should be locked
+            return { ...level, completed: false };
+          });
+          
+          setLevelProgress(fixedProgress);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing level progress:', error);
+    } finally {
+      setLoading(false);
+      setShowLevelSelection(true);
+    }
   };
 
   const fetchQuestions = async () => {
@@ -182,13 +306,43 @@ function ReadingWritingPractice() {
         throw new Error('No questions received');
       }
       
-      // Add default timeLimit property to questions if not present
-      const processedQuestions = data.questions.map(question => ({
-        ...question,
-        timeLimit: question.timeLimit || 60, // Default to 60 seconds if not specified
-        content: question.content || 'Read the content carefully and answer the question',
-        instructions: question.instructions || 'Provide your response below'
-      }));
+      // Add default properties to questions if not present and ensure question text is properly set
+      const processedQuestions = data.questions.map(question => {
+        // Extract actual question text, filtering out any text that looks like instructions or card IDs
+        let questionText = question.questionText || question.question;
+        
+        // Filter out questionText that contains card ID patterns or generic instructions
+        if (questionText && (
+            questionText.match(/card\s+[a-zA-Z]+-[a-zA-Z]+-\d+-\d+/i) ||
+            questionText.match(/read the (passage|story|text) and answer/i) ||
+            questionText.length > 100 // Question text shouldn't be too long
+          )) {
+            // This is likely not a real question but instructions or card ID
+            questionText = null;
+        }
+        
+        // If no valid question text, generate a default question based on content
+        if (!questionText && question.content) {
+          // Extract a subject from the content if possible
+          const firstSentence = question.content.split('.')[0];
+          const subjects = firstSentence.match(/([A-Z][a-z]+)/) || ['Someone'];
+          const subject = subjects[0];
+          // Create a generic but reasonable question
+          questionText = `What did ${subject} do in this story?`;
+        }
+        
+        return {
+          ...question,
+          // Ensure we always have a questionText property that is an actual question
+          questionText: questionText || 'What happens in this passage?',
+          // Default timeLimit
+          timeLimit: question.timeLimit || 60, // Default to 60 seconds if not specified
+          // Ensure we have content
+          content: question.content || question.passage || question.text || 'Read the content carefully and answer the question',
+          // Default instructions
+          instructions: question.instructions || 'Read the passage and answer the question.'
+        };
+      });
 
       // Set the processed questions
       setQuestions(processedQuestions);
@@ -196,6 +350,12 @@ function ReadingWritingPractice() {
       setCurrentIndex(0);
       setResponses([]); // Clear any previous responses
       setShowLevelSelection(false); // Hide level selection
+      
+      // Reset all user interaction states to prevent old feedback from showing
+      setUserResponse('');
+      setSelectedOptions([]);
+      setFeedback(''); // Clear any existing feedback
+      setScore(0); // Reset score
       
       // Only start timer if we have valid questions
       if (processedQuestions.length > 0) {
@@ -316,8 +476,25 @@ function ReadingWritingPractice() {
 
       if (response.ok) {
         const data = await response.json();
-        setFeedback(data.feedback);
-        setScore(data.score || 0);
+        
+        // Check if this is an MCQ question
+        const isMCQ = currentQuestion.options && Array.isArray(currentQuestion.options) && currentQuestion.options.length > 0;
+        
+        // For MCQ questions, if the answer is correct, override Claude's feedback with more appropriate feedback
+        if (isMCQ && currentQuestion.expectedResponse && responseToSubmit.includes(currentQuestion.expectedResponse)) {
+          const mcqFeedback = "Great job! You selected the correct answer. Keep up the good work!";
+          setFeedback(mcqFeedback);
+          setScore(3); // Give full score for correct MCQ answer
+        } else if (isMCQ) {
+          // If MCQ but incorrect answer
+          const mcqFeedback = "Your answer wasn't correct. Try again and carefully read the passage.";
+          setFeedback(mcqFeedback);
+          setScore(data.score || 1);
+        } else {
+          // For non-MCQ questions, use Claude's feedback
+          setFeedback(data.feedback);
+          setScore(data.score || 0);
+        }
         
         // Store response data for level evaluation
         // Extract expected response from question if available
@@ -331,12 +508,18 @@ function ReadingWritingPractice() {
         
         console.log('Storing response with expected response:', expectedResponse);
         
+        // Calculate correct score for storing in responses
+        let calculatedScore = data.score || 1;
+        if (isMCQ && expectedResponse && responseToSubmit.includes(expectedResponse)) {
+          calculatedScore = 3; // Full stars for correct MCQ answer
+        }
+        
         setResponses(prevResponses => [...prevResponses, {
           cardId: currentQuestion.cardId || cardId,
           question: currentQuestion.instructions || currentQuestion.content,
           expectedResponse: expectedResponse,
           userResponse: responseToSubmit,
-          score: data.score || 1,
+          score: calculatedScore,
           timeSpent: currentQuestion.timeLimit - timeLeft,
           completedAt: new Date()
         }]);
@@ -376,6 +559,13 @@ function ReadingWritingPractice() {
     }
   };
   
+  // Function to evaluate responses with Claude AI
+  const evaluateWithClaude = async () => {
+    // Evaluate responses with Claude AI
+    // This is a placeholder for actual evaluation logic
+    console.log('Evaluating responses with Claude AI...');
+  };
+
   // Function to evaluate level completion using Claude AI
   const evaluateLevelCompletion = async () => {
     try {
@@ -426,6 +616,11 @@ function ReadingWritingPractice() {
       try {
         if (response.ok) {
           const result = await response.json();
+          console.log('API returned evaluation result:', result);
+          // Ensure we're using the correct star rating from the API
+          if (result && result.levelProgress && typeof result.levelProgress.stars === 'number') {
+            console.log('Using star rating from API:', result.levelProgress.stars);
+          }
           setEvaluationResult(result);
           setShowEvaluation(true);
           
@@ -443,15 +638,15 @@ function ReadingWritingPractice() {
                   completed: true
                 };
                 
-                // Unlock the next level if it exists
+                // Unlock only the next level when a level is completed
                 if (selectedLevel < 30) {
                   const nextLevelIndex = updatedProgress.findIndex(p => p.level === selectedLevel + 1);
                   if (nextLevelIndex > -1) {
-                    // Unlock the next level
+                    // Unlock only the next level
                     updatedProgress[nextLevelIndex] = {
                       ...updatedProgress[nextLevelIndex],
-                      completed: false,  // Mark as not completed yet
-                      locked: false      // Unlock it
+                      completed: true,  // Mark as available
+                      locked: false     // Ensure it's not locked
                     };
                   }
                 }
@@ -664,10 +859,14 @@ function ReadingWritingPractice() {
                     <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-4">  
                       {levelProgress.map((levelData) => {  
                         const isSelected = selectedLevel === levelData.level;  
-                        // A level is locked if it's not level 1, it's not completed, and the previous level is not completed
+                        // A level is locked if it's not level 1, it's not completed, and it's not exactly the next level after the highest completed level
+                        // First, find the highest completed level
+                        const highestCompletedLevel = Math.max(...levelProgress.filter(l => l.completed).map(l => l.level), 0);
+                        
+                        // A level is locked if: it's not level 1, it's not already completed, and it's not exactly the next level
                         const isLocked = levelData.level !== 1 && 
                                      !levelData.completed && 
-                                     !levelProgress.find(l => l.level === levelData.level - 1)?.completed;  
+                                     levelData.level !== highestCompletedLevel + 1;
                         
                         return (  
                           <div  
@@ -736,8 +935,7 @@ function ReadingWritingPractice() {
                   {loading ? 'Loading...' : 'Start Practice'}  
                 </button>  
               </div>  
-            </div>  
-          ) : !testStarted ? (
+            </div>            ) : !testStarted ? (
             <div className="p-8 text-center">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">
                 {mode === 'reading' ? 'Reading Practice' : 'Writing Practice'}
@@ -769,28 +967,12 @@ function ReadingWritingPractice() {
                 </ul>
               </div>
               
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-700 mb-2">Select Difficulty Level:</h3>
-                <div className="flex justify-center space-x-4">
-                  {['Beginner', 'Moderate', 'Expert'].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setDifficulty(level)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        difficulty === level
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
               <div className="flex justify-center space-x-4">
                 <button
-                  onClick={() => setMode('')}
+                  onClick={() => {
+                    // Go back to difficulty selection instead of showing another difficulty selector
+                    setDifficulty('');
+                  }}
                   className="px-4 py-2 rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-700"
                 >
                   Back
@@ -878,6 +1060,12 @@ function ReadingWritingPractice() {
                 {evaluationResult?.levelProgress?.stars === 3 && (
                   <div className="mt-2 text-green-600 font-bold">Perfect score! Excellent work!</div>
                 )}
+                {evaluationResult?.levelProgress?.stars === 2 && (
+                  <div className="mt-2 text-blue-600 font-bold">Good job! Keep practicing!</div>
+                )}
+                {evaluationResult?.levelProgress?.stars === 1 && (
+                  <div className="mt-2 text-purple-600 font-bold">Keep working on your skills!</div>
+                )}
               </div>
               
               <div className="flex justify-center space-x-4">
@@ -892,11 +1080,23 @@ function ReadingWritingPractice() {
                     onClick={() => {
                       // Only allow proceeding if evaluation is complete
                       if (evaluationResult && !loading) {
-                        setSelectedLevel(prev => Math.min(prev + 1, 30));
+                        // First update the selectedLevel
+                        const nextLevel = Math.min(selectedLevel + 1, 30);
+                        setSelectedLevel(nextLevel);
+                        
+                        // Reset all states for a fresh start
                         setTestCompleted(false);
                         setShowEvaluation(false);
                         setResponses([]);
-                        fetchQuestions();
+                        setUserResponse('');
+                        setSelectedOptions([]);
+                        setFeedback('');
+                        setScore(0);
+                        
+                        // Fetch questions with a slight delay to ensure state is updated
+                        setTimeout(() => {
+                          fetchQuestions();
+                        }, 100);
                       }
                     }}
                     className={`px-4 py-2 rounded-lg font-medium ${
@@ -945,19 +1145,18 @@ function ReadingWritingPractice() {
               </div>
 
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                {/* STEP 1: INSTRUCTIONS */}
                 <h3 className="text-lg font-semibold mb-2">Instructions:</h3>
                 <p className="text-gray-700 mb-4">
                   {questions[currentIndex]?.instructions || "Read the passage and answer the question."}
                 </p>
-                <h3 className="text-lg font-semibold mb-2">Question:</h3>
-                <p className="text-gray-700 mb-4 font-medium">
-                  {questions[currentIndex]?.question || questions[currentIndex]?.questionText || "Loading question..."}
-                </p>
                 
-                <div className="bg-gray-100 p-4 rounded-lg mb-4">
+                {/* STEP 2: READING CONTENT/STORY */}
+                <div className="bg-gray-100 p-4 rounded-lg mb-6">
+                  <h3 className="text-lg font-semibold mb-2">Passage:</h3>
                   <div className="prose max-w-none">
                     <p className="text-gray-800 whitespace-pre-line">
-                      {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading..."}
+                      {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading passage..."}
                     </p>
                   </div>
                   
@@ -975,21 +1174,44 @@ function ReadingWritingPractice() {
                   )}
                 </div>
                 
+                {/* STEP 3: QUESTION */}
+                <h3 className="text-lg font-semibold mb-3">Question:</h3>
+                <p className="text-gray-700 mb-5 font-medium">
+                  {questions[currentIndex]?.questionText || 
+                   (questions[currentIndex]?.content && !questions[currentIndex]?.questionText ? 
+                     "What happened in the story?" : "Loading question...")}
+                </p>
+                
+                {/* STEP 4: MULTIPLE CHOICE OPTIONS */}
                 {isMultipleChoice() ? (
-                  <div className="space-y-3 mb-4">
-                    {questions[currentIndex].options.map((option, index) => (
-                      <div 
-                        key={index}
-                        onClick={() => handleOptionSelect(option)}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          selectedOptions.includes(option)
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-                        }`}
-                      >
-                        {option}
-                      </div>
-                    ))}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3">Choose the correct answer:</h3>
+                    <div className="space-y-3 mb-4">
+                      {questions[currentIndex].options.map((option, index) => (
+                        <div 
+                          key={index}
+                          onClick={() => handleOptionSelect(option)}
+                          className={`p-4 rounded-lg cursor-pointer transition-all flex items-center ${
+                            selectedOptions.includes(option)
+                              ? 'bg-purple-600 text-white border-2 border-purple-800 shadow-md transform scale-[1.02]'
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200'
+                          }`}
+                        >
+                          <div className={`w-6 h-6 flex items-center justify-center rounded-full mr-3 ${
+                            selectedOptions.includes(option)
+                              ? 'bg-white text-purple-600' 
+                              : 'bg-white border border-gray-400'
+                          }`}>
+                            {selectedOptions.includes(option) && (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="flex-1">{option}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="mb-4">

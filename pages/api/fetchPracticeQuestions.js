@@ -170,30 +170,53 @@ async function generatePracticeQuestions(skillArea, difficulty, level, count, re
 
 For each card, include:
 - Card ID (format: first letter of skill area-first letter of difficulty level-${level.toString().padStart(2, '0')}-number)
-- Instructions
-- Content (text or audio)
-- Expected Response (if applicable)
+- Instructions (clear instructions on what the student should do)
+- Content (text passage or content for the student to read)
+- Question (a specific question about the content that tests comprehension)
+- Options (for multiple choice questions, if appropriate)
+- Expected Response (sample answer or correct response)
 - Time Limit (in seconds)
 - Evaluation Criteria (three levels: basic, intermediate, advanced)
 
 IMPORTANT: 
 1. These questions are for level ${level} out of 30 levels, so adjust the difficulty appropriately. Level 1 should be the easiest, and level 30 the most challenging within the ${difficulty} tier.
-2. Your response must be ONLY a valid JSON array, with no explanations, no markdown formatting, and no additional text. Just return the JSON array directly:
+2. Your response must be ONLY a valid JSON array with no markdown formatting and no additional text.
+
+FOR READING PRACTICE:
+- Include a short passage or story appropriate for the level
+- ALWAYS include a specific question that tests comprehension of the passage
+- The question should be different from the instructions
+- ALWAYS include exactly 4 multiple-choice options for the answer
+- Make sure one and only one option is correct
+- For beginner levels, ask simple questions about main ideas or specific details
+- For moderate levels, ask questions about implied meaning and relationships
+- For expert levels, ask questions about inference, analysis, or drawing conclusions
+
+Example Reading Practice format:
 [
   {
-    "cardId": "S-B-${level.toString().padStart(2, '0')}-01",
-    "instructions": "Listen to the audio and repeat the word.",
-    "content": "Audio of the word 'Apple'",
-    "expectedResponse": "Apple",
-    "timeLimit": 5,
+    "cardId": "R-B-${level.toString().padStart(2, '0')}-01",
+    "instructions": "Read the passage and answer the question below.",
+    "content": "Mary went to the store to buy some milk. On her way home, she saw her friend John. They talked for a few minutes about school.",
+    "questionText": "Where did Mary go?",  // THIS SHOULD BE A REAL QUESTION ABOUT THE CONTENT, NOT INSTRUCTIONS
+    "options": ["To the park", "To the store", "To school", "To John's house"],
+    "expectedResponse": "To the store",
+    "timeLimit": 30,
     "level": ${level},
     "evaluationCriteria": [
-      "Basic pronunciation with significant errors",
-      "Clear pronunciation with minor errors",
-      "Perfect pronunciation of the word"
+      "Basic understanding of explicit information in the text",
+      "Accurate comprehension with supporting details",
+      "Full understanding with ability to recall specific details"
     ]
   }
 ]
+
+IMPORTANT REQUIREMENTS:
+1. The questionText must be a REAL QUESTION about the content, NOT instructions or card ID
+2. Example questionText: "What did Sarah and her mom bake together?"
+3. BAD questionText example: "Card R-B-03-01: Read the passage and answer the question"
+4. The question must require reading the passage to answer correctly
+5. Options must include one correct answer and three incorrect but plausible answers
   
   Be creative and varied with the questions, ensuring they properly test ${skillArea} skills at ${difficulty} level ${level}/30. Make sure the questions are appropriate for this specific level - they should get progressively more challenging as levels increase.`;
   
