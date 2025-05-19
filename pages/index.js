@@ -1623,682 +1623,371 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { IoIosArrowBack } from "react-icons/io";
-import { MdAccountCircle } from 'react-icons/md';
+import Image from "next/image";
 import { useRouter } from 'next/router'; // For programmatic navigation
 
-export default function Home({ Logout, user }) {
-  const [dropdown, setDropdown] = useState(false);
-  const [notification, setNotification] = useState(false); // State to track the notification
-  const [firstName, setFirstName] = useState(null); // State to store the first name
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State to control mobile menu
-  const router = useRouter(); // Next.js router to navigate to /role
-  const recognition = useRef(null); // Reference to the speech recognition instance
-  const [isRecognizing, setIsRecognizing] = useState(false); // To track whether recognition is ongoing
-  const [isIphone, setIsIphone] = useState(false); // State to track if the device is iPhone
-  const [userr, setUserr] = useState(null);
-
-  const speak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // Set language to English
-    window.speechSynthesis.speak(utterance);
-  };
-
-  useEffect(() => {
-    // Detect if the device is iPhone
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      setIsIphone(true);
-    }
-
-    // Delay speech synthesis for 1 second after page load
-    const timeoutId = setTimeout(() => {
-      const userFromStorage = JSON.parse(localStorage.getItem('user'));
-      setUserr(userFromStorage); // Set the user state from localStorage
-
-      if (userFromStorage) {
-        const firstName = userFromStorage?.fullName?.split(' ')[0]; // Extract first name from user
-        setFirstName(firstName); // Set first name in the state
-
-        // Speak the instructions once user data is loaded
-        speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`);
-      }
-    }, 1000); // Delay by 1 second after page load
-
-    return () => clearTimeout(timeoutId); // Cleanup timeout on component unmount
-  }, [isIphone]);
-
-  useEffect(() => {
-    // Initialize Speech Recognition API
-    const initSpeechRecognition = () => {
-      if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-        recognition.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.current.lang = "en-US";
-        recognition.current.continuous = true; // Continuous recognition
-        recognition.current.interimResults = false;
-
-        recognition.current.onstart = () => {
-          console.log("Speech recognition started.");
-          setIsRecognizing(true); // Set the recognizing flag to true
-        };
-
-        recognition.current.onend = () => {
-          console.log("Speech recognition ended.");
-          setIsRecognizing(false); // Set the recognizing flag to false
-
-          // Restart recognition only if it's fully ended and not already recognizing
-          if (recognition.current && !isRecognizing && recognition.current.state === "inactive") {
-            console.log("Speech recognition restarted."); // Debug log
-            recognition.current.start(); // Restart recognition
-          }
-        };
-
-        recognition.current.onresult = (event) => {
-          const transcript = event.results[0][0].transcript.toLowerCase();
-          console.log("Transcript: ", transcript);
-
-          // If the user says "I am ready", navigate to /role
-          if (transcript.includes("i am ready")) {
-            router.push("/role"); // Redirect to /role when "I am ready" is spoken
-          }
-        };
-
-        // Start listening when the page loads if it's not already started
-        if (recognition.current && !isRecognizing) {
-          recognition.current.start();
-        }
-      } else {
-        console.error("Speech recognition is not supported in this browser.");
-      }
-    };
-
-    initSpeechRecognition();
-
-    // Check if there’s a notification stored in localStorage when the component mounts
-    const checkStorage = () => {
-      const storedNotification = localStorage.getItem("store");
-      if (storedNotification) {
-        setNotification(true);
-      }
-    };
-
-    checkStorage();
-  }, [router, isRecognizing]);
-
-  const toggleDropdown = () => setDropdown(prev => !prev);
-  const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
-
-  // Function to simulate storing an item in localStorage and triggering the notification
-  const handleReportClick = () => {
-    localStorage.removeItem("store"); // Remove notification from localStorage
-    setNotification(false); // Hide the notification dot
-  };
-
+export default function Home() {
+  const [selected, setSelected] = useState(null);
+  const plans = [
+    { title: '8th to 12th', price: 99 },
+    { title: 'Graduate', price: 99 },
+    { title: 'Post Graduate', price: 99 },
+    { title: 'Competitive', price: 99 },
+    { title: 'Professional', price: 99 },
+  ];
+  const features = [
+    "5 Mock Interviews",
+    "✅ Interview Reports",
+    "✅ Chat Support (+Rs 99)",
+    "✅ YouTube Video Suggestions",
+    "✅ Detailed Score Progress",
+    "✅ Performance Analysis",
+    "✅ Score by Job Role",
+    "✅ Comparison Interviews",
+    "✅ Detailed Analysis",
+    "✅ Test 20 (Personality & Academic Test)",
+  ];
   return (
     <>
       <Head>
         <title>Shakktii Interview Trainer</title>
-        <meta name="description" content="Generated by create next app" />
+        <meta name="description" content="Empower your learning journey through skill analysis, real-time chats, and gamified challenges to prepare for mock interviews — with MockMingle" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div
-        className="min-h-screen bg-gradient-to-b text-white px-4 bg-cover flex flex-col items-center justify-center"
-        style={{ backgroundImage: "url('/bg.gif')" }}
-      >
-        {/* Navigation Bar */}
-        <nav className="flex justify-between items-center mb-20 py-4 px-6 backdrop-blur-md bg-black/40 w-full rounded-xl shadow-lg">
-          <div className="flex items-center gap-2">
-            <img src="/Logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-            <div className="text-white text-xl font-bold">Shakkti<span className="text-pink-500">AI</span></div>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex space-x-8 text-sm items-center">
-            <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">Home</li>
-            
-            <Link href={'/progress'}>
-              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
-                <span className="relative inline-flex">
-                  Progress
-                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
-                </span>
-              </li>
-            </Link>
-            
-            <Link href={'/academicTest'}>
-              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
-                <span className="relative inline-flex">
-                  Academic Test
-                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
-                </span>
-              </li>
-            </Link>
-            
-            <Link href={'/oldreport'}>
-              <li className="relative hover:text-pink-400 cursor-pointer transition-colors font-medium" onClick={handleReportClick}>
-                Reports
-                {notification && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
-                )}
-              </li>
-            </Link>
-          </ul>
-          
-          {/* Desktop User Section */}
-          <div className="hidden md:flex items-center gap-4">
-            {user?.value ? (
-              <div className="relative">
-                <div className="flex items-center gap-2 cursor-pointer group" onClick={toggleDropdown}>
-                  <MdAccountCircle className="text-2xl md:text-3xl text-white group-hover:text-pink-400 transition-colors" />
-                  <span className="text-sm font-medium text-white group-hover:text-pink-400 transition-colors">
-                    {firstName || 'Account'}
-                  </span>
-                </div>
-                
-                {dropdown && (
-                  <div className="absolute right-0 shadow-xl top-12 rounded-lg w-48 border border-gray-200 bg-white text-black overflow-hidden z-50">
-                    <ul>
-                      <Link href={'/profile'}>
-                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                          Profile
-                        </li>
-                      </Link>
-                      <Link href={'/progress'}>
-                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                          </svg>
-                          My Progress
-                        </li>
-                      </Link>
-                      <Link href={'/academicTest'}>
-                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                          </svg>
-                          Academic Test
-                        </li>
-                      </Link>
-                      <li onClick={Logout} className="hover:text-red-700 text-sm font-medium p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 00-1 1v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 15.586V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        Logout
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link href="/login">
-                <button className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl font-medium">
-                  Login
-                </button>
-              </Link>
-            )}
-          </div>
-          
-          {/* Mobile Menu Button - Single hamburger icon for mobile */}
-          <button 
-            className="md:hidden text-white focus:outline-none z-20" 
-            onClick={toggleMobileMenu}
-          >
-            {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            )}
-          </button>
-          
-          {/* Mobile Navigation - Combining all navigation elements for mobile */}
-          {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 bg-black bg-opacity-80 z-10 flex flex-col items-center justify-center">
-              <ul className="flex flex-col space-y-6 text-center items-center">
-                <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>Home</li>
-                
-                <Link href={'/progress'}>
-                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
-                    <span className="relative inline-flex">
-                      Progress
-                      <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
-                    </span>
-                  </li>
-                </Link>
-                
-                <Link href={'/oldreport'}>
-                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer relative" onClick={() => { handleReportClick(); toggleMobileMenu(); }}>
-                    Reports
-                    {notification && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
-                    )}
-                  </li>
-                </Link>
-                
-                {user?.value ? (
-                  <>
-                    <Link href={'/profile'}>
-                      <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
-                        Profile
-                      </li>
-                    </Link>
-                    <li className="text-white hover:text-red-400 font-medium text-xl cursor-pointer" onClick={() => { Logout(); toggleMobileMenu(); }}>
-                      Logout
-                    </li>
-                  </>
-                ) : (
-                  <Link href="/login">
-                    <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-2 rounded-full" onClick={toggleMobileMenu}>
-                      Login
-                    </li>
-                  </Link>
-                )}
-              </ul>
-            </div>
-          )}
-        </nav>
 
-        {/* Main Content */}
-        <div className="flex flex-col items-center   text-center w-full">
-          <div className="w-20 h-20  border-2 border-white rounded-full flex items-center justify-center">
-            <img src="/Logo.png" alt="Logo" className="w-16 h-16 object-contain" />
-          </div>
+      <div className="min-h-screen bg-black px-4 bg-cover flex flex-col items-center justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-screen border-black justify-center">
 
-          {isIphone && firstName && (
-            <div onClick={() => speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`)}>
-              <h1 className="text-4xl font-bold mt-4 text-pink-400">Job</h1>
-              <h2 className="text-3xl font-bold text-pink-400">Interview</h2>
-            </div>
-          )}
-
-          {/* Hero Section */}
-          <div className="relative mb-10 flex flex-col md:flex-row items-center justify-center text-white max-w-7xl mx-auto">
-            <div className="text-center md:text-left max-w-2xl md:mr-32 order-2 md:order-1 z-10">
-              <div className="flex flex-col gap-3">
-                <span className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium mb-2 w-fit animate-pulse">
-                  New: Progress Tracking & Analytics
-                </span>
-                
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                  Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-600">Interview Skills</span>
-                  <br />
-                  With AI-Powered Feedback
-                </h1>
-                
-                <p className="text-gray-300 text-lg mt-2">
-                  Practice with our AI interviewer, get instant feedback, and track your progress over time with detailed analytics.
-                </p>
-                
-                <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                  <Link href={'/role'}>
-                    <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      START PRACTICING
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/progress'}>
-                    <button className="border-2 border-white hover:border-pink-400 text-white py-3 px-8 rounded-full text-lg font-semibold hover:text-pink-400 transition duration-300 flex items-center gap-2 group">
-                      VIEW PROGRESS
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/practices'}>
-                    <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      PRACTICE TESTS
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/academicTest'}>
-                    <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-green-600 hover:to-teal-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      ACADEMIC TEST
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/psychometricTest'}>
-                    <button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      PSYCHOMETRIC TEST
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </button>
-                  </Link>
-                 
-
-
+          {/* Image section */}
+          <div className="min-h-screen flex justify-center items-center order-1 lg:order-2">
+            <div className="w-[25rem] aspect-square rounded-full   shadow-[0_0_5px_5px_rgba(255,255,255,0.5)] flex justify-center items-center">
+              <div className="w-[18rem] aspect-square rounded-full   shadow-[inset_0_0_10px_rgba(255,255,255,0.5)] flex justify-center items-center">
+                <div className="w-[12rem] aspect-square rounded-full   shadow-[0_0_5px_5px_rgba(255,255,255,0.5)] flex justify-center items-center">
+                  <Image src="/SVG_mascote.svg" alt="logo" className="absolute -mr-6 -mt-10" width={750} height={650} />
                 </div>
               </div>
             </div>
-            
-            <div className="order-1 md:order-2 mb-8 md:mb-0">
-              <div className="relative">
-                <img 
-                  src="/mock.png" 
-                  alt="AI Interview Assistant" 
-                  className="relative w-full max-w-md md:max-w-xl rounded-lg" 
-                />
-              </div>
+          </div>
+
+          {/* Text content section */}
+          <div className="col-span-1 lg:col-span-2 mt-20 order-2 lg:order-1 flex flex-col items-center ">
+            <h1 className="text-4xl m-10 font-bold text-shadow-lg text-white" >Your Journey from Learning to Leading Starts Here</h1>
+            <p className="text-2xl m-10 font-semibold text-shadow- text-[#5E3A66] " >Empower your learning journey through skill analysis, real-time chats, and gamified challenges to prepare for mock interviews — with&nbsp;MockMingle</p>
+            <div className="flex justify-center rounded-full  w-full">
+              <button className="shadow-[0px_0px_5px_5px_rgba(0,0,0,0.10)]  w-[42rem]  text-black py-3 px-6 rounded-full text-lg font-semibold bg-white hover:bg-pink-600 hover:text-white transition duration-300">
+                Get Started
+              </button>
             </div>
           </div>
-          
-
-
         </div>
       </div>
 
-      <div className="text-gray-900 p-8 py-20 min-h-screen bg-cover" style={{ backgroundImage: "url('/whitebg.jpg')" }}>
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-12">
-            Are You Interview-Ready? Test Yourself with <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Shakkti AI</span>
-          </h1>
-          
-          {/* Feature Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
-            {/* Progress Tracking Feature */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                  INTERVIEW ANALYTICS
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Track Your Interview Progress</h2>
-                <p className="text-gray-600">
-                  Our progress tracking system helps you visualize your improvement over time. See detailed charts of your performance across different skills and identify areas of growth.
-                </p>
-                <ul className="space-y-2">
-                  {['Skill-specific analytics', 'Performance comparison', 'Growth visualization', 'Interview history'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/progress">
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition duration-300 shadow-md mt-2">
-                    View My Progress
-                  </button>
-                </Link>
-              </div>
-            </div>
 
-            {/* Practice Tests Feature */}
-            <div className="bg-gradient-to-br from-indigo-50 to-cyan-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                  NEW FEATURE
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Practice Tests & Assessments</h2>
-                <p className="text-gray-600">
-                  Enhance your language and interview skills with our specialized practice tests. Get personalized AI feedback to improve your speaking, listening, reading, and writing abilities.
-                </p>
-                <ul className="space-y-2">
-                  {['Personality assessment', 'Speaking practice', 'Listening comprehension', 'Reading & writing tests'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/practices">
-                  <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-md mt-2">
-                    Start Practice Tests
-                  </button>
-                </Link>
-              </div>
-            </div>
-            
-            {/* Academic Test Feature - NEW */}
-            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                  JUST LAUNCHED
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Personalized Academic Tests</h2>
-                <p className="text-gray-600">
-                  Take tailored academic tests designed specifically for your stream, department, and subject. Receive instant AI-powered evaluation and detailed feedback to improve your academic performance.
-                </p>
-                <ul className="space-y-2">
-                  {['Subject-specific questions', 'Multiple test formats (MCQ, Written, Speaking)', 'Difficulty adaptation', '3-star rating system'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/academicTest">
-                  <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-2 px-6 rounded-lg font-medium hover:from-green-600 hover:to-teal-700 transition duration-300 shadow-md mt-2">
-                    Take Academic Test
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg gap-10"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p1.jpeg"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-300"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">1</span>
-              <h2 className="text-xl font-semibold text-purple-700">Try Your Practice</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              Test your interview skills, identify weaknesses, and refine your responses in a risk-free environment. Boost your confidence and reduce interview anxiety before the real challenge!
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
+      <div className="mt-16 w-full rounded-t-[6.188rem] shadow-[0_0_5px_5px_rgba(0,0,0,0.10)] bg-gradient-to-t from-[#76626A] via-[#AE98B3] to-[#D9C0CB] px-4 sm:px-10 py-10">
+        {/* Heading */}
+        <h1
+          className="text-2xl lg:text-4xl font-bold text-left py-4 text-black"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            backgroundColor: "#9A6192",
+            // color: "transparent",
+            textShadow: "2px 2px 3px rgba(255, 255, 255, 0.5)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+          }}
         >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg mr-10  sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p2.jpeg"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 lg:ml-32 shadow-2xl order-1 shadow-gray-300"
-            />
-          </div>
+          Why MockMingle?
+        </h1>
 
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">2</span>
-              <h2 className="text-xl font-semibold text-purple-700">Real-time Interview Practice Conducted by AI</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              Get live, AI-driven mock interviews with instant feedback on tone, confidence, and accuracy, saving time with data-driven insights.
-            </p>
-          </div>
-        </div>
-
-
-
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p3.jpg"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">3</span>
-              <h2 className="text-xl font-semibold text-purple-700">Flexible Interview Timing</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              Practice Anytime, Anywhere – No fixed schedules, instant access for busy students and professionals, ensuring stress-free, flexible preparation.
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
+        <h1
+          className="text-base lg:text-2xl font-bold text-left py-4 text-black"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            backgroundColor: "#363232",
+            // color: "transparent",
+            textShadow: "2px 2px 3px rgba(255, 255, 255, 0.5)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+          }}
         >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg lg:ml-32 mr-10 sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p4.png"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
-            />
-          </div>
+          Because we believe skill development should be fun, personalized, and results-driven — helping you move from practice to perfection with confidence!
+        </h1>
 
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">4</span>
-              <h2 className="text-xl font-semibold text-purple-700">Gamified Experience</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              MockMingle uses gamification with scores, badges, and leaderboards to make learning fun, motivating, and rewarding while tracking your progress.
-            </p>
-          </div>
-        </div>
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p5.png"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">5</span>
-              <h2 className="text-xl font-semibold text-purple-700"> Get Expert Feedback</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              Get detailed insights from AI and industry experts on communication, technical skills, and performance, with personalized improvement suggestions for better interview success.
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
-        >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg mr-10 lg:ml-32 sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p6.jpg"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
-            />
-          </div>
-
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">6</span>
-              <h2 className="text-xl font-semibold text-purple-700">Get Suggestions in Video Format
-              </h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              Get AI-driven or expert video suggestions with step-by-step guidance on answers, posture, and tone for easier, more engaging improvement.
-            </p>
-          </div>
-        </div>
-
-
-        </div>
-      </div>
-      <div className="relative bg-blue-950 grid grid-cols-1 lg:grid-cols-2">
-        <div className="">
-          <img src="/footermock.png" className="" />
-        </div>
-        <div className="text-center mt-5">
-          <h2 className="text-gray-300 text-2xl">Contact Us</h2>
-          <h2 className="text-gray-300 text-3xl mt-2 font-bold">info@shakktii.in</h2>
+        {/* Cards */}
+        <div className="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-52   mt-20">
+          {/* Card 1 */}
           <div>
+            <div className="flex  mt-28 justify-center items-center flex-col bg-gradient-to-t from-[#000000] to-[#D4D4D4] rounded-t-lg p-4">
+              <div className="relative -mt-28 w-48 h-48 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                <div className="w-40 h-40 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                  <div className="w-32 h-32 flex items-center justify-center bg-[#9d77a6] rounded-full shadow-inner">
+                    <div className="w-32 h-32 flex items-center justify-center bg-[#9d77a6] rounded-full shadow-inner">
+                      <Image src="/skill1.svg" alt="Skill" width={64} height={64} className=" min-w-[55rem] min-h-[55rem] ml-[24.3rem] mt-[14.5rem]" />
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white mt-10  " style={{
+                  fontFamily: "Arial, sans-serif",
+                  textShadow: "2px 2px 3px rgba(255, 255, 255, 0.5)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                }}>Skill</h1>
+              </div>
+              <div className="mt-10 mr-14 ">
+                <div className="absolute mt-3 ml-2 w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[1.05rem]">01</h2>
+              </div>
+
+            </div>
+            <div className="bg-[#000000BA]">
+
+              <h1 className="text-xl font-light text-white text-center pt-10">Skill Gap Analysis</h1>
+              <p className="text-left lg:m-4 text-white text-sm">Understand exactly where you stand.
+                MockMingle conducts comprehensive skill assessments designed for both students and working professionals.
+                You’ll receive personalized reports highlighting your strengths and skill gaps, helping you focus on the areas that matter the most for your career growth.
+              </p>
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10rem] xl:ml-[6.5rem]  ml-[10.8rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[11.3rem] 2xl:ml-[10.5rem] xl:ml-[7rem]">02</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">Community Forums and Discussion Rooms</h1>
+                <p className="text-left lg:m-4 text-white text-sm">You’re never alone in your journey at MockMingle!
+                  Join topic-specific forums and discussion rooms where you can talk, learn, and share knowledge with like-minded peers, career mentors, and HR experts.
+                  Engage in debates, peer reviews, Q&A sessions, and mock group discussions.</p>
+              </div>
+
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10.5rem] xl:ml-[6.5rem]  ml-[10.8rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[11.3rem] 2xl:ml-[11rem] xl:ml-[7rem]">03</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">Interview Room</h1>
+                <p className="text-left lg:m-4 text-white pb-16 text-sm">Step into a live virtual Interview Room anytime.
+                  Whether practicing solo or with an interviewer, experience real-time pressure, instant question generation, and situational-based role-play interviews.
+                  Practice often, and beat interview anxiety before the real day arrives!</p>
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+
+          {/* Card 2 */}
+          <div>
+            <div className="flex mt-28  justify-center flex-col bg-gradient-to-t from-[#000000] to-[#D4D4D4] rounded-t-lg p-4">
+              <div className="relative m-auto  -mt-28 w-48 h-48 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                <div className="w-40 h-40 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                  <div className="w-32 h-32 flex items-center justify-center bg-[#9d77a6] rounded-full shadow-inner">
+                    <Image src="/learning.svg" alt="Skill" width={64} height={64} className=" min-w-[55rem] min-h-[55rem] -ml-[1rem] mt-[7.9rem]" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white mt-10 text-center " style={{
+                  fontFamily: "Arial, sans-serif",
+                  textShadow: "2px 2px 3px rgba(255, 255, 255, 0.5)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                }}>Learning</h1>
+              </div>
+              <div className="mt-10 mr-14">
+                <div className="absolute mt-3 ml-[9.5rem] 2xl:ml-[9.2rem]  xl:ml-[6rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[10rem] 2xl:ml-[9.7rem] xl:ml-[6.5rem]">01</h2>
+              </div>
+            </div>
+            <div className="bg-[#000000BA]   ">
+
+              <h1 className="text-xl text-white font-light text-center pt-10">Personalized Learning Paths</h1>
+              <p className="text-left text-white lg:m-4 text-sm">No two learners are the same — so why should your learning journey be?
+                After your skill analysis, MockMingle creates a custom roadmap for your improvement.
+                Follow guided steps with learning milestones, progress reports, and recommended exercises to close your skill gaps faster.
+              </p>
+
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10.6rem] xl:ml-[6.5rem]  ml-[10rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[10.5rem] 2xl:ml-[11.1rem] xl:ml-[7rem]">02</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">Company & College Integration</h1>
+                <p className="text-left text-white lg:m-4 text-sm">MockMingle fits seamlessly into corporate and academic environments.
+                  Whether you’re a student aiming to impress recruiters or an employee wanting to upgrade your skills, your performance reports are easy to share with colleges, training departments, or potential employers.</p>
+              </div>
+
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10.6rem] xl:ml-[6.5rem]  ml-[10rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[10.5rem] 2xl:ml-[11.1rem] xl:ml-[7rem]">03</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">RealMock Interview – Practice it to perfection!</h1>
+                <p className="text-left lg:m-4 text-white text-sm">Get some real-world interviews under your belt before the real deal.
+                  MockMingle doesn't just provide you theories — it puts you in realistic time-bound mocks according to your desired job role or domain. Prepare with the industry-standard questions, behavioral assessments, and technical rounds — that way, you’re not just prepared, you’re practiced.</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Card 3 */}
+          <div>
+            <div className="flex mt-28 justify-center flex-col bg-gradient-to-t from-[#000000] to-[#D4D4D4] rounded-t-lg p-4">
+              <div className="relative m-auto -mt-28 w-48 h-48 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                <div className="w-40 h-40 flex items-center justify-center bg-white bg-opacity-50 rounded-full shadow-inner">
+                  <div className="w-32 h-32 flex items-center justify-center bg-[#9d77a6] rounded-full shadow-inner">
+                    <Image src="/intractive.svg" alt="Interactive" width={64} height={64} className=" min-w-[55rem] min-h-[55rem] -ml-[1rem] mt-[3.9rem]" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white mt-10 text-center " style={{
+                  fontFamily: "Arial, sans-serif",
+                  textShadow: "2px 2px 3px rgba(255, 255, 255, 0.5)",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                }}>Interactive</h1>
+              </div>
+              <div className="mt-10 mr-14 ">
+                <div className="absolute  mt-3 ml-[8.5rem] lg:ml-[6rem] 2xl:ml-[9rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[9rem] lg:ml-[6.5rem] 2xl:ml-[9.5rem]">01</h2>
+              </div>
+            </div>
+
+            <div className="bg-[#000000BA]  ">
+
+              <h1 className="text-xl font-light text-white text-center pt-10">Gamified Challenges</h1>
+              <p className="text-left lg:m-4 text-white text-sm">Learning meets excitement at MockMingle!
+                Daily and weekly challenges across different skill sets help you practice consistently.
+                Win rewards, unlock achievements, and see yourself climb the leaderboard — making preparation fun, addictive, and goal-oriented.
+              </p>
+
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10.6rem] xl:ml-[6.5rem]  ml-[10rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[10.5rem] 2xl:ml-[11.1rem] xl:ml-[7rem]">02</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">Leaderboards and Achievements</h1>
+                <p className="text-left lg:m-4 text-white text-sm">Compete, win, and celebrate your growth!
+                  Every task, chat session, interview, and challenge earns you points.
+                  Get ranked on leaderboards, earn achievement badges, and unlock exclusive rewards — keeping you motivated throughout your journey.</p>
+              </div>
+
+              <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+              <div className="-mt-[2.9rem] ">
+                <div className="absolute mt-3 2xl:ml-[10.6rem] xl:ml-[6.5rem]  ml-[10rem] w-[6rem] h-[3rem] overflow-hidden">
+                  <div className="w-[2.5rem] h-[1.5rem] bg-[#6a6969bb] rounded-b-full opacity-100" />
+                </div>
+
+                <h2 className="absolute rounded-full w-[1.5rem] h-[1.5rem] bg-white border-[1px] border-gray-500 text-sm  text-center mt-[0.3rem] ml-[10.5rem] 2xl:ml-[11.1rem] xl:ml-[7rem]">03</h2>
+              </div>
+              <div className="text-center mt-20">
+                <h1 className="text-xl font-light text-white text-center pt-10">Role-Based Scenerios & Adaptive Q&A</h1>
+                <p className="text-left lg:m-4 text-white pb-7 text-sm">Rehearse for your dream role, not for just any role at all.
+                  MockMingle also will modify each session depending on your desired job title or industry — whether it’s software development, marketing, finance or HR. Receive scenario-based questions, case studies, and role-specific challenges that emulate a real-world interview. The more you practice, the smarter the platform gets at personalizing your experience.</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
+        <div>
+
+          <h2 className="text-5xl font-bold mt-10 ">Simple, Transparent Pricing</h2>
+          <p className=" mt-10 text-3xl  font-semibold">Pay only for what you use. No hidden fees, no contracts, no surprises. Our pricing is simple and transparent, making it easy to budget and plan your learning journey.</p>
+        </div>
+
+
+        <div className="grid mt-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      {plans.map((plan, index) => (
+        <div
+          key={index}
+          onClick={() => setSelected(index)}
+          className={`cursor-pointer rounded-xl bg-black  shadow-lg transition-all duration-300 border-2 ${
+            selected === index ? 'border-blue-500 scale-105' : 'border-transparent'
+          }`}
+        >
+          {/* Plan Header */}
+          <div className={`p-8 -mt-[0.2rem] rounded-t-[55rem] rounded-b-full text-center ${
+            index === 0 ? 'bg-[#86717A] text-white ' : 'bg-[#86717A]'
+          }`}>
+            <h2 className="text-xl font-bold">{plan.title}</h2>
+            <h3 className="text-lg font-semibold mt-2">₹ {plan.price}</h3>
+          </div>
+
+          {/* Features */}
+          <div className={`p-4 ${index === 0 ? 'bg-black text-white' : 'bg-black text-white'} rounded-b-xl`}>
+            <ul className="space-y-1 text-sm font-medium">
+              {features.map((feature, i) => (
+                <li key={i}>{feature}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+        </div>
+        <footer className="bg-black h-[17rem] overflow-y-hidden">
+
+          <div className="grid grid-cols-2 ">
+            <div>
+            <img src="/SVG_mascote.svg" alt="" className="h-[70rem] -mt-[23rem] -mb-[15rem] -pb-[10rem] w-[auto]" />
+            </div>
+            <div className="    ">
+<h1 className="bg-white rounded-full text-center w-32 mt-5 m-auto">Contact Us</h1>
+<h2
+          className="text-2xl lg:text-2xl text-center font-bold  py-4 text-white"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            backgroundColor: "white",
+            color: "transparent",
+            textShadow: "2px 2px 3px rgba(0, 0, 0, 0.7)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+          }}
+        >
+          info@shakktii.in
+        </h2>
+        <div className="flex justify-around mt-20">
+
+<h2 className="text-white border-2 p-2 rounded-full">Terms & Conditions</h2>
+<h2 className="text-white border-2 p-2 rounded-full">Privacy Policy</h2>
+        </div>
+
+            </div>
+          </div>
+        </footer>
+
+      </>
+      );
 }

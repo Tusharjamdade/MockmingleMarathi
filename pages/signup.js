@@ -360,8 +360,7 @@ const handleSubmit = async (e) => {
         <h1 className="text-2xl text-white mb-4">
             Create an <span className="text-pink-400">Account!</span>
         </h1>
-
-        {generalError && (
+         {generalError && (
             <div className="col-span-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
                 <span className="block sm:inline">{generalError}</span>
             </div>
@@ -369,7 +368,7 @@ const handleSubmit = async (e) => {
         
         <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
             <div className="flex flex-col col-span-3 items-center mb-4">
-                <label htmlFor="profile-upload" className="mb-2 text-white font-medium">Profile Photo</label>
+                <label htmlFor="profile-upload" className="mb-2 text-white font-medium">Profile Photo <span className="text-red-500">*</span></label>
                 <div className="relative w-32 h-32 mb-2 rounded-full overflow-hidden bg-gray-200 bg-opacity-30 flex items-center justify-center border-2 border-dashed border-white border-opacity-40">
                     {profileImg ? (
                         <img src={profileImg} alt="Profile Preview" className="w-full h-full object-cover" />
@@ -396,7 +395,7 @@ const handleSubmit = async (e) => {
                     name="fullName"
                     value={fullName}
                     onChange={handleChange}
-                    placeholder="Full Name"
+                    placeholder="Full Name *"
                     required
                     className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.fullName ? 'border-2 border-red-500' : ''}`}
                 />
@@ -408,7 +407,7 @@ const handleSubmit = async (e) => {
                     name="email"
                     value={email}
                     onChange={handleChange}
-                    placeholder="Email Address"
+                    placeholder="Email Address *"
                     required
                     className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.email ? 'border-2 border-red-500' : ''}`}
                 />
@@ -420,7 +419,7 @@ const handleSubmit = async (e) => {
                     name="mobileNo"
                     value={mobileNo}
                     onChange={handleChange}
-                    placeholder="Mobile Number"
+                    placeholder="Mobile Number *"
                     required
                     className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.mobileNo ? 'border-2 border-red-500' : ''}`}
                 />
@@ -431,7 +430,7 @@ const handleSubmit = async (e) => {
                 name="address"
                 value={address}
                 onChange={handleChange}
-                placeholder="Address"
+                placeholder="Address *"
                 required
                 className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
             />
@@ -440,7 +439,7 @@ const handleSubmit = async (e) => {
                 name="DOB"
                 value={DOB}
                 onChange={handleChange}
-                placeholder="DOB"
+                placeholder="DOB *"
                 required
                 className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
             />
@@ -450,7 +449,7 @@ const handleSubmit = async (e) => {
                     name="education"
                     value={education}
                     onChange={handleChange}
-                    placeholder="Education"
+                    placeholder="Education *"
                     required
                     className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.education ? 'border-2 border-red-500' : ''}`}
                 />
@@ -462,7 +461,7 @@ const handleSubmit = async (e) => {
                     name="collageName"
                     value={collageName}
                     onChange={handleChange}
-                    placeholder="College Name"
+                    placeholder="College Name *"
                     required
                     className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.collageName ? 'border-2 border-red-500' : ''}`}
                 />
@@ -476,7 +475,7 @@ const handleSubmit = async (e) => {
                     name="password"
                     value={password}
                     onChange={handlePasswordChange}
-                    placeholder="🔒 Password"
+                    placeholder="Password *"
                     required
                     className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.password ? 'border-2 border-red-500' : ''}`}
                 />
@@ -535,7 +534,7 @@ const handleSubmit = async (e) => {
                     id="confirm-password"
                     value={confirmPassword}
                     onChange={handleConfirmPasswordChange}
-                    placeholder="🔒 Confirm Password"
+                    placeholder="Confirm Password *"
                     required
                     className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${passwordError ? 'border-2 border-red-500' : ''}`}
                 />
@@ -549,6 +548,7 @@ const handleSubmit = async (e) => {
             </div>
 
             <div className="col-span-3 flex items-center justify-between mt-4">
+       
                 <button
                     type="submit"
                     disabled={isSubmitting}
@@ -564,6 +564,7 @@ const handleSubmit = async (e) => {
                         </>
                     ) : 'Sign Up'}
                 </button>
+                    <div className="col-span-3 flex items-center justify-between text-white mt-4">fields marked with  <span className="text-red-500"> * </span> are required</div>
                 <div className="text-white">
                     Already have an account? <Link href="/login" className="text-pink-400 hover:underline">Login</Link>
                 </div>

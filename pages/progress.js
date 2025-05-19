@@ -297,11 +297,20 @@ export default function Progress() {
               <h2 className="text-xl font-semibold text-gray-800">Detailed Score Progress</h2>
               <p className="text-sm text-gray-500 mt-1">Track your improvement in each skill area over time</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-gray-100 px-3 py-1 rounded-md text-xs font-medium text-gray-700">
-                Last Interview: {reports.length > 0 ? new Date(reports[reports.length - 1].date).toLocaleDateString() : 'N/A'}
-              </div>
-              <div className="bg-blue-50 px-3 py-1 rounded-md text-xs font-medium text-blue-700">
+            <div className="flex flex-wrap items-center gap-2">
+              {reports.length > 0 && (
+                <div className="bg-gray-50 border border-gray-200 px-3 py-1 rounded-lg text-xs font-medium flex items-center shadow-sm">
+                  <span className="text-gray-700">Latest Interview:</span> 
+                  <span className="text-gray-900 ml-1">{new Date(reports[reports.length - (reports.length - 1)].date).toLocaleDateString()}</span>
+                </div>
+              )}
+              {reports.length > 0 && reports[reports.length - 1].role && (
+                <div className="bg-blue-50 border border-blue-100 px-3 py-1 rounded-lg text-xs font-medium flex items-center shadow-sm">
+                  <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1.5"></span>
+                  <span className="text-blue-700">{reports[reports.length - 1].role}</span>
+                </div>
+              )}
+              <div className="bg-blue-50 border border-blue-100 px-3 py-1 rounded-lg text-xs font-medium text-blue-700 shadow-sm">
                 Total: {reports.length} Interviews
               </div>
             </div>
