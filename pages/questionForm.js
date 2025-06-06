@@ -364,9 +364,15 @@ After fixing, please refresh the page.`);
       
       // Mobile-specific configurations
       if (isMobile) {
-        // Shorter timeout for mobile to detect issues faster
-        recognitionInstance.continuous = false; // Some mobile browsers work better with continuous: false
-        recognitionInstance.interimResults = false; // Disable interim results on mobile for better performance
+        console.log('Mobile device detected, applying mobile-specific settings');
+        // Keep continuous mode for better stability on mobile
+        recognitionInstance.continuous = true;
+        // Enable interim results for better responsiveness
+        recognitionInstance.interimResults = true;
+        // Increase timeout for mobile devices
+        recognitionInstance.maxAlternatives = 3;
+        // Add a small delay between recognition restarts
+        recognitionInstance.pause = false;
         
         // Add error handling for mobile-specific issues
         recognitionInstance.onerror = (event) => {
@@ -438,27 +444,63 @@ After fixing, please refresh the page.`);
         }
       };
       
-      // Handle end of recognition - CRUCIAL IMPROVEMENT: Auto-restart for continuous speech
+      // Handle end of recognition with improved mobile handling
       recognitionInstance.onend = () => {
         console.log('Speech recognition service disconnected');
         
-        // If user is still supposed to be listening, automatically restart recognition
-        // This is the key fix to prevent microphone cutoff during speaking
-        if (isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
-          console.log('Auto-restarting speech recognition to maintain continuous listening');
+        // If we're on mobile and still supposed to be listening
+        if (isMobile && isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
+          console.log('Mobile: Auto-restarting speech recognition');
+          
+          // Use a more robust restart mechanism for mobile
+          const restartRecognition = () => {
+            if (!isListening || isAnswerSubmitted || window.stopRecognitionRequested) return;
+            
+            try {
+              // Clear any existing timeouts to prevent multiple restarts
+              if (window.recognitionRestartTimeout) {
+                clearTimeout(window.recognitionRestartTimeout);
+              }
+              
+              // Add a small random delay to prevent tight loops
+              const delay = 100 + Math.random() * 200; // 100-300ms
+              
+              window.recognitionRestartTimeout = setTimeout(() => {
+                try {
+                  if (recognitionInstance && isListening) {
+                    recognitionInstance.start();
+                    console.log('Mobile: Successfully restarted recognition');
+                  }
+                } catch (e) {
+                  console.error('Mobile: Failed to restart recognition:', e);
+                  // If restart fails, try again with a longer delay
+                  if (isListening) {
+                    setTimeout(restartRecognition, 1000);
+                  } else {
+                    setIsListening(false);
+                  }
+                }
+              }, delay);
+              
+            } catch (e) {
+              console.error('Mobile: Error in recognition restart logic:', e);
+              setIsListening(false);
+            }
+          };
+          
+          // Start the restart process
+          restartRecognition();
+        } else if (!isMobile && isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
+          // Desktop handling (original behavior)
+          console.log('Desktop: Auto-restarting speech recognition');
           try {
-            // Preserve current transcript during auto-restart
-            // Small delay to ensure clean restart
             setTimeout(() => {
-              try {
+              if (isListening && recognitionInstance) {
                 recognitionInstance.start();
-              } catch (e) {
-                console.error('Failed to auto-restart recognition:', e);
-                setIsListening(false);
               }
             }, 100);
           } catch (e) {
-            console.error('Error in recognition auto-restart:', e);
+            console.error('Failed to restart recognition:', e);
             setIsListening(false);
           }
         } else {
@@ -785,54 +827,33 @@ After fixing, please refresh the page.`);
       setRecordedText('Listening...');
       setIsListening(true);
       
-      // Set a timeout for speech recognition if user turns on mic but doesn't speak (Scenario 3)
-      const silenceTimeout = setTimeout(() => {
-        if (isListening && (recordedText === 'Listening...' || !recordedText.trim())) {
-          console.log('SCENARIO 3: No speech detected after turning on mic - stopping and moving to next question');
-          
-          // First stop the recognition
-          try {
-            recognition.stop();
-          } catch (e) {
-            console.error('Error stopping recognition:', e);
-          }
-          
-          setIsListening(false);
-          setLoading(true);
-          
-          // Create a message about the timeout
-          const noSpeechMessage = "I didn't hear any speech after you turned on the microphone. Moving to the next question.";
-          speakResponse(noSpeechMessage);
-          
-          // Save this as the answer and move to next question
-          setTimeout(() => {
-            if (questions.length > 0 && currentQuestionIndex < questions.length) {
-              const currentQuestion = questions[currentQuestionIndex];
-              
-              if (currentQuestion && currentQuestion._id) {
-                // Store the answer
-                const noAnswerText = "No answer provided - no speech detected";
-                submitAnswer(currentQuestion._id, noAnswerText);
-              }
-              
-              setLoading(false);
-              
-              // Check if this is the last question
-              if (currentQuestionIndex >= questions.length - 1) {
-                console.log('This was the last question - showing completion modal');
-                setIsModalVisible(true);
-              } else {
+      // Mobile-specific: Add a small delay and check if recognition is still active
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+          if (isListening && recognition && !recognition.recording) {
+            console.log('Mobile: Restarting recognition after initial start');
+            try {
+              recognition.stop();
+              setTimeout(() => {
+                if (recognition && isListening) {
+                  recognition.start();
+                }
+              }, 100);
+            } catch (e) {
+              console.error('Mobile: Error in restart after initial start:', e);
+              // If we can't restart, move to the next question
+              if (questions.length > 0 && currentQuestionIndex < questions.length - 1) {
                 setCurrentQuestionIndex(prevIndex => prevIndex + 1);
                 setRecordedText('');
                 setIsAnswerSubmitted(false);
+              } else {
+                console.log('No more questions available');
+                setLoading(false);
               }
-            } else {
-              console.error('No valid questions to process in silence timeout');
-              setLoading(false);
             }
-          }, 3000);
-        }
-      }, 15000); // 15 seconds of silence after turning on mic
+          }
+        }, 1000); // Check after 1 second if we need to restart
+      }
       
       // Store the silence timeout ID
       setSilenceTimeout(silenceTimeout);
