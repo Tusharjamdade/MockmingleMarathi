@@ -12,26 +12,93 @@ const QuestionForm = () => {
   useEffect(() => {
     // Disable all speech synthesis globally - runs only on client side
     if (typeof window !== 'undefined') {
-      window.speechSynthesis.speak = function () {
-        console.warn('[Speech Blocked] Speech synthesis call skipped.');
+      // Only block speech synthesis if not on mobile
+      if (!/Mobi|Android/i.test(navigator.userAgent)) {
+        window.speechSynthesis.speak = function () {
+          console.warn('[Speech Blocked] Speech synthesis call skipped.');
+        };
+      }
+      
+      // Add event listener for page visibility changes (important for mobile)
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible' && isListening) {
+          // If we come back to the tab and were listening, restart recognition
+          setTimeout(() => {
+            if (recognition && isListening) {
+              try {
+                recognition.stop();
+                setTimeout(() => recognition.start(), 100);
+              } catch (e) {
+                console.error('Error restarting recognition after visibility change:', e);
+              }
+            }
+          }, 1000);
+        }
+      };
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
       };
     }
-  }, []);
+  }, [isListening, recognition]);
 
   // Function to handle microphone permission request
   const requestMicPermission = async () => {
     try {
-      // Try to get microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      window.microphoneStream = stream; // Store for later use
+      // First, stop any existing stream
+      if (window.microphoneStream) {
+        window.microphoneStream.getTracks().forEach(track => track.stop());
+        window.microphoneStream = null;
+      }
+      
+      // Try to get microphone access with specific constraints for mobile
+      const constraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+        },
+        // Mobile-specific constraints
+        video: false
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Store the stream globally for later use
+      window.microphoneStream = stream;
+      
+      // Handle track ended events (important for mobile)
+      stream.getAudioTracks().forEach(track => {
+        track.onended = () => {
+          console.log('Microphone track ended, attempting to restart...');
+          if (isListening) {
+            // Small delay before attempting to restart
+            setTimeout(requestMicPermission, 500);
+          }
+        };
+      });
+      
       setMicPermission('granted');
       setShowPermissionModal(false);
       
-      // Reload the page to reinitialize with permissions
-      window.location.reload();
+      // On mobile, we don't want to reload the page as it breaks the flow
+      if (!/Mobi|Android/i.test(navigator.userAgent)) {
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Failed to get microphone permission:', error);
-      alert('Microphone access is required for this application. Please enable it in your browser settings.');
+      setMicPermission('denied');
+      setShowPermissionModal(true);
+      
+      // More user-friendly error message
+      const errorMessage = error.name === 'NotAllowedError' 
+        ? 'Microphone access was denied. Please allow microphone access in your browser settings and try again.'
+        : 'Microphone access is required for this application. Please check your device settings and try again.';
+      
+      alert(errorMessage);
     }
   };
   
@@ -273,7 +340,7 @@ After fixing, please refresh the page.`);
     }
   }, [email, userId]);
 
-  // Set up speech recognition with a simple, reliable approach
+  // Set up speech recognition with mobile-specific handling
   useEffect(() => {
     // Initialize speech recognition setup with proper reset handling
     const setupSpeechRecognition = () => {
@@ -282,16 +349,54 @@ After fixing, please refresh the page.`);
         return null;
       }
       
+      // Check if we're on mobile
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      
       // Create a new SpeechRecognition instance
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognitionInstance = new SpeechRecognition();
       
-      // Configure recognition
+      // Configure recognition with mobile-specific settings
       recognitionInstance.lang = 'mr-IN';
       recognitionInstance.continuous = true; // Keep listening continuously
       recognitionInstance.interimResults = true; // Get partial results
-      // Prevent disconnection on short pauses
       recognitionInstance.maxAlternatives = 1;
+      
+      // Mobile-specific configurations
+      if (isMobile) {
+        // Shorter timeout for mobile to detect issues faster
+        recognitionInstance.continuous = false; // Some mobile browsers work better with continuous: false
+        recognitionInstance.interimResults = false; // Disable interim results on mobile for better performance
+        
+        // Add error handling for mobile-specific issues
+        recognitionInstance.onerror = (event) => {
+          console.error('Mobile speech recognition error:', event.error);
+          
+          // Handle specific mobile errors
+          if (event.error === 'not-allowed') {
+            setMicPermission('denied');
+            setShowPermissionModal(true);
+          } else if (event.error === 'audio-capture') {
+            alert('No microphone was found. Please check your device settings.');
+          } else if (event.error === 'network') {
+            alert('Network error occurred. Please check your internet connection.');
+          }
+          
+          // Try to recover if we're supposed to be listening
+          if (isListening) {
+            setTimeout(() => {
+              try {
+                recognitionInstance.start();
+              } catch (e) {
+                console.error('Failed to restart recognition after error:', e);
+                setIsListening(false);
+              }
+            }, 1000);
+          } else {
+            setIsListening(false);
+          }
+        };
+      }
       
       // Current accumulated transcript - stored outside React state for reliability
       let currentTranscript = '';
@@ -542,10 +647,17 @@ After fixing, please refresh the page.`);
     }
   };
 
-  const handleMicClick = useCallback(() => {
+  const handleMicClick = useCallback(async () => {
     // Handle speech recognition start/stop
     if (!recognition) {
       alert('Speech recognition not available');
+      return;
+    }
+    
+    // Check if we're on mobile and handle permissions
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile && micPermission !== 'granted') {
+      setShowPermissionModal(true);
       return;
     }
 
@@ -637,6 +749,17 @@ After fixing, please refresh the page.`);
       
       // Clear the flag to allow auto-restart
       window.stopRecognitionRequested = false;
+      
+      // On mobile, we need to ensure we have a fresh stream
+      if (isMobile && (!window.microphoneStream || window.microphoneStream.getAudioTracks().length === 0)) {
+        console.log('Refreshing microphone stream for mobile');
+        try {
+          await requestMicPermission();
+        } catch (e) {
+          console.error('Failed to refresh microphone stream:', e);
+          return;
+        }
+      }
       
       // CRITICAL: Clear the question timer when mic is activated
       // This prevents "Time's up" from interrupting while speaking

@@ -87,9 +87,8 @@ const InterviewProgress = ({ userData = null }) => {
     router.push('/role');
   };
 
-  // Calculate completion percentage
-  const completionPercentage = 
-    (interviewStats.no_of_interviews_completed / Math.max(interviewStats.no_of_interviews, 1)) * 100;
+  // Always show 100% completion since interviews are unlimited
+  const completionPercentage = 100;
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6 relative">
@@ -101,9 +100,9 @@ const InterviewProgress = ({ userData = null }) => {
       <h2 className="text-xl font-semibold mb-4 text-white">मुलाखतीच्या प्रगतीचा आढावा</h2>
       
       <div className="flex justify-between items-center mb-4">
-        <span className="text-lg font-medium text-white">पूर्ण झालेल्या मुलाखती</span>
+        <span className="text-lg font-medium text-white">मुलाखतीची प्रगती</span>
         <span className="text-xl font-bold text-white">
-          {interviewStats.no_of_interviews_completed} / {interviewStats.no_of_interviews}
+          {interviewStats.no_of_interviews_completed} पूर्ण
         </span>
       </div>
       
@@ -122,22 +121,18 @@ const InterviewProgress = ({ userData = null }) => {
       
       <div className="mt-4 text-sm text-gray-300">
         {interviewStats.no_of_interviews_completed === 0 
-          ? "तुम्ही अद्याप कोणतीही मुलाखत पूर्ण केलेली नाही. तुमची प्रगती पाहण्यासाठी पहिली मुलाखत सुरू करा!" 
-          : interviewStats.no_of_interviews_completed === interviewStats.no_of_interviews 
-            ? "अभिनंदन! तुम्ही उपलब्ध असलेल्या सर्व मुलाखती पूर्ण केल्या आहेत." 
-            : `You've completed ${interviewStats.no_of_interviews_completed} out of ${interviewStats.no_of_interviews} interviews. Keep going!`}
+          ? "तुम्ही अद्याप कोणतीही मुलाखत पूर्ण केलेली नाही. पहिली मुलाखत सुरू करा!" 
+          : `तुम्ही आतापर्यंत ${interviewStats.no_of_interviews_completed} मुलाखती पूर्ण केल्या आहेत.`}
       </div>
       
-      {interviewStats.no_of_interviews_completed < interviewStats.no_of_interviews && (
-        <div className="mt-6 text-center">
-          <button 
-            onClick={handleStartInterview} 
-            className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 transition-all duration-200"
-          >
-            पुढील मुलाखत सुरू करा
-          </button>
-        </div>
-      )}
+      <div className="mt-6 text-center">
+        <button 
+          onClick={handleStartInterview} 
+          className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 transition-all duration-200"
+        >
+          नवीन मुलाखत सुरू करा
+        </button>
+      </div>
     </div>
   );
 };

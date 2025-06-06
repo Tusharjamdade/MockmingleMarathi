@@ -51,17 +51,37 @@ async function generateQuestionsWithOpenAI(level, standard, board, subject) {
 
   const systemPrompt = `You are an experienced primary school teacher. Generate 10 simple, beginner-friendly questions in Marathi.`;
   
-  const userPrompt = `Generate 10 questions with the following details:
-  - Subject: ${subject}
-  - Standard: ${standard}
-  - Difficulty Level: ${level}
-  - Board: ${board}
-  
-  Requirements:
-  1. Questions should be in Marathi
-  2. Number the questions in Marathi (१, २, ३, ...)
-  3. Questions should be appropriate for the specified standard and board
-  4. Format the response as a clean list of questions`;
+  const userPrompt = `Generate 10 well-structured, syllabus-aligned academic questions in Marathi based on the following details:
+
+Subject: ${subject}
+
+Standard (Grade): ${standard}
+
+Difficulty Level: ${level} (Easy / Medium / Hard)
+
+Education Board: ${board}
+
+🔹 Requirements:
+All questions must be written in Marathi language only.
+
+Each question must contain at least 2 full sentences to ensure clarity and depth. Avoid short or incomplete prompts.
+
+Use Marathi numerals to number the questions (e.g., १, २, ३, ...).
+
+All questions must be strictly aligned with the official syllabus of the specified standard and board.
+
+Ensure that the difficulty level is appropriate:
+
+Easy: Basic concept explanation
+
+Medium: Applied understanding or reasoning
+
+Hard: Analytical, comparative, or evaluative thinking
+
+Frame descriptive or application-based questions only (e.g., “समजावून सांगा”, “तुलनात्मक विवेचन करा”, “स्पष्ट करा”, “लघुनिबंध लिहा”, etc.).
+
+Do not include answers, hints, or extra formatting—just a clean list of numbered questions.
+`;
 
   const requestBody = {
     model: 'gpt-4',

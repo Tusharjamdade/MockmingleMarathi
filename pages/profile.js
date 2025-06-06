@@ -23,8 +23,7 @@ export default function Profile() {
     fullName: '',
     email: '',
     profileImg: '',
-    no_of_interviews: 1,
-    no_of_interviews_completed: 0,
+    interviews_completed: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
       useEffect(() => {
@@ -47,9 +46,8 @@ export default function Profile() {
       setUserData({
         fullName: user.fullName,
         email: user.email,
-        profileImg: user.profileImg || '/default-avatar.png', // Default avatar if none exists
-        no_of_interviews: user.no_of_interviews || 1,
-        no_of_interviews_completed: user.no_of_interviews_completed || 0,
+        profileImg: user.profileImg || '/default-avatar.png',
+        interviews_completed: user.no_of_interviews_completed || 0, // Keep tracking completed interviews
       });
       
       // Also fetch latest user data from the server to get up-to-date interview stats
@@ -64,14 +62,12 @@ export default function Profile() {
               // Update interview stats in local state
               setUserData(prevData => ({
                 ...prevData,
-                no_of_interviews: statsData.stats.no_of_interviews || 1,
-                no_of_interviews_completed: statsData.stats.no_of_interviews_completed || 0,
+                interviews_completed: statsData.stats.no_of_interviews_completed || 0,
               }));
               
               // Also update user in local storage with these stats
               const updatedUser = {
                 ...user,
-                no_of_interviews: statsData.stats.no_of_interviews || 1,
                 no_of_interviews_completed: statsData.stats.no_of_interviews_completed || 0,
               };
               localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -98,8 +94,7 @@ export default function Profile() {
                 // Update state
                 setUserData(prevData => ({
                   ...prevData,
-                  no_of_interviews: data.user.no_of_interviews || 1,
-                  no_of_interviews_completed: data.user.no_of_interviews_completed || 0,
+                  interviews_completed: data.user.no_of_interviews_completed || 0,
                 }));
               }
             }
@@ -173,29 +168,15 @@ export default function Profile() {
                         <BsBarChartFill className="mr-2" />
                         मुलाखत स्टॅटिस्टिक्स
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-[#3a0a5c] p-3 rounded-lg text-center">
-                          <p className="text-xs text-gray-300 mb-1">उपलब्ध</p>
-                          <p className="text-xl font-bold text-white">
-                            {userData.no_of_interviews - userData.no_of_interviews_completed}
-                          </p>
-                        </div>
-                        <div className="bg-[#3a0a5c] p-3 rounded-lg text-center">
-                          <p className="text-xs text-gray-300 mb-1">पूर्ण झाले</p>
-                          <p className="text-xl font-bold text-white">{userData.no_of_interviews_completed}</p>
-                        </div>
+                      <div className="bg-[#3a0a5c] p-4 rounded-lg text-center">
+                        <p className="text-xs text-gray-300 mb-1">एकूण पूर्ण केलेल्या मुलाखती</p>
+                        <p className="text-3xl font-bold text-white">
+                          {userData.interviews_completed}
+                        </p>
                       </div>
                       <div className="mt-4">
                         <InterviewProgress userData={userData} />
                       </div>
-                      <Link href="/profile">
-                        <button className="w-full mt-4 py-2 bg-gradient-to-r from-[#8000ff] to-[#e600ff] text-white rounded-lg font-semibold text-sm transition-transform hover:scale-105 flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          अधिक मुलाखती खरेदी करा.
-                        </button>
-                      </Link>
                     </div>
                   </div>
                 </div>

@@ -119,25 +119,15 @@ export default function Role() {
     e.preventDefault();  // Prevent form from submitting normally
     localStorage.removeItem("apiResponseStatus");
 
-    // 
     if (!subject.trim()) {
       toast.error("कृपया विषय टाका");
       return;
     }
 
     // Show loading indicator
-    toast.loading("मुलाखतीसाठी वेळ पाहत आहे...");
-
-    // Check if user has available interviews
-    const userHasAvailableInterviews = await checkInterviewAvailability();
-    toast.dismiss(); // Dismiss loading toast
-
-    if (!userHasAvailableInterviews) {
-      setShowErrorModal(true);
-      return;
-    }
-
-    // If we get here, proceed with the interview
+    toast.loading("मुलाखतीसाठी तयार होत आहे...");
+    
+    // Always proceed with the interview without checking limits
     toast.success("मुलाखतीची तयारी सुरू करत आहे...");
 
     // Declare formattedQuestions here once

@@ -59,19 +59,11 @@ export default function dashboard({ Logout, user }) {
               <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
                 <span className="relative inline-flex">
                   प्रोग्रेस
-                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">नवीन</span>
-                </span>
+                   </span>
               </li>
             </Link>
             
-            <Link href={'/academicTest'}>
-              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
-                <span className="relative inline-flex">
-                  शैक्षणिक परीक्षा
-                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">नवीन</span>
-                </span>
-              </li>
-            </Link>
+            
             
             <Link href={'/oldreport'}>
               <li className="relative hover:text-pink-400 cursor-pointer transition-colors font-medium" onClick={handleReportClick}>
@@ -283,7 +275,7 @@ export default function dashboard({ Logout, user }) {
           </h1>
           
           {/* Feature Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-24">
             {/* Progress Tracking Feature */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
               <div className="flex flex-col items-center md:items-start gap-6">
@@ -340,32 +332,7 @@ export default function dashboard({ Logout, user }) {
               </div>
             </div>
             
-            {/* Academic Test Feature - NEW */}
-            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                  नवीन लाँच!
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">वैयक्तिकृत शैक्षणिक चाचण्या</h2>
-                <p className="text-gray-600">
-                 तुमच्या स्ट्रीम, डिपार्टमेंट, आणि विषयासाठी खास तयार केलेल्या शैक्षणिक टेस्ट्स द्या. तत्काळ AI-आधारित मूल्यांकन आणि सविस्तर फीडबॅक मिळवा, ज्यामुळे तुमची शैक्षणिक कार्यक्षमता सुधारेल.</p>
-                <ul className="space-y-2">
-                  {['विषयानुसार प्रश्न', 'विविध टेस्ट फॉर्मॅट्स (MCQ, लेखी, बोलणी)', 'अवघडपणानुसार समायोजन', '३-स्टार रेटिंग पद्धत'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/academicTest">
-                  <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-2 px-6 rounded-lg font-medium hover:from-green-600 hover:to-teal-700 transition duration-300 shadow-md mt-2">
-                    शैक्षणिक टेस्ट द्या
-                  </button>
-                </Link>
-              </div>
-            </div>
+           
           </div>
 
 
