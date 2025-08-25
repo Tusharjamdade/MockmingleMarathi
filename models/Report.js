@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ReportsSchema = new mongoose.Schema({
-  standards: {
+  role: {
     type: Number,
     required: true,
   },

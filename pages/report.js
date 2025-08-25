@@ -279,14 +279,14 @@ function Report() {
   const [reportData, setReportData] = useState(null);
   const [user, setUser] = useState('');
   const [email, setEmail] = useState('');
-  const [jobRole, setJobRole] = useState('');
-  const [standard,setStandard]=useState('');
-  const [subject,setSubject]=useState('');
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [jobRoleId, setJobRoleId] = useState(null);
-  const [standardId,setStandardId]=useState(null);
+const [roleId, setRoleId] = useState(null);
   const [isEmailFetched, setIsEmailFetched] = useState(false);
+   const [recordId, setRecordId] = useState(null);
+   const [role, setRole] = useState('');       // optional (English)
+   const [subject, setSubject] = useState('');   // optional (Marathi)
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -328,13 +328,13 @@ console.log("match Score",scoreMatch);
   };
 
   // Store the score function - Make sure this is declared before it's called
-  const storeScore = async (standards,subject, email, overallScore) => {
+  const storeScore = async (role,subject, email, overallScore) => {
     try {
       const collageName = user?.collageName || "Unknown Collage";
   
       // Log the data before sending it
       const requestData = {
-        standards,
+        role,
         subject,
         email,
         collageName,
@@ -377,7 +377,8 @@ console.log("match Score",scoreMatch);
       if (idFromLocalStorage) {
         // If jobRoleId is available, set the jobRoleId
         // setJobRoleId(idFromLocalStorage);
-        setStandardId(idFromLocalStorage);
+        //setStandardId(idFromLocalStorage);
+        setRecordId(idFromLocalStorage);
       } else {
         // If jobRoleId is missing, set the email and show previous reports
         setEmail(email);
@@ -392,11 +393,12 @@ console.log("match Score",scoreMatch);
 
   useEffect(() => {
     // if (!jobRoleId) return;
-    if (!standardId) return;
+    if (!recordId) return;
 
     const fetchJobRole = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/getReadyQuestionsAndAnswers?standardId=${standardId}`);
+   
+        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/getReadyQuestionsAndAnswers?roleId=${recordId}`);
         localStorage.setItem('status', "processing");
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -429,12 +431,12 @@ console.log("match Score",scoreMatch);
 
         console.log("Extracted overall score:", overallScore);
         // Store the extracted overall score
-        await storeScore(data.data.standards,data.data.subject, data.data.email, overallScore);
+        await storeScore(data.data.role || null,data.data.subject || null, data.data.email, overallScore);
         // Store the report analysis
-        await storeReport(data.data.standards,data.data.subject, data.data.email, analysisData);
+        await storeReport(data.data.role || null,data.data.subject || null, data.data.email, analysisData);
 
         setEmail(data.data.email);
-        setStandard(data.data.standards);
+        setRole(data.data.role ||"");
 
         localStorage.removeItem('status');
         localStorage.setItem('status', "model 5 min");
@@ -447,13 +449,13 @@ console.log("match Score",scoreMatch);
     };
 
     fetchJobRole();
-  }, [standardId]);
+  }, [recordId]);
 
-  const storeReport = async (standards,subject, email, reportAnalysis) => {
+  const storeReport = async (role,subject, email, reportAnalysis) => {
     // Ensure collageName has a default value if it's undefined
     const collageName = user?.collageName || 'Unknown College';
     
-    console.log("Storing report for:", { standards,subject,email, reportAnalysis});
+    console.log("Storing report for:", { role,subject,email, reportAnalysis});
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAndGetReport`, {
         method: 'POST',
@@ -461,7 +463,7 @@ console.log("match Score",scoreMatch);
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-        standards,
+        role,
         subject,
           email,
           collageName,
@@ -482,7 +484,7 @@ console.log("match Score",scoreMatch);
   };
 
   if (error) {
-    return console.log(error);
+    return console.log("other error",error);
   }
   const goBack = () => {
         router.push('/'); // This will take the user to the previous page

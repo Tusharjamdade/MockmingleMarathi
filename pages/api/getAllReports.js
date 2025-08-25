@@ -44,7 +44,7 @@ export default async function handler(req, res) {
 function extractScores(reportAnalysis) {
   const scoreTypes = [
     'Technical Proficiency',
-    'Communication',
+    'संवादकौशल्य',
     'Decision Making',
     'Confidence',
     'Language Fluency'

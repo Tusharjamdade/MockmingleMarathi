@@ -12,17 +12,17 @@ export default async function handler(req, res) {
 
   // Handle POST request (for storing new report)
   if (req.method === 'POST') {
-    const { standards,subject, email, collageName, reportAnalysis } = req.body;
-       console.log(res.body);
+    const { role,subject, email, collageName, reportAnalysis } = req.body;
+       console.log(req.body);
     // Validate required fields
-    if (!standards || !subject || !email || !collageName || !reportAnalysis) {
+    if (!role || !subject || !email || !collageName || !reportAnalysis) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
       // Create a new report in the Report model
       const newReport = new Report({
-        standards,
+        role,
         subject,
         email,
         collageName,
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
       // Save the report in the database
       await newReport.save();
-
+  
       // Respond with success message
       return res.status(201).json({ message: 'Report stored successfully', report: newReport });
     } catch (err) {

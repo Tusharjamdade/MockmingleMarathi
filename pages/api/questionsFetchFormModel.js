@@ -15,14 +15,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { level, subject, standard, board } = req.body;
+  const { level, subject, role, board } = req.body;
 
-  if ((!level) && (!standard || !subject || !board)) {
-    return res.status(400).json({ error: 'Standard, Subject, board and level are required.' });
+  if ((!level) && (!role || !subject || !board)) {
+    return res.status(400).json({ error: 'Role, Subject, board and level are required.' });
   }
 
   try {
-    const questions = await generateQuestionsWithOpenAI(level, standard, board, subject);
+    const questions = await generateQuestionsWithOpenAI(level, role, board, subject);
 
     if (questions) {
       return res.status(200).json({
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function generateQuestionsWithOpenAI(level, standard, board, subject) {
+async function generateQuestionsWithOpenAI(level, role, board, subject) {
   const openaiUrl = 'https://api.openai.com/v1/chat/completions';
   
   const headers = {
@@ -55,7 +55,7 @@ async function generateQuestionsWithOpenAI(level, standard, board, subject) {
 
 Subject: ${subject}
 
-Standard (Grade): ${standard}
+Standard (Grade): ${role}
 
 Difficulty Level: ${level} (Easy / Medium / Hard)
 

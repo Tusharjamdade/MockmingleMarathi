@@ -10,7 +10,7 @@ export default function Role() {
   const router = useRouter();
   // const [jobRole, setJobRole] = useState("");
   const [level, setLevel] = useState("Beginner");
-  const [standard, setStandard] = useState("");
+  const [role, setRole] = useState("");
   const [subject, setSubject] = useState('');
   const [email, setEmail] = useState("");
   const [questions, setQuestions] = useState("");
@@ -146,7 +146,7 @@ export default function Role() {
           // jobRole,
           level,
           subject,
-          standard, board
+          role, board
         }),
       });
 
@@ -263,7 +263,7 @@ export default function Role() {
       console.log("Questions to be sent:", formattedQuestions);
 
       if (formattedQuestions && formattedQuestions.length > 0) {
-        const data = { email, level, subject, standard, board, questions: formattedQuestions };
+        const data = { email, level, subject, role, board, questions: formattedQuestions };
 
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRoleAndQuestionsSave`, {
@@ -362,8 +362,8 @@ export default function Role() {
 
           <div className="pl-15 mb-6">
             <select
-              value={standard}
-              onChange={(e) => setStandard(e.target.value)}
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="text-black bg-white text-lg p-2 rounded w-64"
             >
               <option value="">-- इयत्ता निवडा --</option>

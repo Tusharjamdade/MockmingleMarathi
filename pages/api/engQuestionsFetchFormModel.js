@@ -153,14 +153,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { level, subject, standard,board } = req.body;
+  const { level, subject, role,board } = req.body;
 
-  if (!level || !standard || !subject || !board) {
+  if (!level || !role || !subject || !board) {
     return res.status(400).json({ error: 'standard , Subject, board and level are required.' });
   }
 
   try {
-    const questions = await getApiResponse(level, standard,board, subject);
+    const questions = await getApiResponse(level, role,board, subject);
 
     if (questions) {
       return res.status(200).json({
@@ -176,7 +176,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function getApiResponse(level, standard, board, subject) {
+async function getApiResponse(level, role, board, subject) {
   const url = 'https://api.openai.com/v1/chat/completions';
 
   const headers = {
@@ -188,7 +188,7 @@ async function getApiResponse(level, standard, board, subject) {
   
   const userPrompt = `Generate 10 questions with the following details:
   - Subject: ${subject}
-  - Standard: ${standard}
+  - Standard: ${role}
   - Board: ${board}
   - Difficulty Level: ${level} (Beginner, Intermediate, Advanced)
   

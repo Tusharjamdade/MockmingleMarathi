@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import User from "../../models/User" // Fixed import path
-import connectDb from "@/middleware/dbConnect"
+import dbConnect from "@/middleware/dbConnect"
 import mongoose from "mongoose" // Added for direct connection check
 var CryptoJS = require("crypto-js");
 
@@ -16,10 +16,11 @@ export const config = {
 const handler = async (req, res) => {
     try {
         // Ensure database connection
-        if (!mongoose.connections[0].readyState) {
-            console.log('Connecting to MongoDB...');
-            await mongoose.connect(process.env.MONGODB_URI);
-        }
+        // if (!mongoose.connections[0].readyState) {
+        //     console.log('Connecting to MongoDB...');
+        //     await mongoose.connect(process.env.MONGODB_URI);
+        // }
+         await dbConnect();
         
         if (req.method == 'POST') {
             // Extract all fields from request body
@@ -120,7 +121,43 @@ const handler = async (req, res) => {
             console.log('Saved user with fields:', Object.keys(savedUser._doc));
             
             res.status(200).json({ success: true, message: "Signup successful" });
-        } else {
+        } 
+           else if (req.method === 'PUT') {
+            try {
+                const { email, ...updateFields } = req.body;
+
+                // Require email (or userId) to identify the user
+                if (!email) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Email is required for updating profile"
+                    });
+                }
+
+                const updatedUser = await User.findOneAndUpdate(
+                    { email },
+                    { $set: updateFields },
+                    { new: true }
+                ).select("-password");
+
+                if (!updatedUser) {
+                    return res.status(404).json({
+                        success: false,
+                        message: "User not found"
+                    });
+                }
+
+                res.status(200).json({
+                    success: true,
+                    message: "Profile updated successfully",
+                    user: updatedUser
+                });
+            } catch (err) {
+                console.error("Error updating profile:", err);
+                res.status(500).json({ success: false, message: "Server error" });
+            }
+        }  
+        else {
             res.status(405).json({ success: false, error: "Method not allowed", message: "This endpoint only supports POST requests" });
         }
     } catch (error) {
@@ -165,4 +202,4 @@ const handler = async (req, res) => {
     }
 }
 
-export default connectDb(handler)
+export default handler;

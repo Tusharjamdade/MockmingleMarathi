@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Standard from '@/models/Standard';//Assuming the Standard model is stored in models/standard.js
+import JobRole from '@/models/JobRole';//Assuming the Standard model is stored in models/standard.js
 const connectDb = async () => {
   if (mongoose.connections[0].readyState) return;
   await mongoose.connect(process.env.MONGODB_URI);
@@ -11,10 +11,10 @@ export default async function handler(req, res) {
     await connectDb(); // Ensure we're connected to the database
 
     if (req.method === 'POST') {
-      const { standard,board,subject, email, level, questions } = req.body;
+      const { role,board,subject, email, level, questions } = req.body;
 
       // Validate the data before saving
-      if (!standard || !email || !Array.isArray(questions) || questions.length === 0) {
+      if (!role || !email || !Array.isArray(questions) || questions.length === 0) {
         return res.status(400).json({ error: 'Missing or invalid required fields' });
       }
 
@@ -24,8 +24,8 @@ export default async function handler(req, res) {
         answer: q.answer || null,  // Default to null if no answer is provided
       }));
 
-      const newJobRole = new Standard({
-        standards:standard,
+      const newJobRole = new JobRole({
+        role,
         board,
         subject:subject,
         email,

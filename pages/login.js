@@ -8,6 +8,7 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -23,7 +24,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         toast.dismiss(); // Dismiss any previous toasts
-
+        setLoading(true);
         const data = { email, password };
 
         try {
@@ -52,6 +53,7 @@ export default function Login() {
                     progress: undefined,
                     theme: "light",
                 });
+                setLoading(false);
                 return; // Stop further execution
             }
 
@@ -93,6 +95,7 @@ export default function Login() {
                     progress: undefined,
                     theme: "light",
                 });
+                setLoading(false);
             }
         } catch (err) {
             console.error(err);
@@ -106,6 +109,7 @@ export default function Login() {
                 progress: undefined,
                 theme: "light",
             });
+            setLoading(false);
         }
     };
 
@@ -150,13 +154,21 @@ export default function Login() {
                         <input type="checkbox" id="remember" className="mr-2" />
                         <label htmlFor="remember">३० दिवसांसाठी आपली माहिती लक्षात ठेवा.</label>
                     </div>
-                    
-                    <button 
-                        type="submit" 
+                     <button
+                        type="submit"
+                        disabled={loading}
                         className="w-full py-3 rounded-md bg-pink-400 text-white text-base transition-all hover:bg-pink-600"
                     >
-                        लॉग इन
+                        {loading ? (
+                            <>
+                                <div className="flex justify-center items-center h-4">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                </div>
+                                 लॉग इन...
+                            </>
+                        ) : " लॉग इन"}
                     </button>
+                   
                 </form>
                 
                 <a href="/forgot-password" className="text-pink-400 text-sm mt-4 block">पासवर्ड विसरलात?</a>

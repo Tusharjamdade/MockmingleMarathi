@@ -8,9 +8,9 @@ export default async function handler(req, res) {
     await mongoose.connect(process.env.MONGODB_URI);
   }
   if (req.method === 'POST') {
-    const { standards,subject, email,collageName, overallScore } = req.body;
+    const { role,subject, email,collageName, overallScore } = req.body;
     
-console.log("all info",standards,subject, email,collageName, overallScore );
+console.log("all info",role,subject, email,collageName, overallScore );
 
     
 
@@ -18,7 +18,7 @@ console.log("all info",standards,subject, email,collageName, overallScore );
      
       // Create a new report
       const newReport = new Report({
-        standards,
+        role,
         subject,
         email,
         collageName, 
