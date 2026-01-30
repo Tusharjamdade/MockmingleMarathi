@@ -485,407 +485,372 @@ function SpeakingPractice() {
     setShowLevelSelection(true);
     setSelectedLevel(null);
   };
-
-  return (
+return (
     <>
       <Head>
         <title>SHAKKTII AI - बोलण्याचा सराव</title>
       </Head>
-      <div className="min-h-screen bg-gray-100" style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', backgroundColor: 'rgba(0,0,0,0.7)', backgroundBlendMode: 'overlay' }}>
-        <div className="container mx-auto px-4 py-16">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <button 
-                onClick={() => router.push('/practices')} 
-                className="flex items-center text-pink-600 hover:text-pink-800 transition-colors"
-              >
-                <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-                <span className="text-lg font-medium">सराव भागाकडे परत जा</span>
-              </button>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-              <img src="/logoo.png" alt="Logo" className="w-10 h-10" />
+
+      <div className="min-h-screen relative bg-[#0f0c29] font-sans text-white overflow-x-hidden">
+        
+        {/* Background Layer - Deep gradient overlay for readability */}
+        <div className="absolute inset-0 z-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-fixed"
+            style={{ backgroundImage: "url('/BG.jpg')" }}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0f0c29]/95 via-[#302b63]/90 to-[#24243e]/90 backdrop-blur-[2px]"></div>
+        </div>
+
+        <div className="relative z-10 container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+          
+          {/* Header Navigation */}
+          <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
+            <button 
+              onClick={() => router.push('/practices')} 
+              className="group flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 backdrop-blur-md"
+            >
+              <div className="p-1.5 bg-white/10 rounded-full group-hover:scale-110 transition-transform">
+                <img src="/2.svg" alt="Back" className="w-5 h-5 invert" />
+              </div>
+              <span className="text-sm font-medium tracking-wide text-gray-200 group-hover:text-white">सराव भागाकडे परत जा</span>
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-0.5 shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+              <div className="w-full h-full rounded-full bg-[#1a103c] flex items-center justify-center overflow-hidden">
+                 <img src="/logoo.png" alt="Logo" className="w-8 h-8 object-contain" />
+              </div>
             </div>
           </div>
 
-          {/* Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-pink-900">बोलण्याचा सराव</h1>
-            <p className="text-lg text-gray-700 mt-2">
-              परस्पर संवादात्मक सरावांद्वारे तुमच्या बोलण्याच्या कौशल्यात सुधारणा करा.
-            </p>
-          </div>
-
+          {/* Main Content Area */}
           {!testStarted ? (
-            <div>
+            <div className="max-w-4xl mx-auto animate-fade-in-up">
               {!showLevelSelection ? (
-                <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6">
-                  <h2 className="text-2xl font-bold text-center text-pink-900 mb-4">लेव्हल निवडा</h2>
-                  <div className="space-y-4">
-                    {['बिगिनर', 'मॉडरेट', 'एक्स्पर्ट'].map(level => (
-                      <button
-                        key={level}
-                        onClick={() => setDifficulty(level)}
-                        className={`block w-full py-3 px-6 text-lg rounded-lg transition-colors ${
-                          difficulty === level ? 
-                          'bg-pink-600 text-white' : 
-                          'bg-gray-200 hover:bg-pink-100 text-gray-800'
-                        }`}
-                      >
-                        {level}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : testCompleted && showEvaluation && evaluationResult ? (
-                <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
-                  <h2 className="text-2xl font-bold mb-4 text-green-600">लेव्हल {selectedLevel} पूर्ण झाली!</h2>
-                  
-                  {/* Level evaluation results with stars */}
-                  <div className="bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800">तुमचा पर्फॉर्मन्स</h3>
-                    <p className="text-gray-600 mb-4">{evaluationResult.evaluation?.feedback || "तुमचा लेव्हल मूल्यांकन केला गेला आहे."}</p>
-                    
-                    <div className="flex justify-center mb-4">
-                      {[...Array(3)].map((_, i) => (
-                        <svg 
-                          key={i} 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          viewBox="0 0 24 24" 
-                          className={`w-10 h-10 ${i < (evaluationResult.evaluation?.overallRating || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
+                // --- Difficulty Selection Screen ---
+                <div className="flex flex-col items-center text-center">
+                  <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 mb-6 drop-shadow-sm">
+                    बोलण्याचा सराव (Speaking Practice)
+                  </h1>
+                  <p className="text-lg text-gray-300 mb-12 max-w-2xl">
+                    परस्पर संवादात्मक AI सरावांद्वारे तुमचे उच्चार, ओघ आणि आत्मविश्वास वाढवा.
+                  </p>
+
+                  <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+                    <h2 className="text-xl font-bold text-white mb-6 flex items-center justify-center gap-2">
+                      <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                      लेव्हल निवडा
+                      <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                    </h2>
+                    <div className="space-y-4">
+                      {['बिगिनर', 'मॉडरेट', 'एक्स्पर्ट'].map(level => (
+                        <button
+                          key={level}
+                          onClick={() => setDifficulty(level)}
+                          className={`w-full py-4 px-6 text-lg font-semibold rounded-2xl transition-all duration-300 transform hover:-translate-y-1 ${
+                            difficulty === level 
+                            ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-pink-500/30 ring-2 ring-white/20' 
+                            : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white border border-white/5'
+                          }`}
                         >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
+                          {level}
+                        </button>
                       ))}
                     </div>
-                    
-                    <div className="text-center text-sm text-gray-500">
-                      {evaluationResult.evaluation?.overallRating === 3 ? (
-                        <span>छान! तुम्ही हा स्तर पार केला आहे!</span>
-                      ) : evaluationResult.evaluation?.overallRating === 2 ? (
-                        <span>छान! तुम्ही २ स्टार मिळवले आहेत! </span>
-                      ) : evaluationResult.evaluation?.overallRating === 1 ? (
-                        <span>चांगला प्रयत्न! तुम्हाला १ स्टार मिळाला आहे. सराव करत रहा!</span>
-                      ) : (
-                        <span>या पातळीवर तुम्हाला अधिक सरावाची आवश्यकता आहे.</span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <button
-                      onClick={backToLevelSelection}
-                      className="py-2 px-6 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
-                    >
-                     लेव्हल परत जा
-                    </button>
-                    {evaluationResult.nextLevel && (
-                      <button
-                        onClick={() => {
-                          resetTest();
-                          setSelectedLevel(evaluationResult.nextLevel);
-                          setTimeout(() => fetchQuestions(), 100);
-                        }}
-                        className="py-2 px-6 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        पुढील लेव्हल
-                      </button>
-                    )}
                   </div>
                 </div>
               ) : (
-                <div className="max-w-4xl mx-auto bg-white bg-opacity-90 p-6 rounded-xl shadow-lg">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-pink-900">
-                      {difficulty} लेव्हल सराव
-                    </h2>
-                    <button 
-                      onClick={() => {setShowLevelSelection(false); setDifficulty('');}}
-                      className="text-pink-600 hover:text-pink-800 transition-colors"
-                    >
-                      ← लेव्हल कडे परत जा.
-                    </button>
-                  </div>
-                  
-                  {loading ? (
-                    <div className="flex justify-center py-20">
-                      <svg className="animate-spin h-10 w-10 text-pink-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                      {Array.from({length: 30}, (_, i) => i + 1).map((level) => {
-                        // Find the current level's progress (if it exists)
-                        const levelData = levelProgress.find(p => p.level === level) || { level, completed: false, stars: 0 };
-                        
-                        // Find the previous level's progress
-                        const prevLevelData = level > 1 ? levelProgress.find(p => p.level === level-1) : { completed: true };
-                        
-                        // Make first three levels always unlocked
-                        const isLocked = level > 3 && !prevLevelData?.completed;
-                        const isCompleted = levelData.completed;
-                        const stars = levelData.stars || 0;
-                        
-                        return (
-                          <div 
-                            key={`level-${level}`}
-                            onClick={() => !isLocked && handleLevelSelect(level)}
-                            className={`bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center relative ${!isLocked ? 'cursor-pointer hover:shadow-xl hover:bg-pink-50 transform hover:scale-105' : 'cursor-not-allowed opacity-80'} transition-all duration-200 ${
-                              isCompleted ? 'border-2 border-green-500' : ''
-                            } ${
-                              selectedLevel === level ? 'ring-4 ring-pink-500 ring-opacity-70 transform scale-105' : ''
-                            }`}
-                          >
-                            <div className="text-2xl font-bold text-pink-900 mb-2">लेव्हल {level}</div>
-                            
-                            {/* Star display */}
-                            <div className="flex space-x-1">
-                              {[...Array(3)].map((_, i) => (
-                                <svg 
-                                  key={i} 
-                                  xmlns="http://www.w3.org/2000/svg" 
-                                  viewBox="0 0 24 24" 
-                                  className={`w-6 h-6 ${i < stars ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
-                                >
-                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                                </svg>
-                              ))}
-                            </div>
-                            
-                            {/* Show locked indicator for locked levels */}
-                            {isLocked && (
-                              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black bg-opacity-60">
-                                <div className="bg-black bg-opacity-70 p-2 rounded-full">
-                                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                  </svg>
+                // --- Level Grid Selection (Implied from logic flow) ---
+                <div className="w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 md:p-10 shadow-2xl">
+                   {/* If there is specific code for level grid selection, it would go here based on state logic. 
+                       Assuming standard level grid logic needs to be here if showLevelSelection is true but test hasn't started. */}
+                   <div className="text-center mb-8">
+                      <h2 className="text-2xl font-bold text-white mb-2">{difficulty} लेव्हल्स</h2>
+                      <button 
+                        onClick={() => {setShowLevelSelection(false); setDifficulty('');}}
+                        className="text-pink-300 hover:text-pink-200 text-sm flex items-center justify-center gap-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        Change Difficulty
+                      </button>
+                   </div>
+
+                   {loading ? (
+                      <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-pink-200">Loading levels...</p>
+                      </div>
+                   ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {Array.from({length: 30}, (_, i) => i + 1).map((level) => {
+                          const levelData = levelProgress.find(p => p.level === level) || { level, completed: false, stars: 0 };
+                          const prevLevelData = level > 1 ? levelProgress.find(p => p.level === level-1) : { completed: true };
+                          const isLocked = level > 3 && !prevLevelData?.completed;
+                          const isCompleted = levelData.completed;
+                          const stars = levelData.stars || 0;
+                          
+                          return (
+                            <div 
+                              key={`level-${level}`}
+                              onClick={() => !isLocked && handleLevelSelect(level)}
+                              className={`aspect-square rounded-2xl flex flex-col items-center justify-center relative transition-all duration-300 ${
+                                isLocked 
+                                  ? 'bg-black/20 border border-white/5 cursor-not-allowed opacity-60' 
+                                  : 'bg-gradient-to-br from-white/10 to-white/5 border border-white/10 cursor-pointer hover:border-pink-500/50 hover:shadow-lg hover:shadow-pink-500/20 hover:-translate-y-1'
+                              } ${selectedLevel === level ? 'ring-2 ring-pink-500 bg-white/15' : ''}`}
+                            >
+                              <span className={`text-2xl font-bold mb-1 ${isLocked ? 'text-gray-500' : 'text-white'}`}>{level}</span>
+                              
+                              {/* Stars */}
+                              {!isLocked && (
+                                <div className="flex gap-0.5">
+                                  {[...Array(3)].map((_, i) => (
+                                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-3 h-3 ${i < stars ? 'text-yellow-400 fill-current' : 'text-gray-600 fill-current'}`}>
+                                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                    </svg>
+                                  ))}
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                              )}
+
+                              {isLocked && (
+                                <svg className="w-5 h-5 text-gray-500 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                              )}
+                              
+                              {isCompleted && (
+                                <div className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                   )}
                 </div>
               )}
             </div>
+          ) : testCompleted && showEvaluation && evaluationResult ? (
+            
+            // --- Evaluation Result Screen ---
+            <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl text-center animate-zoom-in">
+              <h1 className="text-3xl font-bold text-white mb-2">अभिनंदन! (Congratulations!)</h1>
+              <h2 className="text-xl text-pink-300 font-medium mb-8">लेव्हल {selectedLevel} पूर्ण झाली</h2>
+
+              <div className="bg-black/20 rounded-2xl p-6 mb-8 border border-white/5">
+                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Performance Report</h3>
+                
+                {/* Big Stars */}
+                <div className="flex justify-center gap-3 mb-6">
+                  {[...Array(3)].map((_, i) => (
+                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-16 h-16 filter drop-shadow-lg transition-all duration-500 ${i < (evaluationResult.evaluation?.overallRating || 0) ? 'text-yellow-400 fill-current scale-110' : 'text-gray-700 fill-current'}`}>
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+
+                <div className="bg-white/5 rounded-xl p-4 text-gray-200 italic leading-relaxed border border-white/5">
+                  "{evaluationResult.evaluation?.feedback || "उत्तम प्रयत्न! सातत्याने सराव केल्यास तुमचे कौशल्य नक्कीच सुधारेल."}"
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={backToLevelSelection}
+                  className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition-colors border border-white/10"
+                >
+                  लेव्हल्स यादी
+                </button>
+                {evaluationResult.nextLevel && (
+                  <button
+                    onClick={() => {
+                      resetTest();
+                      setSelectedLevel(evaluationResult.nextLevel);
+                      setTimeout(() => fetchQuestions(), 100);
+                    }}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold shadow-lg hover:shadow-pink-500/30 transition-transform hover:-translate-y-0.5"
+                  >
+                    पुढील लेव्हल खेळा &rarr;
+                  </button>
+                )}
+              </div>
+            </div>
+
           ) : testCompleted && !showEvaluation ? (
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">सराव पूर्ण झाला!</h1>
+            
+            // --- Test Completed Confirmation ---
+            <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl text-center animate-fade-in">
+              <h1 className="text-3xl font-bold text-white mb-6">सराव पूर्ण झाला!</h1>
+              
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500 mb-4"></div>
-                  <p className="text-lg text-gray-600">क्लॉड एआय सोबत तुमच्या प्रतिसादांचे मूल्यांकन करत आहे...</p>
+                <div className="flex flex-col items-center justify-center py-10">
+                  <div className="relative w-20 h-20 mb-6">
+                    <div className="absolute inset-0 border-4 border-pink-500/30 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-t-pink-500 rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-lg text-pink-200 animate-pulse">AI तुमच्या उत्तरांचे विश्लेषण करत आहे...</p>
                 </div>
               ) : (
                 <>
-                  <div className="w-32 h-32 mx-auto my-6">
-                    <img src="/completed.svg" alt="Complete" className="w-full h-full" onError={(e) => {
-                      e.target.src = "/logoo.png";
-                    }} />
+                  <div className="w-40 h-40 mx-auto mb-8 bg-white/5 rounded-full p-6 border border-white/10 shadow-inner">
+                    <img src="/completed.svg" alt="Complete" className="w-full h-full object-contain drop-shadow-lg" onError={(e) => { e.target.src = "/logoo.png"; }} />
                   </div>
-                  <p className="text-lg text-gray-600 mb-6">
-                   छान! तुम्ही बोलण्याचा सराव सत्र पूर्ण केला आहे.
+                  <p className="text-xl text-gray-200 mb-8">
+                    ग्रेट जॉब! तुम्ही हे सत्र यशस्वीरित्या पूर्ण केले आहे.
                   </p>
-                  <div className="flex justify-center space-x-4">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={backToLevelSelection}
-                      className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
+                      className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium border border-white/10"
                     >
-                       लेव्हल परत जा
+                      लेव्हल्सकडे परत जा
                     </button>
                     <button
                       onClick={() => setShowEvaluation(true)}
-                      className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg hover:shadow-purple-500/30 transition-transform hover:-translate-y-0.5"
                     >
-                      निकाल दाखवा
+                      निकाल पहा (View Results)
                     </button>
                   </div>
                 </>
               )}
             </div>
-          ) : testCompleted && showEvaluation ? (
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">तुमचे सरावाचे निकाल</h1>
-              
-              <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-                <h2 className="text-xl font-bold text-purple-800 mb-2">एकूण पर्फॉर्मन्स</h2>
-                <div className="flex justify-center mb-4">
-                  {/* Star display for overall rating */}
-                  <div className="flex space-x-2">
-                    {[...Array(3)].map((_, i) => (
-                      <svg 
-                        key={i} 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
-                        className={`w-10 h-10 ${i < (evaluationResult?.levelProgress?.stars || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="text-lg text-gray-700 mb-4">
-                  {evaluationResult?.evaluation?.feedback || "तुम्ही हा स्तर पूर्ण केला आहे. तुमच्या कौशल्यांना सुधारण्यासाठी सराव चालू ठेवा!"}
-                </div>
-              </div>
-              
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">लेवल {selectedLevel} पूर्ण झाली</h2>
-                <p className="text-lg text-gray-600">
-                  तुम्ही या लेवलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळवला आहे.
-                </p>
-                {evaluationResult?.levelProgress?.stars === 3 && (
-                  <div className="mt-2 text-green-600 font-bold">उत्तम गुण! छान!</div>
-                )}
-              </div>
-              
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={backToLevelSelection}
-                  className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
-                >
-                  लेव्हल्सकडे परत जा 
-                </button>
-                {selectedLevel < 30 && (
-                  <button
-                    onClick={() => {
-                      setSelectedLevel(prev => Math.min(prev + 1, 30));
-                      setTestCompleted(false);
-                      setShowEvaluation(false);
-                      setResponses([]);
-                      fetchQuestions(selectedLevel + 1);
-                    }}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
-                  >
-                    पुढील लेवल
-                  </button>
-                )}
-              </div>
-            </div>
+
           ) : (
-            <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6 mb-8">
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm font-medium text-gray-600">
-                    प्रश्न {currentIndex + 1} / {questions.length}
-                  </span>
-                  <span className="text-sm font-medium text-gray-600">
-                    {difficulty} लेवल  • {selectedLevel || ''}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-1 mb-1">
-                  <div 
-                    className="bg-pink-500 h-1 rounded-full" 
-                    style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-                  ></div>
-                </div>
+            // --- Active Test Interface ---
+            <div className="max-w-3xl mx-auto animate-fade-in">
+              
+              {/* Progress Bar */}
+              <div className="flex justify-between items-end mb-2 px-2">
+                <span className="text-gray-400 text-sm font-bold tracking-wide">
+                  QUESTION {currentIndex + 1} <span className="text-gray-600">/ {questions.length}</span>
+                </span>
+                <span className="text-xs font-bold px-3 py-1 bg-white/10 rounded-full border border-white/10 text-pink-300">
+                  {difficulty} • Level {selectedLevel}
+                </span>
+              </div>
+              <div className="w-full bg-gray-700/50 rounded-full h-1.5 mb-8 overflow-hidden backdrop-blur-sm">
+                <div
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(236,72,153,0.5)]"
+                  style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+                ></div>
               </div>
 
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+              {/* Question Card */}
+              <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 leading-snug">
                   {questions[currentIndex]?.instructions || "Read the following prompt and respond:"}
                 </h2>
-                <div className="p-4 bg-pink-50 rounded-lg text-pink-900">
-                  {questions[currentIndex]?.content || ""}
+                
+                <div className="bg-black/20 rounded-2xl p-6 border border-white/5 text-lg text-gray-200 leading-relaxed shadow-inner">
+                  {questions[currentIndex]?.content || "Loading content..."}
                 </div>
               </div>
 
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center">
-                    <button
-                      onClick={recording ? stopSpeechRecognition : startSpeechRecognition}
-                      disabled={!!feedback}
-                      className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
-                        recording 
-                          ? 'bg-red-500 animate-pulse' 
-                          : feedback 
-                            ? 'bg-gray-300 cursor-not-allowed' 
-                            : 'bg-pink-500 hover:bg-pink-600'
-                      }`}
-                    >
-                      {recording ? (
-                        <span className="w-6 h-6 bg-white rounded-sm"></span>
-                      ) : (
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
-                        </svg>
-                      )}
-                    </button>
-                    <span className="ml-3 text-sm font-medium text-gray-700">
-                      {recording ? "रेकॉर्डिंग सुरू आहे... थांबवण्यासाठी क्लिक करा" : "बोलण्यासाठी क्लिक करा"}
-                    </span>
-                  </div>
-
+              {/* Recording Area */}
+              <div className="flex flex-col items-center justify-center mb-10">
+                <div className="relative">
+                  {/* Pulse Effect rings */}
+                  {recording && (
+                    <>
+                      <div className="absolute inset-0 rounded-full bg-red-500 opacity-20 animate-ping"></div>
+                      <div className="absolute inset-[-10px] rounded-full bg-red-500 opacity-10 animate-pulse"></div>
+                    </>
+                  )}
+                  
+                  <button
+                    onClick={recording ? stopSpeechRecognition : startSpeechRecognition}
+                    disabled={!!feedback}
+                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl border-4 ${
+                      recording 
+                        ? 'bg-red-500 border-red-400 scale-110' 
+                        : feedback 
+                          ? 'bg-gray-700 border-gray-600 cursor-not-allowed opacity-50' 
+                          : 'bg-gradient-to-br from-pink-500 to-purple-600 border-white/10 hover:scale-105 hover:shadow-pink-500/40'
+                    }`}
+                  >
+                    {recording ? (
+                      <div className="w-8 h-8 bg-white rounded-md shadow-sm"></div>
+                    ) : (
+                      <svg className="w-10 h-10 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                
+                <div className="mt-6 flex flex-col items-center gap-2">
+                  <span className={`text-lg font-medium ${recording ? 'text-red-400 animate-pulse' : 'text-gray-300'}`}>
+                    {recording ? "Recording... (Tap to Stop)" : "Tap microphone to speak"}
+                  </span>
+                  
                   {timeLeft > 0 && (
-                    <div className="w-10 h-10">
+                    <div className="w-16 h-16 mt-2 relative">
+                      <div className="absolute inset-0 bg-white/5 rounded-full"></div>
                       <CircularProgressbar
                         value={timeLeft}
                         maxValue={questions[currentIndex]?.timeLimit || 60}
                         text={`${timeLeft}`}
                         styles={buildStyles({
-                          textSize: '35px',
-                          pathColor: timeLeft < 10 ? '#ef4444' : '#ec4899',
-                          textColor: timeLeft < 10 ? '#ef4444' : '#ec4899',
+                          textSize: '32px',
+                          pathColor: timeLeft < 10 ? '#ef4444' : '#c084fc',
+                          textColor: '#fff',
+                          trailColor: 'transparent',
+                          pathTransitionDuration: 0.5,
                         })}
                       />
                     </div>
                   )}
                 </div>
+              </div>
 
+              {/* Transcript & Feedback */}
+              <div className="space-y-6">
                 {userResponse && (
-                  <div className="p-4 bg-gray-50 rounded-lg mb-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">फीडबॅक</h3>
-                    <p className="text-gray-800">{userResponse}</p>
+                  <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 animate-fade-in-up">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wider">Your Transcript</h3>
+                    <p className="text-gray-200 text-lg leading-relaxed font-medium">"{userResponse}"</p>
                   </div>
                 )}
 
                 {feedback && (
-                  <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <h3 className="text-sm font-semibold text-green-800 mb-2">फीडबॅक:</h3>
-                    <div className="flex items-center mb-2">
-                      <div className="flex space-x-1 mr-2">
+                  <div className={`p-6 rounded-2xl border backdrop-blur-md animate-fade-in-up ${
+                    score === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' :
+                    score === 2 ? 'bg-blue-500/10 border-blue-500/30 text-blue-200' :
+                    'bg-amber-500/10 border-amber-500/30 text-amber-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold uppercase tracking-wider text-sm flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-current"></span>
+                        AI Feedback
+                      </h3>
+                      <div className="flex gap-1">
                         {[...Array(3)].map((_, i) => (
-                          <svg 
-                            key={i} 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            className={`w-5 h-5 ${i < score ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
-                          >
+                          <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-5 h-5 ${i < score ? 'fill-current' : 'fill-white/10'}`}>
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                           </svg>
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">
-                        {score === 3 ? 'उत्कृष्ट!' : score === 2 ? 'चांगले काम!' : 'सराव करत राहा!'}
-                      </span>
                     </div>
-                    <p className="text-green-800 text-sm">
-                      {feedback}
-                    </p>
+                    <p className="text-lg leading-relaxed font-medium">{feedback}</p>
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-end">
+              {/* Next Button */}
+              <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleNext}
                   disabled={!feedback}
-                  className={`px-4 py-2 rounded-lg font-medium ${
+                  className={`px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform hover:-translate-y-1 ${
                     !feedback
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                      ? 'bg-gray-700/50 text-gray-500 cursor-not-allowed opacity-50'
+                      : 'bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:shadow-purple-500/40'
                   }`}
                 >
-                  {currentIndex < questions.length - 1 ? 'पुढील प्रश्न' : 'सराव पूर्ण करा'}
+                  {currentIndex < questions.length - 1 ? 'पुढील प्रश्न (Next Question) &rarr;' : 'सराव पूर्ण करा (Finish) &rarr;'}
                 </button>
               </div>
+
             </div>
           )}
         </div>

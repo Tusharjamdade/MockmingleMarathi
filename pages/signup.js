@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 const SignUp = () => {
     const router = useRouter()
- 
+
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [mobileNo, setMobileNo] = useState("");
@@ -19,13 +19,13 @@ const SignUp = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [DOB, setDOB] = useState("");
     const [profileImg, setProfileImg] = useState("");
-    
+
     // Form validation states
     const [passwordError, setPasswordError] = useState("");
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [generalError, setGeneralError] = useState("");
-    
+
     // Password strength validation states
     const [passwordStrength, setPasswordStrength] = useState(0); // 0: none, 1: weak, 2: medium, 3: strong
     const [passwordValidation, setPasswordValidation] = useState({
@@ -45,10 +45,10 @@ const SignUp = () => {
             hasNumber: /[0-9]/.test(password),
             hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
-        
+
         // Update validation state
         setPasswordValidation(validations);
-        
+
         // Calculate password strength
         const criteriaCount = Object.values(validations).filter(Boolean).length;
         if (password === '') {
@@ -60,24 +60,24 @@ const SignUp = () => {
         } else {
             setPasswordStrength(3); // Strong
         }
-        
+
         // Clear any previous password error if valid
         if (criteriaCount >= 3) {
             setFormErrors(prev => {
-                const newErrors = {...prev};
+                const newErrors = { ...prev };
                 delete newErrors.password;
                 return newErrors;
             });
         }
-        
+
         return criteriaCount >= 3; // Password is valid if it meets at least 3 criteria
     };
-    
+
     const handlePasswordChange = (e) => {
         const newPassword = e.target.value;
         setPassword(newPassword);
         validatePassword(newPassword);
-        
+
         // If confirm password is filled, check match
         if (confirmPassword) {
             if (newPassword !== confirmPassword) {
@@ -91,7 +91,7 @@ const SignUp = () => {
     const handleConfirmPasswordChange = (e) => {
         const value = e.target.value;
         setConfirmPassword(value);
-        
+
         // Check if passwords match
         if (value && password !== value) {
             setPasswordError("Passwords do not match!");
@@ -107,7 +107,7 @@ const SignUp = () => {
         e.target.textContent = type === "password" ? "👁️" : "🙈";
     };
 
-    
+
     // Compress image before uploading
     const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
         return new Promise((resolve, reject) => {
@@ -152,7 +152,7 @@ const SignUp = () => {
             reader.onerror = error => reject(error);
         });
     };
-    
+
     const handleChange = (e) => {
         if (e.target.name == 'fullName') {
             setFullName(e.target.value)
@@ -186,14 +186,14 @@ const SignUp = () => {
                     });
                     return;
                 }
-                
+
                 if (!file.type.startsWith('image/')) {
                     toast.error("Please select a valid image file", {
                         position: "top-center"
                     });
                     return;
                 }
-                
+
                 // Compress the image
                 compressImage(file)
                     .then(compressedImageData => {
@@ -209,370 +209,385 @@ const SignUp = () => {
         }
     }
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Reset previous errors
-    setFormErrors({});
-    setGeneralError("");
-    setPasswordError("");
-    
-    // Password match validation
-    if (password !== confirmPassword) {
-        setPasswordError("Passwords do not match!");
-        return;
-    }
-    
-    // Password strength validation
-    const isPasswordValid = validatePassword(password);
-    if (!isPasswordValid) {
-        setFormErrors(prev => ({
-            ...prev,
-            password: "Password doesn't meet the minimum security requirements"
-        }));
-        return;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    // Set submitting state to true to show loading/disable the button
-    setIsSubmitting(true);
+        // Reset previous errors
+        setFormErrors({});
+        setGeneralError("");
+        setPasswordError("");
 
-    const data = { profileImg, fullName, email, DOB, password, mobileNo, address, education, collageName };
-
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const responseData = await res.json();
-
-        // Handle successful response
-        if (res.ok && responseData.success) {
-            // Clear all form fields
-            setProfileImg('');
-            setMobileNo('');
-            setConfirmPassword('');
-            setAddress('');
-            setEducation('');
-            setCollageName('SPPU');
-            setDOB('');
-            setEmail('');
-            setFullName('');
-            setPassword('');
-
-            toast.success('Your account has been created! Redirecting to login...', {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
-            
-            // Redirect to login page after 3 seconds
-            setTimeout(() => {
-                router.push('/login');
-            }, 3000);
-            
+        // Password match validation
+        if (password !== confirmPassword) {
+            setPasswordError("Passwords do not match!");
             return;
         }
 
-        // Handle validation errors and other API errors
-        if (responseData.error === "Required fields missing" && responseData.missingFields) {
-            // Create field-specific error messages
-            const errors = {};
-            responseData.missingFields.forEach(field => {
-                const fieldKey = field === "Full Name" ? "fullName" :
-                                field === "Email Address" ? "email" :
-                                field === "Mobile Number" ? "mobileNo" :
+        // Password strength validation
+        const isPasswordValid = validatePassword(password);
+        if (!isPasswordValid) {
+            setFormErrors(prev => ({
+                ...prev,
+                password: "Password doesn't meet the minimum security requirements"
+            }));
+            return;
+        }
+
+        // Set submitting state to true to show loading/disable the button
+        setIsSubmitting(true);
+
+        const data = { profileImg, fullName, email, DOB, password, mobileNo, address, education, collageName };
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const responseData = await res.json();
+
+            // Handle successful response
+            if (res.ok && responseData.success) {
+                // Clear all form fields
+                setProfileImg('');
+                setMobileNo('');
+                setConfirmPassword('');
+                setAddress('');
+                setEducation('');
+                setCollageName('SPPU');
+                setDOB('');
+                setEmail('');
+                setFullName('');
+                setPassword('');
+
+                toast.success('Your account has been created! Redirecting to login...', {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+
+                // Redirect to login page after 3 seconds
+                setTimeout(() => {
+                    router.push('/login');
+                }, 3000);
+
+                return;
+            }
+
+            // Handle validation errors and other API errors
+            if (responseData.error === "Required fields missing" && responseData.missingFields) {
+                // Create field-specific error messages
+                const errors = {};
+                responseData.missingFields.forEach(field => {
+                    const fieldKey = field === "Full Name" ? "fullName" :
+                        field === "Email Address" ? "email" :
+                            field === "Mobile Number" ? "mobileNo" :
                                 field === "College Name" ? "collageName" :
-                                field.toLowerCase().replace(/ /g, '');
-                errors[fieldKey] = `${field} is required`;
-            });
-            setFormErrors(errors);
-            
-            toast.error(responseData.message || "Please fill in all required fields", {
+                                    field.toLowerCase().replace(/ /g, '');
+                    errors[fieldKey] = `${field} is required`;
+                });
+                setFormErrors(errors);
+
+                toast.error(responseData.message || "Please fill in all required fields", {
+                    position: "top-center",
+                });
+            }
+            else if (responseData.error === "Invalid email format") {
+                setFormErrors({ email: responseData.message || "Please enter a valid email address" });
+                toast.error(responseData.message, { position: "top-center" });
+            }
+            else if (responseData.error === "Email already registered") {
+                setFormErrors({ email: responseData.message || "This email is already registered" });
+                toast.error(responseData.message, { position: "top-center" });
+            }
+            else if (responseData.error === "Validation failed" && responseData.validationErrors) {
+                setFormErrors(responseData.validationErrors);
+                toast.error(responseData.message || "Please fix the validation errors", { position: "top-center" });
+            }
+            else {
+                // Handle general error
+                setGeneralError(responseData.message || "An unexpected error occurred");
+                toast.error(responseData.message || "Something went wrong. Please try again.", { position: "top-center" });
+            }
+
+        } catch (error) {
+            console.error("Signup error:", error);
+            setGeneralError("Network or server error. Please try again later.");
+            toast.error("Connection error. Please check your internet and try again.", {
                 position: "top-center",
+                autoClose: 5000,
             });
-        } 
-        else if (responseData.error === "Invalid email format") {
-            setFormErrors({ email: responseData.message || "Please enter a valid email address" });
-            toast.error(responseData.message, { position: "top-center" });
+        } finally {
+            setIsSubmitting(false);
         }
-        else if (responseData.error === "Email already registered") {
-            setFormErrors({ email: responseData.message || "This email is already registered" });
-            toast.error(responseData.message, { position: "top-center" });
-        }
-        else if (responseData.error === "Validation failed" && responseData.validationErrors) {
-            setFormErrors(responseData.validationErrors);
-            toast.error(responseData.message || "Please fix the validation errors", { position: "top-center" });
-        }
-        else {
-            // Handle general error
-            setGeneralError(responseData.message || "An unexpected error occurred");
-            toast.error(responseData.message || "Something went wrong. Please try again.", { position: "top-center" });
-        }
-
-    } catch (error) {
-        console.error("Signup error:", error);
-        setGeneralError("Network or server error. Please try again later.");
-        toast.error("Connection error. Please check your internet and try again.", {
-            position: "top-center",
-            autoClose: 5000,
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-};
+    };
 
 
-    return (<> 
-    <ToastContainer
-        position="top-left"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-    />
-       <div className="relative grid grid-cols-1 place-items-center w-full min-h-screen">
-    <img
-        src="/bg.gif"
-        alt="background"
-        className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
-    />
-    <img
-        src="/Logoo.png"
-        alt="Shakti AI Logo"
-        className="absolute top-4 right-8 w-20 mb-5"
-    />
+    return (
+        <>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+            />
 
-    <div className="container ml-2 mr-2 w-full max-w-5xl p-4 rounded-lg bg-white bg-opacity-30">
-        <h1 className="text-2xl text-white mb-4">
-            Create an <span className="text-pink-400">Account!</span>
-        </h1>
-         {generalError && (
-            <div className="col-span-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                <span className="block sm:inline">{generalError}</span>
-            </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col col-span-3 items-center mb-4">
-                <label htmlFor="profile-upload" className="mb-2 text-white font-medium">Profile Photo <span className="text-red-500">*</span></label>
-                <div className="relative w-32 h-32 mb-2 rounded-full overflow-hidden bg-gray-200 bg-opacity-30 flex items-center justify-center border-2 border-dashed border-white border-opacity-40">
-                    {profileImg ? (
-                        <img src={profileImg} alt="Profile Preview" className="w-full h-full object-cover" />
-                    ) : (
-                        <span className="text-white text-4xl">👤</span>
-                    )}
+            <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans overflow-hidden">
+                {/* Background Layer */}
+                <div className="absolute inset-0 z-[-1]">
+                    <img
+                        src="/bg.gif"
+                        alt="background"
+                        className="w-full h-full object-cover opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-[#0f0c29]/70 backdrop-blur-[2px]"></div>
                 </div>
-                <label htmlFor="profile-upload" className="cursor-pointer bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-md text-sm transition duration-300">
-                    {profileImg ? "Change Photo" : "Upload Photo"}
-                </label>
-                <input
-                    id="profile-upload"
-                    type="file"
-                    name="profileImg"
-                    accept="image/*"
-                    onChange={handleChange}
-                    className="hidden"
-                />
-                <p className="text-gray-300 text-xs mt-1">Max size: 10MB (will be compressed)</p>
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="fullName"
-                    value={fullName}
-                    onChange={handleChange}
-                    placeholder="Full Name *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.fullName ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.fullName && <p className="text-red-500 text-sm mt-1">{formErrors.fullName}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={handleChange}
-                    placeholder="Email Address *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.email ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="mobileNo"
-                    value={mobileNo}
-                    onChange={handleChange}
-                    placeholder="Mobile Number *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.mobileNo ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.mobileNo && <p className="text-red-500 text-sm mt-1">{formErrors.mobileNo}</p>}
-            </div>
-            <input
-                type="text"
-                name="address"
-                value={address}
-                onChange={handleChange}
-                placeholder="Address *"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="DOB"
-                value={DOB}
-                onChange={handleChange}
-                placeholder="DOB *"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="education"
-                    value={education}
-                    onChange={handleChange}
-                    placeholder="Education *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.education ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.education && <p className="text-red-500 text-sm mt-1">{formErrors.education}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="collageName"
-                    value={collageName}
-                    onChange={handleChange}
-                    placeholder="College Name *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.collageName ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.collageName && <p className="text-red-500 text-sm mt-1">{formErrors.collageName}</p>}
-            </div>
 
-            <div className="flex flex-col relative">
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="Password *"
-                    required
-                    className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.password ? 'border-2 border-red-500' : ''}`}
+                {/* Floating Logo */}
+                <img
+                    src="/Logoo.png"
+                    alt="Shakti AI Logo"
+                    className="absolute top-6 right-6 w-16 md:w-20 drop-shadow-lg transition-transform hover:scale-105"
                 />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "password")}
-                >
-                    👁️
-                </span>
-                {formErrors.password && <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>}
-                
-                {/* Password strength indicator */}
-                {password && (
-                    <div className="mt-1">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className={`text-xs ${passwordStrength === 0 ? 'text-gray-400' : 
-                                            passwordStrength === 1 ? 'text-red-400' : 
-                                            passwordStrength === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
-                                {passwordStrength === 0 ? 'Enter password' : 
-                                passwordStrength === 1 ? 'Weak' : 
-                                passwordStrength === 2 ? 'Medium' : 'Strong'}
-                            </span>
+
+                {/* Main Card Container */}
+                <div className="w-full max-w-5xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+
+                    {/* Header Decorative Line */}
+                    <div className="h-1.5 w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"></div>
+
+                    <div className="p-6 md:p-10">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+                                Create an <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Account!</span>
+                            </h1>
+                            <p className="text-gray-400 text-sm">Join us to start your journey.</p>
                         </div>
-                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                            <div className={`h-full ${passwordStrength === 0 ? 'w-0' : 
-                                        passwordStrength === 1 ? 'w-1/3 bg-red-400' : 
-                                        passwordStrength === 2 ? 'w-2/3 bg-yellow-400' : 'w-full bg-green-400'}`}>
+
+                        {generalError && (
+                            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                <span className="text-sm font-medium">{generalError}</span>
                             </div>
-                        </div>
-                        
-                        {/* Password requirements */}
-                        <ul className="text-xs space-y-1 mt-2 text-gray-300">
-                            <li className={passwordValidation.minLength ? 'text-green-400' : ''}>
-                                {passwordValidation.minLength ? '✓' : '○'} At least 8 characters
-                            </li>
-                            <li className={passwordValidation.hasUppercase ? 'text-green-400' : ''}>
-                                {passwordValidation.hasUppercase ? '✓' : '○'} At least one uppercase letter
-                            </li>
-                            <li className={passwordValidation.hasLowercase ? 'text-green-400' : ''}>
-                                {passwordValidation.hasLowercase ? '✓' : '○'} At least one lowercase letter
-                            </li>
-                            <li className={passwordValidation.hasNumber ? 'text-green-400' : ''}>
-                                {passwordValidation.hasNumber ? '✓' : '○'} At least one number
-                            </li>
-                            <li className={passwordValidation.hasSpecial ? 'text-green-400' : ''}>
-                                {passwordValidation.hasSpecial ? '✓' : '○'} At least one special character
-                            </li>
-                        </ul>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            {/* Profile Upload - Spans Full Width */}
+                            <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center mb-6">
+                                <div className="relative group cursor-pointer">
+                                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-xl bg-black/20 relative">
+                                        {profileImg ? (
+                                            <img src={profileImg} alt="Profile Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-4xl text-gray-500">👤</div>
+                                        )}
+                                        {/* Overlay on Hover */}
+                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <span className="text-white text-xs font-bold">Change</span>
+                                        </div>
+                                    </div>
+                                    <label htmlFor="profile-upload" className="absolute bottom-0 right-0 bg-pink-500 text-white p-2 rounded-full shadow-lg cursor-pointer hover:bg-pink-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                        </svg>
+                                    </label>
+                                </div>
+                                <input
+                                    id="profile-upload"
+                                    type="file"
+                                    name="profileImg"
+                                    accept="image/*"
+                                    onChange={handleChange}
+                                    className="hidden"
+                                />
+                                <div className="text-center mt-2">
+                                    <p className="text-white font-medium text-sm">Profile Photo <span className="text-pink-500">*</span></p>
+                                    <p className="text-gray-400 text-xs">Max size: 10MB</p>
+                                </div>
+                            </div>
+
+                            {/* Standard Inputs */}
+                            {[
+                                { name: 'fullName', type: 'text', placeholder: 'Full Name', value: fullName },
+                                { name: 'email', type: 'email', placeholder: 'Email Address', value: email },
+                                { name: 'mobileNo', type: 'text', placeholder: 'Mobile Number', value: mobileNo },
+                                { name: 'DOB', type: 'text', placeholder: 'Date of Birth (DD/MM/YYYY)', value: DOB },
+                                { name: 'address', type: 'text', placeholder: 'Address', value: address },
+                                { name: 'education', type: 'text', placeholder: 'Education', value: education },
+                                { name: 'collageName', type: 'text', placeholder: 'College/Institute Name', value: collageName },
+                            ].map((field, idx) => (
+                                <div key={idx} className="flex flex-col">
+                                    <div className="relative group">
+                                        <input
+                                            type={field.type}
+                                            name={field.name}
+                                            value={field.value}
+                                            onChange={handleChange}
+                                            placeholder=" "
+                                            required
+                                            className={`peer w-full px-4 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white placeholder-transparent focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all duration-300 ${formErrors[field.name] ? 'border-red-500' : ''}`}
+                                        />
+                                        <label className="absolute left-4 top-[-10px] bg-[#2a2445] px-1 text-xs text-gray-400 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-pink-400 peer-focus:bg-[#2a2445] rounded">
+                                            {field.placeholder} <span className="text-red-500">*</span>
+                                        </label>
+                                    </div>
+                                    {formErrors[field.name] && <p className="text-red-400 text-xs mt-1 ml-1">{formErrors[field.name]}</p>}
+                                </div>
+                            ))}
+
+                            {/* Empty spacer div for layout balance on larger screens if needed, otherwise flows naturally */}
+                            <div className="hidden md:block"></div>
+
+                            {/* Password Field */}
+                            <div className="flex flex-col">
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        value={password}
+                                        onChange={handlePasswordChange}
+                                        placeholder=" "
+                                        required
+                                        className={`peer w-full px-4 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white placeholder-transparent focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all duration-300 ${formErrors.password ? 'border-red-500' : ''}`}
+                                    />
+                                    <label className="absolute left-4 top-[-10px] bg-[#2a2445] px-1 text-xs text-gray-400 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-pink-400 peer-focus:bg-[#2a2445] rounded">
+                                        Password <span className="text-red-500">*</span>
+                                    </label>
+                                    <span
+                                        className="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white transition-colors text-lg"
+                                        onClick={(e) => handlePasswordToggle(e, "password")}
+                                    >
+                                        👁️
+                                    </span>
+                                </div>
+                                {formErrors.password && <p className="text-red-400 text-xs mt-1 ml-1">{formErrors.password}</p>}
+
+                                {/* Password Strength Visual */}
+                                {password && (
+                                    <div className="mt-2 p-3 bg-black/20 rounded-lg border border-white/5 transition-all duration-300 animate-fade-in">
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <span className="text-xs text-gray-400">Strength</span>
+                                            <span className={`text-xs font-bold ${passwordStrength === 0 ? 'text-gray-500' :
+                                                    passwordStrength === 1 ? 'text-red-400' :
+                                                        passwordStrength === 2 ? 'text-yellow-400' : 'text-green-400'
+                                                }`}>
+                                                {passwordStrength === 0 ? 'Too Weak' : passwordStrength === 1 ? 'Weak' : passwordStrength === 2 ? 'Medium' : 'Strong'}
+                                            </span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden flex">
+                                            <div className={`h-full transition-all duration-300 ${passwordStrength >= 1 ? 'w-1/3 bg-red-500' : 'w-0'
+                                                }`}></div>
+                                            <div className={`h-full transition-all duration-300 ${passwordStrength >= 2 ? 'w-1/3 bg-yellow-500' : 'w-0'
+                                                }`}></div>
+                                            <div className={`h-full transition-all duration-300 ${passwordStrength >= 3 ? 'w-1/3 bg-green-500' : 'w-0'
+                                                }`}></div>
+                                        </div>
+
+                                        {/* Requirements List */}
+                                        <ul className="grid grid-cols-2 gap-1 mt-2">
+                                            {[
+                                                { label: '8+ Chars', valid: passwordValidation.minLength },
+                                                { label: 'Uppercase', valid: passwordValidation.hasUppercase },
+                                                { label: 'Lowercase', valid: passwordValidation.hasLowercase },
+                                                { label: 'Number', valid: passwordValidation.hasNumber },
+                                                { label: 'Special Char', valid: passwordValidation.hasSpecial },
+                                            ].map((req, i) => (
+                                                <li key={i} className={`text-[10px] flex items-center gap-1 ${req.valid ? 'text-green-400' : 'text-gray-500'}`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${req.valid ? 'bg-green-400' : 'bg-gray-600'}`}></span>
+                                                    {req.label}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Confirm Password Field */}
+                            <div className="flex flex-col">
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        id="confirm-password"
+                                        value={confirmPassword}
+                                        onChange={handleConfirmPasswordChange}
+                                        placeholder=" "
+                                        required
+                                        className={`peer w-full px-4 py-3.5 rounded-xl bg-black/20 border border-white/10 text-white placeholder-transparent focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all duration-300 ${passwordError ? 'border-red-500' : ''}`}
+                                    />
+                                    <label className="absolute left-4 top-[-10px] bg-[#2a2445] px-1 text-xs text-gray-400 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-pink-400 peer-focus:bg-[#2a2445] rounded">
+                                        Confirm Password <span className="text-red-500">*</span>
+                                    </label>
+                                    <span
+                                        className="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white transition-colors text-lg"
+                                        onClick={(e) => handlePasswordToggle(e, "confirm-password")}
+                                    >
+                                        👁️
+                                    </span>
+                                </div>
+                                {passwordError && <p className="text-red-400 text-xs mt-1 ml-1">{passwordError}</p>}
+                            </div>
+
+                            {/* Footer / Submit Section - Spans Full Width */}
+                            <div className="col-span-1 md:col-span-2 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div className="text-gray-400 text-xs text-center md:text-left">
+                                    Fields marked with <span className="text-red-500">*</span> are required.
+                                </div>
+
+                                <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+                                    <Link href="/login" className="text-sm text-gray-300 hover:text-white transition-colors">
+                                        Already have an account? <span className="text-pink-400 font-semibold hover:underline">Login</span>
+                                    </Link>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className={`w-full md:w-auto px-8 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all duration-300 transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 ${isSubmitting
+                                                ? 'bg-gray-600 cursor-not-allowed opacity-70'
+                                                : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:shadow-pink-500/30'
+                                            }`}
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Creating Account...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Sign Up</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                </svg>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
                     </div>
-                )}
-            </div>
-
-            <div className="flex flex-col relative">
-                <input
-                    type="password"
-                    id="confirm-password"
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                    placeholder="Confirm Password *"
-                    required
-                    className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${passwordError ? 'border-2 border-red-500' : ''}`}
-                />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "confirm-password")}
-                >
-                    👁️
-                </span>
-                {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
-            </div>
-
-            <div className="col-span-3 flex items-center justify-between mt-4">
-       
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-6 py-3 text-white ${isSubmitting ? 'bg-gray-400' : 'bg-pink-400 hover:bg-pink-500'} rounded-md transition duration-300 flex items-center`}
-                >
-                    {isSubmitting ? (
-                        <>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Processing...
-                        </>
-                    ) : 'Sign Up'}
-                </button>
-                    <div className="col-span-3 flex items-center justify-between text-white mt-4">fields marked with  <span className="text-red-500"> * </span> are required</div>
-                <div className="text-white">
-                    Already have an account? <Link href="/login" className="text-pink-400 hover:underline">Login</Link>
                 </div>
             </div>
-        </form>
-    </div>
-</div>
-
         </>
     );
 };

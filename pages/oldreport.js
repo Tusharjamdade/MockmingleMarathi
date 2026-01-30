@@ -550,8 +550,373 @@ function Oldreport() {
 
   // We're no longer using the separate ScoreCard component as we integrated the scorecard display 
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 text-white">
+  // return (
+  //   <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 text-white">
+  //     <Head>
+  //       <title>मुलाखत अहवाल | SHAKKTII AI</title>
+  //       <meta name="description" content="View your AI-powered interview performance reports" />
+  //     </Head>
+
+  //     {/* Full Report Modal with enhanced UI */}
+  //     {showFullReport && (
+  //       <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto transition-all duration-300">
+  //         <div
+  //           className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-purple-500 border-opacity-40 transform transition-all duration-500"
+  //           style={{ boxShadow: '0 0 25px rgba(147, 51, 234, 0.3)' }}
+  //         >
+  //           {/* Modal Header */}
+  //           <div className="sticky top-0 bg-gradient-to-r from-indigo-900 to-purple-900 px-6 py-5 flex justify-between items-center z-10 backdrop-blur">
+  //             <div>
+  //               <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">सविस्तर रिपोर्टचे विश्लेषण</h3>
+  //               <p className="text-sm text-gray-300 mt-1">{fullReportData?.role} - {fullReportData?.date}</p>
+  //             </div>
+  //             <button
+  //               onClick={() => setShowFullReport(false)}
+  //               className="text-gray-300 hover:text-white text-2xl focus:outline-none hover:bg-gray-800 hover:bg-opacity-30 p-2 rounded-full transition-all duration-200"
+  //               aria-label="Close modal"
+  //             >
+  //               <IoClose />
+  //             </button>
+  //           </div>
+
+
+  //           <div className="p-8">
+  //             <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+  //               <h3 className="text-xl font-bold text-indigo-800 mb-4">तपशीलवार विश्लेषण</h3>
+
+  //               {fullReportData ? (
+  //                 <div className="prose max-w-none text-gray-800">
+  //                   {fullReportData.reportAnalysis.split('\n').map((line, index) => {
+  //                     // Remove markdown heading (#)
+  //                     if (line.trim().startsWith('#')) {
+  //                       const headerText = line.replace(/^#+\s*/, '');
+  //                       return (
+  //                         <h3 key={index} className="text-xl font-bold mt-4 mb-2 text-indigo-800">
+  //                           {headerText}
+  //                         </h3>
+  //                       );
+  //                     }
+
+
+  //                     if (line.trim().startsWith('|')) {
+  //                       const cells = line.split('|').map(c => c.trim()).filter(c => c);
+  //                       if (cells.length === 2) {
+  //                         return (
+  //                           <p key={index} className="mb-2">
+  //                             <span className="font-semibold">{cells[0]}:</span> {cells[1]}
+  //                           </p>
+  //                         );
+  //                       }
+  //                       return null; 
+  //                     }
+
+
+  //                     if (line.match(/\*\*[^*]+\*\*/)) {
+  //                       const headerText = line.replace(/\*\*/g, '');
+  //                       return (
+  //                         <h4 key={index} className="text-lg font-bold mt-4 mb-2 text-indigo-800">
+  //                           {headerText}
+  //                         </h4>
+  //                       );
+  //                     }
+
+  //                     // Bullet points
+  //                     if (line.trim().startsWith('-')) {
+  //                       const bulletText = line.trim().substring(1).trim();
+  //                       return <li key={index} className="ml-6 mb-1">{bulletText}</li>;
+  //                     }
+
+  //                     // Numbered list
+  //                     if (line.match(/^\s*\d+\.\s+/)) {
+  //                       const numberText = line.replace(/^\s*\d+\.\s+/, '');
+  //                       return <li key={index} className="ml-8 mb-1 list-decimal">{numberText}</li>;
+  //                     }
+
+
+  //                     if (line.match(/(\d+\/(10|50))/)) {
+  //                       return <p key={index} className="font-semibold text-indigo-700 mb-2">{line}</p>;
+  //                     }
+
+  //                     // Empty line
+  //                     if (line.trim() === '') {
+  //                       return <div key={index} className="h-2"></div>;
+  //                     }
+
+  //                     // Default paragraph
+  //                     return <p key={index} className="mb-2">{line}</p>;
+  //                   })}
+
+  //                 </div>
+  //               ) : (
+  //                 <p className="text-gray-600">कोणतेही अहवाल विश्लेषण उपलब्ध नाही</p>
+  //               )}
+  //             </div>
+
+  //             {/* Download PDF section */}
+  //             <div className="mt-6 flex justify-center">
+  //               <button
+  //                 onClick={downloadDetailedReport}
+  //                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+  //               >
+  //                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  //                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+  //                 </svg>
+  //                 तपशीलवार अहवाल डाउनलोड करा
+  //               </button>
+  //             </div>
+
+  //             <div className="flex justify-between mt-8">
+  //               <button
+  //                 onClick={downloadDetailedReport}
+  //                 className="bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+  //               >
+  //                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  //                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  //                 </svg>
+  //                 <span>तपशीलवार अहवाल डाउनलोड करा</span>
+  //               </button>
+
+  //               <button
+  //                 onClick={() => setShowFullReport(false)}
+  //                 className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+  //               >
+  //                 <IoClose className="text-lg" />
+  //                 <span>अहवाल बंद करा</span>
+  //               </button>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     )}
+  //     {/* Header with Navigation */}
+  //     <div className="sticky top-0 bg-black bg-opacity-30 backdrop-blur-sm z-10 shadow-lg">
+  //       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+  //         <div className="flex items-center space-x-4">
+  //           <button onClick={goBack} className="text-white text-3xl hover:text-indigo-300 transition-all duration-300 transform hover:scale-110">
+  //             <IoIosArrowBack />
+  //           </button>
+  //           <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-300">SHAKKTII AI</h1>
+  //         </div>
+  //         <div className="text-sm md:text-base text-gray-200">
+  //           {email && <span className="font-medium">वापरकर्ता: {email}</span>}
+  //         </div>
+  //       </div>
+  //     </div>
+
+  //     {/* Main Content */}
+  //     <div className="container mx-auto px-4 py-8">
+  //       <h1 className="text-center text-4xl md:text-5xl font-bold mb-6 p-4 mt-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
+  //         मुलाखतीतली प्रगती आणि परफॉर्मन्स रेकॉर्ड
+  //       </h1>
+
+  //       {/* Reports Section */}
+  //       <div className="max-w-5xl mx-auto">
+  //         {loading ? (
+  //           <div className="flex justify-center items-center h-48">
+  //             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-300"></div>
+  //           </div>
+  //         ) : (
+  //           <div className="space-y-6">
+  //             {reports && reports.length > 0 ? (
+  //               reports.map((report, index) => (
+  //                 <div key={index} className="bg-gray-800 bg-opacity-50 rounded-xl overflow-hidden shadow-xl backdrop-blur-sm border border-purple-500 border-opacity-30 transition-all duration-300 hover:shadow-purple-500/20">
+  //                   {/* Report Header */}
+  //                   <div
+  //                     onClick={() => toggleIndividualReportVisibility(index)}
+  //                     className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 cursor-pointer flex items-center justify-between hover:from-purple-700 hover:to-indigo-700 transition-all duration-300"
+  //                   >
+  //                     <div className="flex items-center space-x-3">
+  //                       <span className="font-bold text-lg"> {report.role}</span>
+  //                       <span className="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">
+  //                         {reportVisibility[index] ? 'तपशील डिस्प्ले बंद करा' : 'तपशील शो करा'}
+  //                       </span>
+  //                     </div>
+  //                     <div className="flex items-center space-x-4">
+  //                       <span className="text-sm opacity-80">{new Date(report.createdAt).toLocaleDateString()} at {new Date(report.createdAt).toLocaleTimeString()}</span>
+  //                       <span className="transform transition-transform duration-300 text-lg">
+  //                         {reportVisibility[index] ? '▲' : '▼'}
+  //                       </span>
+  //                     </div>
+  //                   </div>
+
+  //                   {/* Report Content - Conditional Render */}
+  //                   {reportVisibility[index] && (
+  //                     <div className="p-6">
+  //                       {/* Report Meta */}
+  //                       <div className="flex flex-wrap justify-between mb-6 pb-4 border-b border-gray-600">
+  //                         <div>
+  //                           <p className="text-gray-400 text-sm">पद</p>
+  //                           <p className="font-semibold text-lg">{report.role}</p>
+  //                         </div>
+  //                         {/* <div>
+  //                           <p className="text-gray-400 text-sm">College</p>
+  //                           <p className="font-semibold">{report.collageName || 'Not specified'}</p>
+  //                         </div> */}
+  //                         <div>
+  //                           <p className="text-gray-400 text-sm">तारीख</p>
+  //                           <p className="font-semibold">{new Date(report.createdAt).toLocaleDateString()}</p>
+  //                         </div>
+  //                       </div>
+
+  //                       {/* Performance Scores */}
+  //                       <h3 className="text-xl font-bold mb-4 text-blue-300">परफॉर्मन्स स्कोअर्स</h3>
+
+  //                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  //                         {['टेक्निकल स्किल्स', 'कम्युनिकेशन', 'निर्णय क्षमता', 'आत्मविश्वास', 'भाषा प्रावीण्य', 'एकूण गुण'].map((category) => {
+  //                           // Get score and feedback
+  //                           const { score, feedback } = extractScore(report, category);
+
+  //                           const isOverallScore = category === 'Overall Score';
+  //                           const maxScore = isOverallScore ? 50 : 10;
+  //                           // Ensure score is within valid range (0-10 for individual, 0-50 for overall)
+  //                           let safeScore = Math.min(Math.max(0, score || 0), maxScore);
+
+  //                           // If we still have a score of 1, which might be a default, try one more time
+  //                           if (safeScore === 1 && !isOverallScore) {
+  //                             // Look for the score in the report text directly
+  //                             const scorePattern = new RegExp(`${category.replace(/[\s-]/g, '[\\s-]*')}[\\s:]*([0-9]+)`, 'i');
+  //                             const match = report.reportAnalysis.match(scorePattern);
+  //                             if (match && match[1]) {
+  //                               const extractedScore = parseInt(match[1], 10);
+  //                               if (!isNaN(extractedScore) && extractedScore > 1) {
+  //                                 safeScore = extractedScore;
+  //                               }
+  //                             }
+  //                           }
+
+  //                           // Format the score text (e.g., "7/10" or "35/50")
+  //                           const scoreText = isOverallScore ? 
+  //                             `${safeScore}/50` : `${safeScore}/10`;
+
+  //                           // Scale for display (0-10 for all scores in the UI)
+  //                           const displayScore = isOverallScore ? 
+  //                             (safeScore / 5) : // Scale 0-50 to 0-10
+  //                             safeScore; // Already 0-10
+
+  //                           return (
+  //                             <div key={category} className="bg-gray-900 bg-opacity-60 rounded-lg p-5 transform transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-1 border border-transparent hover:border-purple-500/20">
+  //                               <div className="flex items-center mb-4">
+  //                                 <h4 className="font-semibold text-lg flex-1 text-blue-200">{category}</h4>
+  //                               </div>
+
+  //                               <div className="flex flex-col sm:flex-row items-center">
+  //                                 {/* Enhanced Circular Progress Bar */}
+  //                                 <div className="w-28 h-28 mb-4 sm:mb-0 relative group">
+  //                                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300 -z-10"></div>
+  //                                                                       <CircularProgressbar
+  //                                     value={displayScore}
+  //                                     maxValue={10}
+  //                                     text={isOverallScore ? `${safeScore}/50` : scoreText}
+  //                                     background
+  //                                     backgroundPadding={6}
+  //                                     styles={buildStyles({
+  //                                       pathColor: isOverallScore 
+  //                                         ? 'url(#overallGradient)'
+  //                                         : displayScore >= 7 
+  //                                           ? '#4ade80' // Good score (7-10)
+  //                                           : displayScore >= 4 
+  //                                             ? '#facc15' // Average score (4-6.9)
+  //                                             : '#f87171', // Poor score (0-3.9)
+  //                                       backgroundColor: '#1f2937',
+  //                                       textColor: '#ffffff',
+  //                                       trailColor: '#374151',
+  //                                       textSize: isOverallScore ? '20px' : '24px',
+  //                                       pathTransitionDuration: 0.5,
+  //                                       strokeLinecap: 'round',
+  //                                       text: {
+  //                                         fontSize: isOverallScore ? '20px' : '24px',
+  //                                         fontWeight: 'bold'
+  //                                       }
+  //                                     })}
+  //                                   />
+  //                                   {/* Add SVG gradient definition for overall score */}
+  //                                   <svg style={{ height: 0 }}>
+  //                                     <defs>
+  //                                       <linearGradient id="overallGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+  //                                         <stop offset="0%" stopColor="#8b5cf6" />
+  //                                         <stop offset="100%" stopColor="#d946ef" />
+  //                                       </linearGradient>
+  //                                     </defs>
+  //                                   </svg>
+  //                                 </div>
+
+  //                                 <div className="ml-0 sm:ml-5 flex-1">
+  //                                   {/* Score bar with animation */}
+  //                                   <div className="w-full bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
+  //                                     <div
+  //                                       className="bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full transition-all duration-1000 ease-out"
+  //                                       style={{
+  //                                         width: `${(displayScore / (isOverallScore?10:10)) * 100}%`,
+  //                                         boxShadow: '0 0 8px rgba(147, 51, 234, 0.5)'
+  //                                       }}
+  //                                     ></div>
+  //                                   </div>
+
+  //                                   <div className="text-sm text-gray-300 leading-relaxed">
+  //                                     {/* Limit to approximately 20-25 words */}
+  //                                     {feedback.split(/\s+/).slice(0, 22).join(" ")}...
+  //                                   </div>
+  //                                 </div>
+  //                               </div>
+  //                             </div>
+  //                           );
+  //                         })}
+  //                       </div>
+
+  //                       {/* Report Action Buttons */}
+  //                       <div className="flex flex-col sm:flex-row justify-center mt-8 space-y-4 sm:space-y-0 sm:space-x-5">
+  //                         <button
+  //                           onClick={() => {
+  //                             setFullReportData({
+  //                               reportAnalysis: report.reportAnalysis,
+  //                               role: report.role,
+  //                               date: new Date(report.createdAt).toLocaleDateString()
+  //                             });
+  //                             setShowFullReport(true);
+  //                           }}
+  //                           className="relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center group"
+  //                         >
+  //                           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></span>
+  //                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+  //                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+  //                             <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+  //                           </svg>
+  //                           <span className="relative z-10">संपूर्ण रिपोर्ट पहा</span>
+  //                           <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+  //                         </button>
+
+  //                         <button
+  //                           onClick={() => downloadReport(report.reportAnalysis, report)}
+  //                           className="relative overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-700 hover:from-indigo-600 hover:to-purple-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center group"
+  //                         >
+  //                           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-400 to-pink-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></span>
+  //                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+  //                             <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+  //                           </svg>
+  //                           <span className="relative z-10">PDF रिपोर्ट डाउनलोड करा</span>
+  //                           <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+  //                         </button>
+  //                       </div>
+  //                     </div>
+  //                   )}
+  //                 </div>
+  //               ))
+  //             ) : (
+  //               <div className="text-center py-16 rounded-xl bg-gray-800 bg-opacity-40 backdrop-blur-sm">
+  //                 <div className="text-5xl mb-4">⏳</div>
+  //                 <h3 className="text-2xl font-semibold mb-2">तुमचा रिपोर्ट तयार करत आहे</h3>
+  //                 <p className="text-gray-300">इंटरव्ह्यू रिपोर्ट तयार होण्यास साधारण ५ मिनिटांचा वेळ लागू शकतो. कृपया थोडा वेळ थांबा.</p>
+  //                 <p className="text-gray-400 mt-4">कृपया थोडा वेळ द्या, लवकरच माहिती उपलब्ध होईल!</p>
+  //               </div>
+  //             )}
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+return (
+    <div className="min-h-screen bg-slate-900 text-slate-50 selection:bg-indigo-500 selection:text-white">
       <Head>
         <title>मुलाखत अहवाल | SHAKKTII AI</title>
         <meta name="description" content="View your AI-powered interview performance reports" />
@@ -559,128 +924,129 @@ function Oldreport() {
 
       {/* Full Report Modal with enhanced UI */}
       {showFullReport && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto transition-all duration-300">
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all duration-300">
           <div
-            className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-purple-500 border-opacity-40 transform transition-all duration-500"
-            style={{ boxShadow: '0 0 25px rgba(147, 51, 234, 0.3)' }}
+            className="bg-white/5 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn"
+            style={{ boxShadow: '0 0 50px rgba(79, 70, 229, 0.15)' }}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-indigo-900 to-purple-900 px-6 py-5 flex justify-between items-center z-10 backdrop-blur">
+            <div className="sticky top-0 bg-slate-900/95 px-6 py-5 flex justify-between items-center z-10 border-b border-white/10 backdrop-blur-xl">
               <div>
-                <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">सविस्तर रिपोर्टचे विश्लेषण</h3>
-                <p className="text-sm text-gray-300 mt-1">{fullReportData?.role} - {fullReportData?.date}</p>
+                <h3 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">सविस्तर रिपोर्टचे विश्लेषण</h3>
+                <p className="text-xs md:text-sm text-slate-400 mt-1 flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">{fullReportData?.role}</span>
+                  <span>•</span>
+                  <span>{fullReportData?.date}</span>
+                </p>
               </div>
               <button
                 onClick={() => setShowFullReport(false)}
-                className="text-gray-300 hover:text-white text-2xl focus:outline-none hover:bg-gray-800 hover:bg-opacity-30 p-2 rounded-full transition-all duration-200"
+                className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all duration-200"
                 aria-label="Close modal"
               >
-                <IoClose />
+                <IoClose size={24} />
               </button>
             </div>
 
-            
-            <div className="p-8">
-              <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
-                <h3 className="text-xl font-bold text-indigo-800 mb-4">तपशीलवार विश्लेषण</h3>
+            {/* Modal Body */}
+            <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
+              <div className="mb-8 p-6 md:p-8 bg-white rounded-xl shadow-xl text-slate-800">
+                <h3 className="text-2xl font-bold text-slate-900 mb-6 border-b pb-4">तपशीलवार विश्लेषण</h3>
 
                 {fullReportData ? (
-                  <div className="prose max-w-none text-gray-800">
+                  <div className="prose prose-slate max-w-none">
                     {fullReportData.reportAnalysis.split('\n').map((line, index) => {
                       // Remove markdown heading (#)
                       if (line.trim().startsWith('#')) {
                         const headerText = line.replace(/^#+\s*/, '');
                         return (
-                          <h3 key={index} className="text-xl font-bold mt-4 mb-2 text-indigo-800">
+                          <h3 key={index} className="text-xl font-bold mt-8 mb-4 text-indigo-700 flex items-center gap-2">
+                            <span className="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
                             {headerText}
                           </h3>
                         );
                       }
 
-                      
                       if (line.trim().startsWith('|')) {
                         const cells = line.split('|').map(c => c.trim()).filter(c => c);
                         if (cells.length === 2) {
                           return (
-                            <p key={index} className="mb-2">
-                              <span className="font-semibold">{cells[0]}:</span> {cells[1]}
-                            </p>
+                            <div key={index} className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-slate-100 last:border-0">
+                              <span className="font-semibold text-slate-700 w-48">{cells[0]}:</span>
+                              <span className="text-slate-600">{cells[1]}</span>
+                            </div>
                           );
                         }
-                        return null; 
+                        return null;
                       }
 
-                      
                       if (line.match(/\*\*[^*]+\*\*/)) {
                         const headerText = line.replace(/\*\*/g, '');
                         return (
-                          <h4 key={index} className="text-lg font-bold mt-4 mb-2 text-indigo-800">
+                          <h4 key={index} className="text-lg font-bold mt-6 mb-3 text-slate-800">
                             {headerText}
                           </h4>
                         );
                       }
 
-                      // Bullet points
+                      // Bullet points - CHANGED FROM <li> TO <div> TO FIX CRASH
                       if (line.trim().startsWith('-')) {
                         const bulletText = line.trim().substring(1).trim();
-                        return <li key={index} className="ml-6 mb-1">{bulletText}</li>;
+                        return (
+                          <div key={index} className="ml-4 mb-2 relative pl-5 text-slate-700">
+                             <span className="absolute left-0 top-2 w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                             {bulletText}
+                          </div>
+                        );
                       }
 
-                      // Numbered list
+                      // Numbered list - CHANGED FROM <li> TO <div> TO FIX CRASH
                       if (line.match(/^\s*\d+\.\s+/)) {
                         const numberText = line.replace(/^\s*\d+\.\s+/, '');
-                        return <li key={index} className="ml-8 mb-1 list-decimal">{numberText}</li>;
+                        return <div key={index} className="ml-5 mb-2 text-slate-700 flex gap-2">
+                            <span className="font-semibold text-indigo-600">•</span>
+                            <span>{numberText}</span>
+                        </div>;
                       }
 
-                      
                       if (line.match(/(\d+\/(10|50))/)) {
-                        return <p key={index} className="font-semibold text-indigo-700 mb-2">{line}</p>;
+                        return <div key={index} className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg font-bold mb-4 border border-indigo-100">{line}</div>;
                       }
 
                       // Empty line
                       if (line.trim() === '') {
-                        return <div key={index} className="h-2"></div>;
+                        return <div key={index} className="h-4"></div>;
                       }
 
                       // Default paragraph
-                      return <p key={index} className="mb-2">{line}</p>;
+                      return <p key={index} className="mb-3 text-slate-600 leading-relaxed">{line}</p>;
                     })}
 
                   </div>
                 ) : (
-                  <p className="text-gray-600">कोणतेही अहवाल विश्लेषण उपलब्ध नाही</p>
+                  <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                     <p>कोणतेही अहवाल विश्लेषण उपलब्ध नाही</p>
+                  </div>
                 )}
               </div>
 
-              {/* Download PDF section */}
-              <div className="mt-6 flex justify-center">
+              {/* Action Buttons Footer */}
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8 pb-4">
                 <button
                   onClick={downloadDetailedReport}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                  </svg>
-                  तपशीलवार अहवाल डाउनलोड करा
-                </button>
-              </div>
-
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={downloadDetailedReport}
-                  className="bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>तपशीलवार अहवाल डाउनलोड करा</span>
                 </button>
 
                 <button
                   onClick={() => setShowFullReport(false)}
-                  className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <IoClose className="text-lg" />
+                  <IoClose className="text-xl" />
                   <span>अहवाल बंद करा</span>
                 </button>
               </div>
@@ -688,183 +1054,166 @@ function Oldreport() {
           </div>
         </div>
       )}
+
       {/* Header with Navigation */}
-      <div className="sticky top-0 bg-black bg-opacity-30 backdrop-blur-sm z-10 shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button onClick={goBack} className="text-white text-3xl hover:text-indigo-300 transition-all duration-300 transform hover:scale-110">
-              <IoIosArrowBack />
+      <div className="sticky top-0 bg-slate-900/80 backdrop-blur-lg z-40 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={goBack} className="p-2 -ml-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all">
+              <IoIosArrowBack size={24} />
             </button>
-            <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-300">SHAKKTII AI</h1>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">SHAKKTII AI</h1>
           </div>
-          <div className="text-sm md:text-base text-gray-200">
-            {email && <span className="font-medium">वापरकर्ता: {email}</span>}
+          <div className="hidden md:block text-sm text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+            {email && <span>वापरकर्ता: <span className="text-slate-200">{email}</span></span>}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-center text-4xl md:text-5xl font-bold mb-6 p-4 mt-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
-          मुलाखतीतली प्रगती आणि परफॉर्मन्स रेकॉर्ड
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 pb-2">
+            मुलाखतीतली प्रगती आणि परफॉर्मन्स
+          </h1>
+          <p className="text-slate-400 max-w-2xl mx-auto">तुमचा मागील सर्व मुलाखतींचा सविस्तर आढावा आणि प्रगती पुस्तक.</p>
+        </div>
 
         {/* Reports Section */}
         <div className="max-w-5xl mx-auto">
           {loading ? (
-            <div className="flex justify-center items-center h-48">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-300"></div>
+            <div className="flex flex-col justify-center items-center h-64 gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500/30 border-t-indigo-500"></div>
+              <p className="text-slate-400 animate-pulse">माहिती लोड होत आहे...</p>
             </div>
           ) : (
             <div className="space-y-6">
               {reports && reports.length > 0 ? (
                 reports.map((report, index) => (
-                  <div key={index} className="bg-gray-800 bg-opacity-50 rounded-xl overflow-hidden shadow-xl backdrop-blur-sm border border-purple-500 border-opacity-30 transition-all duration-300 hover:shadow-purple-500/20">
-                    {/* Report Header */}
+                  <div key={index} className={`rounded-2xl overflow-hidden transition-all duration-300 border ${reportVisibility[index] ? 'bg-slate-800/80 border-indigo-500/50 shadow-2xl shadow-indigo-900/20' : 'bg-slate-800/40 border-white/5 hover:border-white/10 hover:bg-slate-800/60'}`}>
+
+                    {/* Report Header Card */}
                     <div
                       onClick={() => toggleIndividualReportVisibility(index)}
-                      className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 cursor-pointer flex items-center justify-between hover:from-purple-700 hover:to-indigo-700 transition-all duration-300"
+                      className="p-5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
                     >
-                      <div className="flex items-center space-x-3">
-                        <span className="font-bold text-lg"> {report.role}</span>
-                        <span className="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">
-                          {reportVisibility[index] ? 'तपशील डिस्प्ले बंद करा' : 'तपशील शो करा'}
-                        </span>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold transition-colors ${reportVisibility[index] ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white'}`}>
+                           {report.role.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h2 className="font-bold text-lg text-slate-100 group-hover:text-indigo-300 transition-colors">{report.role}</h2>
+                          <p className="text-sm text-slate-400 flex items-center gap-2">
+                            <span>{new Date(report.createdAt).toLocaleDateString()}</span>
+                            <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
+                            <span>{new Date(report.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm opacity-80">{new Date(report.createdAt).toLocaleDateString()} at {new Date(report.createdAt).toLocaleTimeString()}</span>
-                        <span className="transform transition-transform duration-300 text-lg">
-                          {reportVisibility[index] ? '▲' : '▼'}
+
+                      <div className="flex items-center justify-between sm:justify-end gap-4 pl-16 sm:pl-0">
+                        <span className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${reportVisibility[index] ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 text-slate-400 group-hover:bg-white/10'}`}>
+                          {reportVisibility[index] ? 'तपशील लपवा' : 'तपशील पहा'}
                         </span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${reportVisibility[index] ? 'bg-white/10 rotate-180' : 'bg-transparent'}`}>
+                           <span className="text-slate-400">▼</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Report Content - Conditional Render */}
-                    {reportVisibility[index] && (
-                      <div className="p-6">
-                        {/* Report Meta */}
-                        <div className="flex flex-wrap justify-between mb-6 pb-4 border-b border-gray-600">
+                    {/* Report Expanded Content */}
+                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${reportVisibility[index] ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                      <div className="p-6 md:p-8 border-t border-white/5 bg-slate-900/30">
+
+                        {/* Report Meta Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 pb-8 border-b border-white/5">
                           <div>
-                            <p className="text-gray-400 text-sm">पद</p>
-                            <p className="font-semibold text-lg">{report.role}</p>
+                            <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">पद</p>
+                            <p className="text-white font-medium">{report.role}</p>
                           </div>
-                          {/* <div>
-                            <p className="text-gray-400 text-sm">College</p>
-                            <p className="font-semibold">{report.collageName || 'Not specified'}</p>
-                          </div> */}
                           <div>
-                            <p className="text-gray-400 text-sm">तारीख</p>
-                            <p className="font-semibold">{new Date(report.createdAt).toLocaleDateString()}</p>
+                            <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">तारीख</p>
+                            <p className="text-white font-medium">{new Date(report.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                             <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">वेळ</p>
+                             <p className="text-white font-medium">{new Date(report.createdAt).toLocaleTimeString()}</p>
+                          </div>
+                          <div>
+                             <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-1">ID</p>
+                             <p className="text-white font-medium font-mono text-sm opacity-60">#{index + 1001}</p>
                           </div>
                         </div>
 
-                        {/* Performance Scores */}
-                        <h3 className="text-xl font-bold mb-4 text-blue-300">परफॉर्मन्स स्कोअर्स</h3>
+                        {/* Scores Grid */}
+                        <div className="mb-10">
+                            <h3 className="text-lg font-bold mb-6 text-indigo-300 flex items-center gap-2">
+                                <span className="w-1 h-5 bg-indigo-500 rounded-full"></span>
+                                परफॉर्मन्स स्कोअर्स
+                            </h3>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                          {['टेक्निकल स्किल्स', 'कम्युनिकेशन', 'निर्णय क्षमता', 'आत्मविश्वास', 'भाषा प्रावीण्य', 'एकूण गुण'].map((category) => {
-                            // Get score and feedback
-                            const { score, feedback } = extractScore(report, category);
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {['टेक्निकल स्किल्स', 'कम्युनिकेशन', 'निर्णय क्षमता', 'आत्मविश्वास', 'भाषा प्रावीण्य', 'एकूण गुण'].map((category) => {
+                                const { score, feedback } = extractScore(report, category);
+                                const isOverallScore = category === 'Overall Score';
+                                const maxScore = isOverallScore ? 50 : 10;
+                                let safeScore = Math.min(Math.max(0, score || 0), maxScore);
 
-                            const isOverallScore = category === 'Overall Score';
-                            const maxScore = isOverallScore ? 50 : 10;
-                            // Ensure score is within valid range (0-10 for individual, 0-50 for overall)
-                            let safeScore = Math.min(Math.max(0, score || 0), maxScore);
-                            
-                            // If we still have a score of 1, which might be a default, try one more time
-                            if (safeScore === 1 && !isOverallScore) {
-                              // Look for the score in the report text directly
-                              const scorePattern = new RegExp(`${category.replace(/[\s-]/g, '[\\s-]*')}[\\s:]*([0-9]+)`, 'i');
-                              const match = report.reportAnalysis.match(scorePattern);
-                              if (match && match[1]) {
-                                const extractedScore = parseInt(match[1], 10);
-                                if (!isNaN(extractedScore) && extractedScore > 1) {
-                                  safeScore = extractedScore;
+                                if (safeScore === 1 && !isOverallScore) {
+                                const scorePattern = new RegExp(`${category.replace(/[\s-]/g, '[\\s-]*')}[\\s:]*([0-9]+)`, 'i');
+                                const match = report.reportAnalysis.match(scorePattern);
+                                if (match && match[1]) {
+                                    const extractedScore = parseInt(match[1], 10);
+                                    if (!isNaN(extractedScore) && extractedScore > 1) safeScore = extractedScore;
                                 }
-                              }
-                            }
-                            
-                            // Format the score text (e.g., "7/10" or "35/50")
-                            const scoreText = isOverallScore ? 
-                              `${safeScore}/50` : `${safeScore}/10`;
-                              
-                            // Scale for display (0-10 for all scores in the UI)
-                            const displayScore = isOverallScore ? 
-                              (safeScore / 5) : // Scale 0-50 to 0-10
-                              safeScore; // Already 0-10
+                                }
 
-                            return (
-                              <div key={category} className="bg-gray-900 bg-opacity-60 rounded-lg p-5 transform transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-1 border border-transparent hover:border-purple-500/20">
-                                <div className="flex items-center mb-4">
-                                  <h4 className="font-semibold text-lg flex-1 text-blue-200">{category}</h4>
-                                </div>
+                                const scoreText = isOverallScore ? `${safeScore}/50` : `${safeScore}/10`;
+                                const displayScore = isOverallScore ? (safeScore / 5) : safeScore;
 
-                                <div className="flex flex-col sm:flex-row items-center">
-                                  {/* Enhanced Circular Progress Bar */}
-                                  <div className="w-28 h-28 mb-4 sm:mb-0 relative group">
-                                    <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300 -z-10"></div>
-                                                                        <CircularProgressbar
-                                      value={displayScore}
-                                      maxValue={10}
-                                      text={isOverallScore ? `${safeScore}/50` : scoreText}
-                                      background
-                                      backgroundPadding={6}
-                                      styles={buildStyles({
-                                        pathColor: isOverallScore 
-                                          ? 'url(#overallGradient)'
-                                          : displayScore >= 7 
-                                            ? '#4ade80' // Good score (7-10)
-                                            : displayScore >= 4 
-                                              ? '#facc15' // Average score (4-6.9)
-                                              : '#f87171', // Poor score (0-3.9)
-                                        backgroundColor: '#1f2937',
-                                        textColor: '#ffffff',
-                                        trailColor: '#374151',
-                                        textSize: isOverallScore ? '20px' : '24px',
-                                        pathTransitionDuration: 0.5,
-                                        strokeLinecap: 'round',
-                                        text: {
-                                          fontSize: isOverallScore ? '20px' : '24px',
-                                          fontWeight: 'bold'
-                                        }
-                                      })}
-                                    />
-                                    {/* Add SVG gradient definition for overall score */}
-                                    <svg style={{ height: 0 }}>
-                                      <defs>
-                                        <linearGradient id="overallGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                          <stop offset="0%" stopColor="#8b5cf6" />
-                                          <stop offset="100%" stopColor="#d946ef" />
-                                        </linearGradient>
-                                      </defs>
-                                    </svg>
-                                  </div>
-
-                                  <div className="ml-0 sm:ml-5 flex-1">
-                                    {/* Score bar with animation */}
-                                    <div className="w-full bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
-                                      <div
-                                        className="bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full transition-all duration-1000 ease-out"
-                                        style={{
-                                          width: `${(displayScore / (isOverallScore?10:10)) * 100}%`,
-                                          boxShadow: '0 0 8px rgba(147, 51, 234, 0.5)'
-                                        }}
-                                      ></div>
+                                return (
+                                <div key={category} className="bg-slate-800/50 rounded-xl p-5 border border-white/5 hover:border-indigo-500/30 transition-all duration-300 hover:shadow-lg hover:bg-slate-800">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h4 className="font-semibold text-slate-200">{category}</h4>
+                                        <div className="w-12 h-12">
+                                            <CircularProgressbar
+                                                value={displayScore}
+                                                maxValue={10}
+                                                strokeWidth={12}
+                                                styles={buildStyles({
+                                                    pathColor: isOverallScore ? '#818cf8' : displayScore >= 7 ? '#4ade80' : displayScore >= 4 ? '#fbbf24' : '#f87171',
+                                                    trailColor: '#1e293b',
+                                                    strokeLinecap: 'round',
+                                                })}
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="text-sm text-gray-300 leading-relaxed">
-                                      {/* Limit to approximately 20-25 words */}
-                                      {feedback.split(/\s+/).slice(0, 22).join(" ")}...
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-2xl font-bold text-white">{scoreText}</span>
+                                            <span className="text-xs text-slate-500 mb-1">Score</span>
+                                        </div>
+
+                                        <div className="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                                            <div 
+                                                className={`h-full rounded-full ${isOverallScore ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : displayScore >= 7 ? 'bg-green-400' : displayScore >= 4 ? 'bg-amber-400' : 'bg-red-400'}`} 
+                                                style={{ width: `${(displayScore / 10) * 100}%` }}
+                                            ></div>
+                                        </div>
+
+                                        <p className="text-sm text-slate-400 leading-relaxed line-clamp-2 h-10">
+                                            {feedback.replace('No feedback available.', 'तपशीलवार फीडबॅकसाठी संपूर्ण रिपोर्ट पहा.')}
+                                        </p>
                                     </div>
-                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                                );
+                            })}
+                            </div>
                         </div>
 
-                        {/* Report Action Buttons */}
-                        <div className="flex flex-col sm:flex-row justify-center mt-8 space-y-4 sm:space-y-0 sm:space-x-5">
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/5">
                           <button
                             onClick={() => {
                               setFullReportData({
@@ -874,39 +1223,40 @@ function Oldreport() {
                               });
                               setShowFullReport(true);
                             }}
-                            className="relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center group"
+                            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-900/30 transition-all hover:-translate-y-0.5"
                           >
-                            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <span className="relative z-10">संपूर्ण रिपोर्ट पहा</span>
-                            <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+                            संपूर्ण रिपोर्ट पहा
                           </button>
 
                           <button
                             onClick={() => downloadReport(report.reportAnalysis, report)}
-                            className="relative overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-700 hover:from-indigo-600 hover:to-purple-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center group"
+                            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-all hover:-translate-y-0.5 border border-white/10"
                           >
-                            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-400 to-pink-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            <span className="relative z-10">PDF रिपोर्ट डाउनलोड करा</span>
-                            <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+                            PDF डाउनलोड करा
                           </button>
                         </div>
+
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-16 rounded-xl bg-gray-800 bg-opacity-40 backdrop-blur-sm">
-                  <div className="text-5xl mb-4">⏳</div>
-                  <h3 className="text-2xl font-semibold mb-2">तुमचा रिपोर्ट तयार करत आहे</h3>
-                  <p className="text-gray-300">इंटरव्ह्यू रिपोर्ट तयार होण्यास साधारण ५ मिनिटांचा वेळ लागू शकतो. कृपया थोडा वेळ थांबा.</p>
-                  <p className="text-gray-400 mt-4">कृपया थोडा वेळ द्या, लवकरच माहिती उपलब्ध होईल!</p>
+                <div className="text-center py-20 px-6 rounded-3xl bg-slate-800/30 border border-white/5 border-dashed">
+                  <div className="text-6xl mb-6 animate-pulse">⏳</div>
+                  <h3 className="text-2xl font-bold text-white mb-2">अहवाल तयार होत आहे</h3>
+                  <p className="text-slate-400 max-w-md mx-auto mb-6">
+                    तुमच्या मुलाखतीचे विश्लेषण आणि रिपोर्ट तयार होण्यास काही मिनिटे लागू शकतात. कृपया थोड्या वेळाने पुन्हा तपासा.
+                  </p>
+                  <button onClick={() => window.location.reload()} className="px-6 py-2 bg-white/5 hover:bg-white/10 rounded-full text-sm text-slate-300 transition-colors">
+                    पेज रिफ्रेश करा
+                  </button>
                 </div>
               )}
             </div>
@@ -918,3 +1268,5 @@ function Oldreport() {
 }
 
 export default Oldreport;
+
+

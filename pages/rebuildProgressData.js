@@ -50,64 +50,102 @@ export default function RebuildProgressData() {
     }
   };
 
-  return (
+return (
     <>
       <Head>
-        <title>SHAKKTII AI -प्रोग्रेसची माहिती रीबिल्ड करा</title>
+        <title>SHAKKTII AI - प्रोग्रेसची माहिती रीबिल्ड करा</title>
       </Head>
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4" 
-           style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover' }}>
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center text-purple-800 mb-6">
-           प्रॅक्टिस प्रोग्रेसची माहिती रीबिल्ड करा
-          </h1>
+
+      <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-hidden bg-[#0f0c29]">
+        
+        {/* Background Layer with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+            style={{ backgroundImage: "url('/BG.jpg')" }}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0f0c29] via-[#1a1638]/95 to-[#24243e]/90 backdrop-blur-[2px]"></div>
+        </div>
+
+        {/* Main Glass Card */}
+        <div className="relative z-10 w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
           
-          <p className="text-gray-600 mb-6">
-            हा टूल तुमच्या आधीच्या सर्व प्रॅक्टिस उत्तरांमधून तुमची प्रॅक्टिस प्रोग्रेस डेटा पुन्हा तयार करेल.
-जर तुमच्या प्रोग्रेस डॅशबोर्डवर शून्ये किंवा अपूर्ण माहिती दिसत असेल तर हा पर्याय वापरा.
-          </p>
-          
-          <div className="text-gray-700 mb-4">
-            <strong>वापरकर्ता आयडी:</strong> {userId || 'Not found'}
-          </div>
-          
-          <button
-            onClick={handleRebuild}
-            disabled={isRebuilding || !userId}
-            className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
-              isRebuilding || !userId ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            } transition-colors mb-4`}
-          >
-            {isRebuilding ? (
-              <>
-                <span className="animate-spin inline-block h-4 w-4 border-t-2 border-white rounded-full mr-2"></span>
-                पुन्हा तयार करत आहे...
-              </>
-            ) : (
-              'Rebuild Progress Data'
-            )}
-          </button>
-          
-          {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
-              <strong>Error:</strong> {error}
+          {/* Decorative Top Bar */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"></div>
+
+          <div className="p-8 sm:p-10">
+            <div className="text-center mb-8">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white mb-4">
+                प्रॅक्टिस प्रोग्रेस रीबिल्ड (Data Rebuild)
+              </h1>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                हा टूल तुमच्या मागील सर्व उत्तरांचे विश्लेषण करून तुमचा प्रोग्रेस रिपोर्ट (Progress Data) पुन्हा तयार करेल. जर डॅशबोर्डवर चुकीची माहिती दिसत असेल तरच याचा वापर करा.
+              </p>
             </div>
-          )}
-          
-          {result && (
-            <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4">
-              <strong>Success!</strong> {result.message}
-              <p className="mt-2">Processed {result.totalResponses} practice responses.</p>
+
+            <div className="bg-black/20 rounded-xl p-4 mb-8 border border-white/5 flex justify-between items-center">
+              <span className="text-gray-400 text-sm font-medium">वापरकर्ता आयडी (User ID)</span>
+              <span className="text-white font-mono text-sm bg-white/10 px-3 py-1 rounded-lg border border-white/10">
+                {userId || 'शोधत आहे...'}
+              </span>
             </div>
-          )}
-          
-          <div className="flex justify-center mt-4">
+
             <button
-              onClick={() => router.push('/practiceProgress')}
-              className="text-purple-600 hover:text-purple-800 transition-colors"
+              onClick={handleRebuild}
+              disabled={isRebuilding || !userId}
+              className={`w-full py-4 px-6 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-3 transition-all duration-300 transform ${
+                isRebuilding || !userId
+                  ? 'bg-gray-700/50 cursor-not-allowed opacity-50'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 hover:shadow-purple-500/25 hover:-translate-y-0.5 active:scale-95'
+              }`}
             >
-              प्रोग्रेस डॅशबोर्डकडे जा
+              {isRebuilding ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>प्रक्रिया सुरू आहे...</span>
+                </>
+              ) : (
+                <span>डेटा रीबिल्ड करा (Rebuild Data)</span>
+              )}
             </button>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 backdrop-blur-sm animate-shake">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 text-red-400">⚠️</div>
+                  <div>
+                    <h4 className="text-red-300 font-bold text-sm mb-1">त्रुटी (Error)</h4>
+                    <p className="text-red-200/80 text-xs">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {result && (
+              <div className="mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm transition-all duration-500">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 text-emerald-400">✅</div>
+                  <div>
+                    <h4 className="text-emerald-300 font-bold text-sm mb-1">यशस्वी! (Success)</h4>
+                    <p className="text-emerald-200/80 text-xs mb-1">{result.message}</p>
+                    <p className="text-emerald-100 text-xs font-mono bg-emerald-500/10 inline-block px-2 py-0.5 rounded">
+                      Processed: {result.totalResponses} records
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => router.push('/practiceProgress')}
+                className="text-gray-400 hover:text-white text-sm font-medium transition-colors border-b border-transparent hover:border-pink-400 pb-0.5"
+              >
+                &larr; प्रोग्रेस डॅशबोर्डकडे परत जा
+              </button>
+            </div>
           </div>
         </div>
       </div>

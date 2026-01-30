@@ -1154,15 +1154,31 @@ export default function Chart({ chartData, closeChart }) {
     }
   }, [chartData]); // Re-run effect when chartData changes
 
-  return (
-    <div className="absolute mt-52 ml-32 w-[700px] h-[350px] border bg-purple-600 bg-opacity-80 border-[#555]">
-      <canvas ref={canvasRef}></canvas>
-      <button 
-        onClick={closeChart}
-        className="top-0 right-0 p-2 bg-red-500 text-white rounded"
-      >
-        बंद करा
-      </button>
+return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
+      
+      {/* Modal Container */}
+      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-100">
+        
+        {/* Header with Title and Close Button */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+          <span className="font-semibold text-slate-700">Performance Analytics</span>
+          <button 
+            onClick={closeChart}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-md transition-all duration-200 active:scale-95"
+          >
+            बंद करा
+          </button>
+        </div>
+
+        {/* Chart Canvas Area - Responsive Height */}
+        <div className="p-6 w-full bg-white">
+          <div className="relative w-full h-[300px] md:h-[450px]">
+            <canvas ref={canvasRef} className="w-full h-full"></canvas>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

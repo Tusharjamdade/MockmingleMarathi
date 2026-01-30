@@ -65,86 +65,138 @@ export default function FixProgress() {
     return date.toLocaleString();
   };
 
-  return (
-    <>
+return (
+    <div className="relative min-h-screen w-full flex items-center justify-center py-12 px-4 sm:px-6 font-sans overflow-hidden bg-[#0f0c29]">
       <Head>
         <title>SHAKKTII AI - प्रोग्रेस डेटा दुरुस्त करा</title>
       </Head>
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4" 
-           style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover' }}>
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center text-purple-800 mb-6">
-            प्रोग्रेस रेकॉर्ड दुरुस्त करा
-          </h1>
-          
-          <p className="text-gray-600 mb-6">
-            ही सुविधा विद्यमान सराव प्रतिसादांवर आधारित सत्रातील मेट्रिक्स अद्ययावत करून एका विशेष प्रगती नोंदी दुरुस्त करेल.
-          </p>
-          
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="progressId">
-              प्रोग्रेस रेकॉर्ड आयडी
-            </label>
-            <input
-              id="progressId"
-              type="text"
-              value={progressId}
-              onChange={(e) => setProgressId(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Enter Progress ID"
-            />
+
+      {/* Background Image with Dark Overlay */}
+      <div className="absolute inset-0 z-0">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+          style={{ backgroundImage: "url('/BG.jpg')" }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f0c29] via-[#1a1638]/90 to-[#24243e]/90 backdrop-blur-[2px]"></div>
+      </div>
+
+      {/* Main Glass Card */}
+      <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+        
+        {/* Top Decorative Line */}
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+        <div className="p-8 sm:p-10">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-3">
+              प्रोग्रेस रेकॉर्ड दुरुस्त करा
+            </h1>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              विद्यमान डेटा वापरून तुमच्या प्रगतीचा अहवाल (Progress Record) पुन्हा कॅल्क्युलेट आणि अपडेट करा.
+            </p>
           </div>
-          
-          <button
-            onClick={handleFix}
-            disabled={isFixing || !progressId}
-            className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
-              isFixing || !progressId ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-            } transition-colors mb-4`}
-          >
-            {isFixing ? (
-              <>
-                <span className="animate-spin inline-block h-4 w-4 border-t-2 border-white rounded-full mr-2"></span>
-                दुरुस्त करत आहे...
-              </>
-            ) : (
-              'प्रोग्रेस रेकॉर्ड दुरुस्त करा'
-            )}
-          </button>
-          
+
+          <div className="space-y-6">
+            
+            {/* Input Field */}
+            <div className="group">
+              <label htmlFor="progressId" className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1 group-focus-within:text-purple-400 transition-colors">
+                प्रोग्रेस रेकॉर्ड आयडी
+              </label>
+              <div className="relative">
+                <input
+                  id="progressId"
+                  type="text"
+                  value={progressId}
+                  onChange={(e) => setProgressId(e.target.value)}
+                  className="w-full px-4 py-3.5 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all shadow-inner"
+                  placeholder="ID येथे पेस्ट करा..."
+                />
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={handleFix}
+              disabled={isFixing || !progressId}
+              className={`w-full py-4 px-6 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-3 transform transition-all duration-300 ${
+                isFixing || !progressId
+                  ? 'bg-gray-700/50 cursor-not-allowed opacity-50'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-purple-500/40 hover:-translate-y-0.5 active:scale-95'
+              }`}
+            >
+              {isFixing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>दुरुस्त करत आहे...</span>
+                </>
+              ) : (
+                <span>रेकॉर्ड अपडेट करा (Fix Now)</span>
+              )}
+            </button>
+          </div>
+
+          {/* Error Message */}
           {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">
-              <strong>त्रुटी:</strong> {error}
+            <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 backdrop-blur-sm animate-shake">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 w-2 h-2 rounded-full bg-red-500 shrink-0"></div>
+                <div>
+                  <h4 className="text-red-400 font-bold text-sm mb-1">त्रुटी आढळली</h4>
+                  <p className="text-red-200 text-xs opacity-90">{error}</p>
+                </div>
+              </div>
             </div>
           )}
-          
+
+          {/* Success Result Card */}
           {result && (
-            <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4">
-              <strong>यशस्वी!</strong> {result.message}
-              
+            <div className="mt-6 overflow-hidden rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm transition-all duration-500">
+              <div className="p-4 bg-emerald-500/20 border-b border-emerald-500/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                  <h4 className="text-emerald-100 font-bold text-sm">यशस्वी! {result.message}</h4>
+                </div>
+              </div>
+
               {result.updatedRecord && (
-                <div className="mt-4 text-sm border-t border-green-200 pt-2">
-                  <p><strong>सेशन्स पूर्ण झाले:</strong> {result.updatedRecord.sessionsCompleted}</p>
-                  <p><strong>प्रश्नांची उत्तरे दिली:</strong> {result.updatedRecord.questionsAttempted}</p>
-                  <p><strong>सरासरी गुण:</strong> {result.updatedRecord.averageScore.toFixed(2)}</p>
-                  <p><strong>वेळ:</strong> {result.updatedRecord.timeSpent} seconds</p>
-                  <p><strong>लास्ट अपडेटेड:</strong> {formatDate(result.updatedRecord.lastUpdated)}</p>
+                <div className="p-4 space-y-2">
+                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                    <span className="text-gray-400">सेशन्स पूर्ण:</span>
+                    <span className="text-white font-mono">{result.updatedRecord.sessionsCompleted}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                    <span className="text-gray-400">प्रश्न सोडवले:</span>
+                    <span className="text-white font-mono">{result.updatedRecord.questionsAttempted}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                    <span className="text-gray-400">सरासरी गुण:</span>
+                    <span className="text-emerald-300 font-bold font-mono">{result.updatedRecord.averageScore.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                    <span className="text-gray-400">वेळ (सेकंद):</span>
+                    <span className="text-white font-mono">{result.updatedRecord.timeSpent}s</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs pt-1">
+                    <span className="text-gray-500">अंतिम अपडेट:</span>
+                    <span className="text-gray-400">{formatDate(result.updatedRecord.lastUpdated)}</span>
+                  </div>
                 </div>
               )}
             </div>
           )}
-          
-          <div className="flex justify-center mt-4">
+
+          {/* Footer Link */}
+          <div className="mt-8 text-center">
             <button
               onClick={() => router.push('/practiceProgress')}
-              className="text-purple-600 hover:text-purple-800 transition-colors"
+              className="text-sm font-medium text-gray-400 hover:text-white transition-colors border-b border-transparent hover:border-purple-400 pb-0.5"
             >
-              प्रोग्रेस डॅशबोर्डकडे जा
+              &larr; प्रोग्रेस डॅशबोर्डकडे परत जा
             </button>
-
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

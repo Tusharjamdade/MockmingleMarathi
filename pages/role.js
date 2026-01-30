@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { getApiResponse } from './api/questionsFetchFormModel';
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowBack, IoMdSchool, IoMdCreate } from "react-icons/io"; // Added icons for visuals
+import { FaChalkboardTeacher, FaLayerGroup } from "react-icons/fa"; // Added icons for visuals
 import Link from "next/link";
 import { toast, Toaster } from "react-hot-toast";
 
@@ -44,6 +45,7 @@ export default function Role() {
     { label: "Odisha State Board", value: "odisha" },
     { label: "Chhattisgarh State Board", value: "chhattisgarh" }
   ];
+
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push("/login");
@@ -126,7 +128,7 @@ export default function Role() {
 
     // Show loading indicator
     toast.loading("मुलाखतीसाठी तयार होत आहे...");
-    
+
     // Always proceed with the interview without checking limits
     toast.success("मुलाखतीची तयारी सुरू करत आहे...");
 
@@ -310,37 +312,54 @@ export default function Role() {
     }
   };
 
+  // Helper for radio buttons
+  const levels = [
+    { id: "Beginner", label: "सुरुवातीचा स्तर", sub: "Beginner" },
+    { id: "Intermediate", label: "मध्यम स्तर", sub: "Intermediate" },
+    { id: "Advanced", label: "उच्च स्तर", sub: "Advanced" },
+    { id: "Expert", label: "अनुभवी", sub: "Expert" },
+  ];
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/bg.gif')" }}>
+    <div className="relative min-h-screen w-full flex justify-center items-center bg-cover bg-center overflow-hidden" 
+         style={{ backgroundImage: "url('/bg.gif')" }}>
+      
+      {/* Dark overlay to improve text readability over the GIF */}
+      <div className="absolute inset-0 bg-black/60 z-0"></div>
+
       {/* <Toaster position="top-center" toastOptions={{ duration: 3000 }} /> */}
 
       <Link href="/">
-        <div className="absolute top-10 left-3 text-4xl text-white cursor-pointer">
-          <IoIosArrowBack />
+        <div className="absolute top-6 left-4 z-20 flex items-center gap-2 text-white hover:text-[#e600ff] transition-colors cursor-pointer group">
+          <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-all backdrop-blur-sm">
+             <IoIosArrowBack className="text-2xl" />
+          </div>
+          <span className="text-sm font-medium hidden sm:block">Back</span>
         </div>
       </Link>
 
       {/* No interviews available modal */}
       {showErrorModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70">
-          <div className="bg-gray-800 p-6 rounded-xl max-w-md border border-red-500 shadow-2xl">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-red-500 rounded-full mx-auto flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-red-500/50 p-8 rounded-2xl max-w-md w-full shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-red-500/20 rounded-full mx-auto flex items-center justify-center mb-6 ring-1 ring-red-500/50">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">कोणतीही मुलाखत उपलब्ध नाही</h2>
-              <p className="text-gray-300 mb-4">तुम्ही तुमच्या सर्व उपलब्ध मुलाखती वापरल्या आहेत. कृपया अधिक मुलाखतीसाठी प्रशासकाशी संपर्क साधा.</p>
-              <div className="flex justify-center space-x-4">
+              <h2 className="text-2xl font-bold mb-3 text-white">कोणतीही मुलाखत उपलब्ध नाही</h2>
+              <p className="text-gray-400 mb-8 leading-relaxed">तुम्ही तुमच्या सर्व उपलब्ध मुलाखती वापरल्या आहेत. कृपया अधिक मुलाखतीसाठी प्रशासकाशी संपर्क साधा.</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link href="/profile">
-                  <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200">
+                  <button className="w-full sm:w-auto bg-[#2a72ff] text-white px-6 py-3 rounded-xl hover:bg-[#1a5adb] transition-all duration-200 font-medium shadow-lg shadow-blue-500/20">
                     प्रोफाइल पाहा
                   </button>
                 </Link>
                 <button
                   onClick={() => setShowErrorModal(false)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all duration-200"
+                  className="w-full sm:w-auto bg-gray-700 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all duration-200 font-medium"
                 >
                   बंद करा
                 </button>
@@ -350,131 +369,162 @@ export default function Role() {
         </div>
       )}
 
-
-
-      <div className="bg-transparent w-11/12 max-w-md p-8 text-center">
-        <img src="/logoo.png" alt="Shakti AI लोगो" className="w-20 mx-auto mb-4" />
-
-        <h3 className="text-2xl text-[#e600ff] mb-4">इयत्ता निवडा</h3>
-        <form onSubmit={handleSubmit}>
-
-
-
-          <div className="pl-15 mb-6">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="text-black bg-white text-lg p-2 rounded w-64"
-            >
-              <option value="">-- इयत्ता निवडा --</option>
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-          </div>
-
-
-          <div className="pl-15 mb-6">
-            <select
-              value={board}
-              onChange={(e) => setBoard(e.target.value)}
-              className="text-black bg-white text-lg p-2 rounded w-64"
-            >
-              <option value="">-- बोर्ड निवडा --</option>
-              {boards.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-          <Link href="/engrole" passHref >
-            <button type="button" className="text-black bg-[#2a72ff] text-lg p-2 rounded w-64 pl-15 mb-6">
-              For English Subject click me
-            </button>
-          </Link>
+      {/* Main Form Container - Glassmorphism */}
+      <div className="relative z-10 w-full max-w-lg p-6 sm:p-10 m-4">
+        <div className="bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8">
           
+          <div className="text-center mb-8">
+            <img src="/logoo.png" alt="Shakti AI लोगो" className="w-24 mx-auto mb-4 drop-shadow-lg" />
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+               अभ्यास आणि मुलाखत
+            </h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {/* Class Selection */}
+            <div className="space-y-2">
+              <label className="text-gray-300 text-sm font-medium ml-1 flex items-center gap-2">
+                <IoMdSchool className="text-[#e600ff]" /> इयत्ता निवडा
+              </label>
+              <div className="relative">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#e600ff] focus:border-transparent transition-all appearance-none cursor-pointer"
+                >
+                  <option value="" className="text-gray-800">-- इयत्ता निवडा --</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1} className="text-gray-800">
+                      इयत्ता {i + 1} वी
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/50">
+                  ▼
+                </div>
+              </div>
             </div>
 
-          <input
-            type="text"
-            name="subject"
-            id="subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full p-2 mb-4 rounded-lg text-xl border border-transparent bg-gray-100 focus:border-purple-500 focus:outline-none"
-            placeholder="विषय निवडा. (e.g. Marathi, Maths)"
-            required
-          />
+            {/* Board Selection */}
+            <div className="space-y-2">
+              <label className="text-gray-300 text-sm font-medium ml-1 flex items-center gap-2">
+                <FaChalkboardTeacher className="text-[#2a72ff]" /> बोर्ड निवडा
+              </label>
+              <div className="relative">
+                <select
+                  value={board}
+                  onChange={(e) => setBoard(e.target.value)}
+                  className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#2a72ff] focus:border-transparent transition-all appearance-none cursor-pointer"
+                >
+                  <option value="" className="text-gray-800">-- बोर्ड निवडा --</option>
+                  {boards.map(({ value, label }) => (
+                    <option key={value} value={value} className="text-gray-800">
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/50">
+                  ▼
+                </div>
+              </div>
+            </div>
 
-          <input
-            type="email"
-            name="email"
-            value={email}
-            readOnly
-            className="hidden w-full p-3 mb-5 bg-opacity-20 bg-white text-white border-none rounded-md text-lg text-center"
-          />
+            {/* English Redirect Button */}
+            <Link href="/engrole" passHref>
+              <button type="button" className="w-full group mt-2 relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 p-3 hover:border-blue-500/60 transition-all">
+                <div className="flex justify-center items-center gap-2 text-blue-200 group-hover:text-white font-medium">
+                  <span>For English Subject Click Here</span>
+                  <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+              </button>
+            </Link>
 
-          <h2 className=" text-3xl font-light mt-8"></h2>
-          <h3 className=" text-2xl text-[#e600ff] mb-4"> लेव्हल निवडा</h3>
-          <div className=" flex flex-col text-white text-left pl-16 text-lg mb-6" >
-            <label>
+            {/* Subject Input */}
+            <div className="space-y-2 pt-2">
+              <label className="text-gray-300 text-sm font-medium ml-1 flex items-center gap-2">
+                <IoMdCreate className="text-[#e600ff]" /> विषय
+              </label>
               <input
-                type="radio"
-                name="level"
-                value="Beginner"
-                className="mr-2"
-                checked={level === "Beginner"}
-                onChange={() => setLevel("Beginner")}
-              /> सुरुवातीचा स्तर
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="level"
-                value="Intermediate"
-                className="mr-2"
-                checked={level === "Intermediate"}
-                onChange={() => setLevel("Intermediate")}
-              /> मध्यम स्तर
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="level"
-                value="Advanced"
-                className="mr-2"
-                checked={level === "Advanced"}
-                onChange={() => setLevel("Advanced")}
-              /> उच्च स्तर
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="level"
-                value="Expert"
-                className="mr-2"
-                checked={level === "Expert"}
-                onChange={() => setLevel("Expert")}
-              /> अनुभवी
-            </label>
-          </div>
+                type="text"
+                name="subject"
+                id="subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3.5 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#e600ff] focus:border-transparent transition-all"
+                placeholder="उदा. मराठी, गणित, विज्ञान..."
+                required
+              />
+            </div>
 
+            <input
+              type="email"
+              name="email"
+              value={email}
+              readOnly
+              className="hidden"
+            />
 
+            {/* Level Selection */}
+            <div className="pt-4">
+              <label className="text-[#e600ff] text-lg font-semibold mb-4 block flex items-center gap-2">
+                 <FaLayerGroup /> काठिन्य पातळी निवडा
+              </label>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {levels.map((lvl) => (
+                  <label 
+                    key={lvl.id}
+                    className={`
+                      relative flex flex-col p-4 rounded-xl cursor-pointer border transition-all duration-200
+                      ${level === lvl.id 
+                        ? 'bg-[#e600ff]/20 border-[#e600ff] shadow-[0_0_15px_rgba(230,0,255,0.3)]' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30'}
+                    `}
+                  >
+                    <input
+                      type="radio"
+                      name="level"
+                      value={lvl.id}
+                      className="hidden"
+                      checked={level === lvl.id}
+                      onChange={() => setLevel(lvl.id)}
+                    />
+                    <span className={`font-semibold text-lg ${level === lvl.id ? 'text-white' : 'text-gray-300'}`}>
+                      {lvl.label}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider">
+                      {lvl.sub}
+                    </span>
+                    
+                    {level === lvl.id && (
+                      <div className="absolute top-4 right-4 w-3 h-3 bg-[#e600ff] rounded-full shadow-[0_0_10px_#e600ff]"></div>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
 
-
-
-
-
-
-
-          <button type="submit" className="bg-[#2a72ff] text-white py-2 px-8 font-semibold rounded-full w-full mt-4 hover:bg-[#1a5adb] flex justify-center items-center">
-            पुढील <span className="ml-4 text-2xl">»</span>
-          </button>
-        </form>
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              className="w-full mt-6 bg-gradient-to-r from-[#2a72ff] to-[#1a5adb] hover:from-[#3b7dff] hover:to-[#2a6ae0] text-white py-4 px-8 rounded-xl font-bold text-lg shadow-lg shadow-blue-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-3"
+            >
+              <span>पुढील</span>
+              <div className="bg-white/20 rounded-full p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </button>
+            
+          </form>
+        </div>
+        
+        {/* Footer info */}
+        <p className="text-center text-gray-500 text-xs mt-6">
+          © Shakti AI | Education & Interview Prep
+        </p>
       </div>
     </div>
   );

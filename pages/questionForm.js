@@ -1837,229 +1837,294 @@ After fixing, please refresh the page.`);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-start pt-10 pb-20 overflow-x-hidden">
+return (
+    <div className="relative min-h-screen bg-[#0f0c29] bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] flex flex-col items-center justify-between py-6 px-4 sm:px-6 overflow-x-hidden font-sans text-white">
       <Head>
         <title>SHAKKTII AI - संवादात्मक मुलाखत</title>
         <meta name="description" content="AI-powered interview platform by SHAKKTII AI" />
         <style jsx global>{`
-          /* Pulse animation for microphone */
-          @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
+          @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(230, 0, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(230, 0, 255, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(230, 0, 255, 0); }
           }
-          .pulse {
-            animation: pulse 1s infinite;
+          .mic-pulse {
+            animation: pulse-ring 2s infinite;
+          }
+          .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
           }
         `}</style>
       </Head>
-      
-      {/* Microphone Permission Modal */}
-      {showPermissionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-[#29064b] p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-[#e600ff] mb-4">मायक्रोफोनसाठी परवानगी आवश्यक आहे.</h2>
-            <p className="text-white mb-6">
-             ही मुलाखत अ‍ॅप्लिकेशन योग्यरित्या काम करण्यासाठी तुमच्या मायक्रोफोनचा प्रवेश आवश्यक आहे. कृपया पुढे जाण्यासाठी मायक्रोफोनची परवानगी द्या.
-            </p>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#e600ff] mb-2">समस्या निवारण टिपा:</h3>
-              <ul className="text-white list-disc pl-5 space-y-1">
-                <li>तुमचा मायक्रोफोन व्यवस्थित कनेक्ट आहे का ते तपासा</li>
-                <li>सिस्टम सेटिंग्जमध्ये तो म्युट नाही याची खात्री करा</li>
-                <li>Google Chrome किंवा Microsoft Edge ब्राउझर वापरून पहा</li>
-               <li>ब्राउझरच्या परवानगी सेटिंग्ज तपासा</li>
 
+      {/* Ambient Background Glows */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px]"></div>
+      </div>
+
+      {/* --- Permission Modal --- */}
+      {showPermissionModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="glass-panel p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full border-t border-white/10">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-purple-500/20 rounded-full text-purple-300">
+                <FaMicrophone className="w-8 h-8" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center text-white mb-4">मायक्रोफोन परवानगी आवश्यक</h2>
+            <p className="text-gray-300 text-center mb-6 leading-relaxed text-sm">
+              मुलाखत सुरू करण्यासाठी आम्हाला तुमचा आवाज ऐकणे आवश्यक आहे. कृपया 'Allow' बटणावर क्लिक करा.
+            </p>
+            
+            <div className="bg-black/30 rounded-lg p-4 mb-6 text-left">
+              <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">समस्या येत आहे?</h3>
+              <ul className="text-gray-400 text-xs space-y-2 list-disc pl-4">
+                <li>तुमचा माईक म्यूट नाही ना ते तपासा.</li>
+                <li>Chrome किंवा Edge ब्राउझर वापरा.</li>
+                <li>ब्राउझर सेटिंग्जमध्ये परवानग्या तपासा.</li>
               </ul>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={requestMicPermission}
-                className="bg-[#e600ff] hover:bg-[#ca00e3] text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all transform active:scale-95"
               >
-               मायक्रोफोन वापरण्याची परवानगी द्या
+                परवानगी द्या
               </button>
               <button
                 onClick={handleRefreshPage}
-                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-xl transition-all"
               >
-                पुनः लोड करा
+                रिफ्रेश करा
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {questions.length > 0 ? (
-        <div className="w-full max-w-3xl px-4 mb-6">
-          <div className="relative pt-1">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-right">
-                <span className="text-xs font-semibold inline-block text-white">
-                  प्रश्न {currentQuestionIndex + 1} पैकी {questions.length}
-                </span>
-              </div>
+      {/* --- Top Section: Progress Bar --- */}
+      <div className="w-full max-w-2xl z-10 flex flex-col gap-2 pt-2">
+        {questions.length > 0 ? (
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-xs font-medium text-purple-200 tracking-wide">SHAKKTII AI INTERVIEW</span>
+              <span className="text-xs font-bold text-white bg-white/10 px-2 py-1 rounded-md">
+                {currentQuestionIndex + 1} / {questions.length}
+              </span>
             </div>
-            <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+            <div className="h-1.5 w-full bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm">
               <div
                 style={{ width: `${((currentQuestionIndex) / questions.length) * 100}%` }}
-                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-pink-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(236,72,153,0.5)]"
               ></div>
             </div>
           </div>
-        </div>
-      ) : loading ? (
-        <div className="w-full max-w-3xl px-4 mb-6 text-center">
-          <div className="animate-pulse flex space-x-4 justify-center">
-            <div className="h-3 bg-gray-400 rounded w-3/4"></div>
+        ) : loading ? (
+          <div className="w-full animate-pulse flex flex-col items-center gap-2">
+            <div className="h-1.5 w-full bg-gray-700/50 rounded-full"></div>
+            <span className="text-xs text-gray-400">लोडिंग...</span>
           </div>
-          <p className="text-white mt-2">प्रश्न लोड होत आहेत...</p>
-        </div>
-      ) : (
-        <div className="w-full max-w-3xl px-4 mb-6 text-center">
-          <div className="bg-red-600 bg-opacity-70 text-white py-2 px-4 rounded-lg">
-            <p>प्रश्न उपलब्ध नाहीत. रीफ्रेश करा किंवा सपोर्टशी संपर्क करा.</p>
+        ) : (
+          <div className="w-full text-center py-2 bg-red-500/20 border border-red-500/50 rounded-lg">
+            <p className="text-xs text-red-200">प्रश्न उपलब्ध नाहीत. कृपया रिफ्रेश करा.</p>
           </div>
-        </div>
-      )}
-
-      <div className="flex justify-center mb-8">
-        <img id="mainImage" src="mock.png" className="w-60 h-60 text-center rounded-full shadow-lg" alt="Shakti AI Logo" />
+        )}
       </div>
 
-      {questions.length > 0 && (
-        <div className="w-full max-w-2xl bg-gray-900 bg-opacity-70 backdrop-blur-lg p-6 rounded-xl shadow-2xl mx-4 mb-8 border border-gray-800">
-          <div className="question-container mb-6">
-            <h2 className="text-2xl font-bold text-center text-white mb-2">प्रश्न:</h2>
-            <p className="text-xl text-center text-white px-4 py-3 rounded-lg bg-gray-800 bg-opacity-50">
-              {questions[currentQuestionIndex]?.questionText || "प्रश्न लोड होत आहेत..."}
-            </p>
-            {/* {!isIphone && (
-              <button
-                onClick={() => questions[currentQuestionIndex]?.questionText && speakQuestion(questions[currentQuestionIndex].questionText)}
-                className="mt-3 flex items-center justify-center mx-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-all duration-200"
-                disabled={isSpeaking}
-              >
-                <FcSpeaker className="mr-2 text-xl" />
-                <span>पुन्हा ऐका</span>
-              </button>
-            )} */}
+      {/* --- Middle Section: Avatar & Content --- */}
+      <div className="flex-1 w-full max-w-2xl z-10 flex flex-col items-center justify-center gap-6 my-4">
+        
+        {/* Avatar Image */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl">
+            <img 
+              id="mainImage" 
+              src="mock.png" 
+              className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105" 
+              alt="Shakti AI Avatar" 
+            />
           </div>
-
-          <div className=" recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
-            <h3 className="text-lg font-medium text-gray-300 mb-2">तुमचे उत्तर:</h3>
-            <p className=" text-white">
-              {recordedText && recordedText !== 'Listening...' ? (
-                recordedText
-              ) : (
-                isListening ? (
-                  <span className="animate-pulse text-blue-400">ऐकत आहे...</span>
-                ) : (
-                  "तुमचे बोललेले उत्तर येथे दिसेल..."
-                )
-              )}
-            </p>
-            {isListening && (
-              <div className="mt-2 text-xs text-blue-300">
-                कृपया तुमच्या मायक्रोफोनमध्ये स्पष्टपणे बोला...
-              </div>
-            )}
-          </div>
-
-          <div className="text-center relative">
-            {isListening && (
-              <div className="sound-waves mb-4">
-                <div className="wave bg-pink-500"></div>
-                <div className="wave bg-indigo-500 delay-75"></div>
-                <div className="wave bg-blue-500 delay-150"></div>
-                <div className="wave bg-purple-500 delay-300"></div>
-              </div>
-            )}
-            
-            {/* {isSpeaking && (
-              <div className="text-center mb-4">
-                <div className="inline-block px-3 py-1 bg-green-600 text-white text-sm rounded-full animate-pulse">
-                  AI बोलत आहे...
-                </div>
-              </div>
-            )} */}
-
-            <button
-              className={`mic-button relative inline-flex items-center justify-center p-4 rounded-full text-3xl ${isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-gradient-to-r from-indigo-600 to-pink-500 hover:from-indigo-700 hover:to-pink-600'} text-white shadow-lg transform transition-all duration-300 ${isListening ? 'scale-110 animate-pulse' : ''}`}
-              onClick={handleMicClick}
-              disabled={isSpeaking}
-            >
-              {isListening ? <FaMicrophoneSlash className="w-8 h-8" /> : <FaMicrophone className="w-8 h-8" />}
-              <span className="absolute -bottom-8 text-xs text-white font-medium">
-                {isListening ? 'रेकॉर्डिंग बंद करा' : 'बोलायला सुरुवात करा'}
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isModalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm z-50 transition-all duration-300">
-          <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl max-w-md w-full border border-indigo-500 shadow-2xl transform scale-100 transition-all duration-300">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-500 rounded-full mx-auto flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">मुलाखत पूर्ण झाली!</h2>
-              <p className="text-gray-300">मुलाखत पूर्ण केल्याबद्दल धन्यवाद. तुमची उत्तरे नोंदवली गेली आहेत.</p>
+          {/* Speaking Indicator Badge (Optional) */}
+          {/* {isSpeaking && (
+            <div className="absolute bottom-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse border-2 border-[#1a0b2e]">
+              AI SPEAKING
             </div>
+          )} */}
+        </div>
+
+        {/* Question & Answer Cards Area */}
+        {questions.length > 0 && (
+          <div className="w-full flex flex-col gap-4">
+            
+            {/* Question Card */}
+            <div className="glass-panel rounded-2xl p-6 text-center shadow-lg relative overflow-hidden group">
+               <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-purple-500"></div>
+               <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">CURRENT QUESTION</h2>
+               <p className="text-lg sm:text-xl font-medium text-white leading-relaxed">
+                 {questions[currentQuestionIndex]?.questionText || "Waiting for question..."}
+               </p>
+               {/* Replay Button (Hidden on iPhone logic preserved) */}
+               {/* {!isIphone && (
+                 <button
+                   onClick={() => questions[currentQuestionIndex]?.questionText && speakQuestion(questions[currentQuestionIndex].questionText)}
+                   className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors disabled:opacity-30"
+                   disabled={isSpeaking}
+                 >
+                   <FcSpeaker className="text-xl" />
+                 </button>
+               )} */}
+            </div>
+
+            {/* Answer Transcription Box */}
+            <div className={`glass-panel rounded-2xl p-5 min-h-[120px] flex flex-col justify-between transition-all duration-300 ${isListening ? 'border-pink-500/50 bg-pink-500/5 shadow-[0_0_20px_rgba(236,72,153,0.1)]' : ''}`}>
+              <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  {isListening && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                  YOUR ANSWER
+                </h3>
+                <p className={`text-base leading-relaxed ${!recordedText || recordedText === 'Listening...' ? 'text-gray-500 italic' : 'text-gray-100'}`}>
+                   {recordedText && recordedText !== 'Listening...' ? (
+                     recordedText
+                   ) : (
+                     isListening ? "मी ऐकत आहे..." : "तुमचे उत्तर येथे टाईप होईल..."
+                   )}
+                </p>
+              </div>
+              
+              {isListening && (
+                <div className="text-xs text-pink-300 mt-4 font-medium animate-pulse">
+                   स्पष्टपणे बोला...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* --- Bottom Section: Controls --- */}
+      <div className="w-full max-w-2xl z-10 flex flex-col items-center justify-end gap-6 pb-2">
+        
+        {/* Sound Waves Visualizer */}
+        <div className="h-8 flex items-end justify-center gap-1">
+          {isListening ? (
+            <>
+              <div className="w-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-full animate-[bounce_1s_infinite] h-3"></div>
+              <div className="w-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-full animate-[bounce_1.2s_infinite] h-6"></div>
+              <div className="w-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-full animate-[bounce_0.8s_infinite] h-4"></div>
+              <div className="w-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-full animate-[bounce_1.1s_infinite] h-7"></div>
+              <div className="w-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-full animate-[bounce_0.9s_infinite] h-4"></div>
+            </>
+          ) : (
+             <div className="text-xs text-gray-500 font-medium">मायक्रोफोन सुरू करण्यासाठी बटण दाबा</div>
+          )}
+        </div>
+
+        {/* Main Action Button */}
+        <button
+          onClick={handleMicClick}
+          disabled={isSpeaking}
+          className={`
+            relative group flex items-center justify-center w-20 h-20 rounded-full shadow-2xl transition-all duration-300
+            ${isListening 
+              ? 'bg-red-500 text-white mic-pulse' 
+              : 'bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white hover:scale-110 hover:shadow-purple-500/50'
+            }
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+          `}
+        >
+          {isListening ? (
+            <FaMicrophoneSlash className="w-8 h-8 drop-shadow-md" />
+          ) : (
+            <FaMicrophone className="w-8 h-8 drop-shadow-md" />
+          )}
+          
+          {/* Button Glow Effect */}
+          {!isListening && !isSpeaking && (
+            <span className="absolute inset-0 rounded-full bg-white opacity-20 group-hover:animate-ping"></span>
+          )}
+        </button>
+        
+        <span className="text-sm font-medium text-gray-400">
+          {isListening ? 'रेकॉर्डिंग थांबवण्यासाठी टॅप करा' : 'बोलायला सुरुवात करा'}
+        </span>
+      </div>
+
+      {/* --- Completion Modal --- */}
+      {isModalVisible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md z-50 p-4 transition-all duration-300">
+          <div className="bg-[#1a103c] border border-purple-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center transform scale-100 transition-all duration-300 relative overflow-hidden">
+            {/* Background decorative blob */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            
+            <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center mb-6 shadow-lg shadow-green-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            
+            <h2 className="text-3xl font-bold mb-3 text-white">अभिनंदन!</h2>
+            <p className="text-gray-300 mb-8 leading-relaxed">
+              तुमची मुलाखत यशस्वीरित्या पूर्ण झाली आहे. आम्ही तुमच्या उत्तरांचे विश्लेषण केले आहे.
+            </p>
+            
             <button
               onClick={handleInterviewComplete}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 focus:outline-none transform transition-all duration-200 hover:scale-105"
+              className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all duration-200"
             >
-              रिझल्ट पहा
+              निकाल पहा (View Results)
             </button>
           </div>
         </div>
       )}
 
+      {/* --- Exit Confirmation Modal --- */}
       {isExitModalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm z-50">
-          <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl max-w-md w-full border border-red-500 shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-500 rounded-full mx-auto flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md z-50 p-4">
+          <div className="bg-[#1a103c] border border-red-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center">
+             <div className="w-16 h-16 bg-red-500/20 rounded-full mx-auto flex items-center justify-center mb-6 text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-              </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">मुलाखत बंद करायची आहे का ?</h2>
-              <p className="text-gray-300">आपण खरोखर बाहेर पडू इच्छिता का? आपली प्रगती गमावली जाईल आणि ती पुनर्प्राप्त करता येणार नाही.</p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleExitConfirmation}
-                className="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none transition-all duration-200"
-              >
-                हो, बाहेर जा
-              </button>
-              <button
-                onClick={handleExitModalClose}
-                className="flex-1 py-3 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none transition-all duration-200"
-              >
-              नाही, इथेच राहा
-              </button>
-            </div>
+             </div>
+             <h2 className="text-2xl font-bold mb-3 text-white">इंटरव्ह्यू बंद करायचा?</h2>
+             <p className="text-gray-400 mb-8 text-sm">
+               तुम्ही आता बाहेर पडल्यास तुमची सर्व प्रगती गमावली जाईल आणि ती परत मिळवता येणार नाही.
+             </p>
+             <div className="flex gap-4">
+               <button
+                 onClick={handleExitConfirmation}
+                 className="flex-1 py-3 bg-red-600/90 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors"
+               >
+                 बाहेर जा
+               </button>
+               <button
+                 onClick={handleExitModalClose}
+                 className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-colors"
+               >
+                 थांबा
+               </button>
+             </div>
           </div>
         </div>
       )}
 
+      {/* --- Status Toasts --- */}
       {loading && !isListening && (
-        <div className="fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg">
-          प्रक्रिया सुरू आहे...
+        <div className="fixed bottom-6 left-6 z-40 bg-indigo-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-xl border border-indigo-500/30 flex items-center gap-3">
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-sm font-medium">प्रक्रिया सुरू आहे...</span>
         </div>
       )}
 
       {/* {isSpeaking && (
-        <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg animate-pulse">
-          AI संवाद साधत आहे...
+        <div className="fixed bottom-6 right-6 z-40 bg-emerald-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-xl border border-emerald-500/30 animate-pulse">
+           <span className="text-sm font-medium">AI बोलत आहे...</span>
         </div>
       )} */}
     </div>
